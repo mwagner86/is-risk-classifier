@@ -81,6 +81,11 @@ def test_ak_03_3_gateway_failure_is_logged_and_flagged(
     failures = AuditEntry.objects.filter(risk=risk, action=AuditAction.NOTIFICATION_FAILED)
     assert failures.count() == 2
     assert str(AuditAction.NOTIFICATION_FAILED.label) == "Notifikation fehlgeschlagen"
+    # Language-neutral value: readable in the German and the English UI alike
+    assert {e.new_value.split(":")[0] for e in failures} == {
+        "EMAIL → ir-team@example.org",
+        "SMS → +49 30 1234567",
+    }
     assert has_failed_notification(risk)
 
 

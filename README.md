@@ -87,24 +87,66 @@ vorhandenen Realm beim Import nicht überschreibt.
 └── Makefile, compose.yaml, compose.prod.yaml, pyproject.toml, uv.lock, .env.example
 ```
 
-## Ansicht
+## Oberfläche
 
-![Dashboard](docs/screenshots/dashboard.png)
+Dunkles Thema nach dem Stil von dependencytrack.org, auf Deutsch (Standard) und Englisch. Die
+Aufnahmen zeigen die englische Oberfläche mit Beispieldaten; Asset-Namen kommen aus der deutschen
+CMDB-Beispieldatei und bleiben deshalb deutsch.
 
-Dunkles Thema nach dem Stil von dependencytrack.org: Kennzahlen, Risikomatrix 5 × 5, Badges je
-Risikostufe (ab 20 kritisch, 12–19 hoch, 6–11 mittel, 1–5 niedrig). Ein Risiko mit fehlgeschlagener
-Notifikation bleibt rot markiert, mit Symbol und Text, bis eine erneute Zustellung gelingt; die
-Administration stößt sie unter **Eskalationen** an.
+### Dashboard
+
+![Dashboard: Kennzahlen, Risikomatrix, rot markierte Eskalation](docs/screenshots/en/01-dashboard.png)
+
+Kennzahlen, Risikomatrix 5 × 5 (ein Klick auf eine Zelle filtert die Risikoliste) und Badges je
+Risikostufe: ab 20 kritisch, 12–19 hoch, 6–11 mittel, 1–5 niedrig. Ein Risiko, dessen Eskalation
+das Incident-Response-Team nicht erreicht hat, bleibt rot markiert, mit Symbol und Text, bis eine
+erneute Zustellung gelingt (AK-03.3).
+
+### Risiko erfassen (US-01)
+
+![Erfassungsformular mit Live-Einstufung](docs/screenshots/en/03-report-risk.png)
+
+Die Einstufung erscheint schon beim Ausfüllen. Hier: nur Verfügbarkeit und technisches Versagen
+ergeben ein IT-Risiko, das erst nach Freigabe durch einen Risk Manager wirksam wird (M-04); das Feld
+„Affected assets“ bleibt gesperrt, bis die Eingaben ein IS-Risiko ergeben.
+
+### Risiko im Detail
+
+![Detailseite mit fehlgeschlagener Notifikation und Verlauf](docs/screenshots/en/04-risk-detail.png)
+
+Bewertung, Aktionen je Rolle, Notifikationen mit Zustellstatus und der Verlauf aus dem Audit-Log.
+
+### Bewerten (US-02)
+
+![Bewertung mit Fehlermeldung zum Schadensausmaß](docs/screenshots/en/05-scoring-validation.png)
+
+Werte außerhalb von 1 bis 5 weist der Server ab; die Meldung nennt die Dimension, der Risikowert
+zeigt „Cannot be calculated“.
+
+### Weitere Seiten
+
+| | |
+| --- | --- |
+| ![Risikoliste mit Filtern](docs/screenshots/en/02-risks.png) | ![Freigaben nach dem Vier-Augen-Prinzip](docs/screenshots/en/06-approvals.png) |
+| Risikoliste mit Filtern | Freigaben: Anträge anderer, nie die eigenen (M-04) |
+| ![Eskalationen mit „Resend“ für die Administration](docs/screenshots/en/07-escalations.png) | ![Export nur mit Filter](docs/screenshots/en/08-export.png) |
+| Eskalationen: erneut senden nur durch die Administration | Export nur mit Filter, jede Datei gekennzeichnet (M-07, M-08) |
+| ![Audit-Log](docs/screenshots/en/09-audit-log.png) | ![Anmeldung über Keycloak auf Englisch](docs/screenshots/en/10-sign-in.png) |
+| Audit-Log, nur anfügbar (M-06) | Anmeldung über Keycloak in der gewählten Sprache |
+| ![Dashboard auf dem Handy](docs/screenshots/en/11-dashboard-mobile.png) | ![Eskalationsmail in Mailpit](docs/screenshots/en/12-mailpit.png) |
+| Dashboard auf dem Handy | Eskalationsmail in Mailpit: nur Kennung und Link (M-09) |
+
+Ein PDF-Export auf Englisch liegt als Beispiel unter
+[`docs/screenshots/en/export-example.pdf`](docs/screenshots/en/export-example.pdf).
 
 ## Sprache
 
-Die Oberfläche gibt es auf Deutsch (Standard) und Englisch; umgeschaltet wird oben rechts mit
-**DE** / **EN**. Die Wahl bleibt in einem Cookie gespeichert; ohne Wahl entscheidet die Sprache des
-Browsers. Die Anmeldeseite von Keycloak folgt der gewählten Sprache, CSV- und PDF-Exporte ebenfalls.
-Deutsch ist die Quellsprache: Die Meldungen der Spezifikation stehen dort wörtlich. Die
-Benachrichtigungen an das Incident-Response-Team bleiben deutsch.
+Umgeschaltet wird oben rechts mit **DE** / **EN**. Die Wahl bleibt in einem Cookie gespeichert; ohne
+Wahl entscheidet die Sprache des Browsers. Die Anmeldeseite von Keycloak folgt der gewählten Sprache,
+CSV- und PDF-Exporte ebenfalls. Deutsch ist die Quellsprache: Die Meldungen der Spezifikation stehen
+dort wörtlich. Die Benachrichtigungen an das Incident-Response-Team bleiben deutsch.
 
-![Dashboard auf Englisch](docs/screenshots/dashboard-en.png)
+![Dashboard auf Deutsch](docs/screenshots/de/dashboard.png)
 
 ## Ablauf ausprobieren
 

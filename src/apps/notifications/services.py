@@ -108,7 +108,8 @@ def process_outbox(*, gateway: NotificationGateway | None = None, batch_size: in
                     obj=notification,
                     risk=notification.risk,
                     field="channel",
-                    new=f"{notification.get_channel_display()} an {notification.recipient}: {exc}",
+                    # Language-neutral: the log is append-only and read in either UI language
+                    new=f"{notification.channel} → {notification.recipient}: {exc}",
                 )
                 logger.warning("notification %s failed: %s", notification.pk, exc)
             else:
@@ -171,7 +172,7 @@ def resend_failed(risk: "Risk", actor: User) -> list[Notification]:
             obj=copy,
             risk=risk,
             field="channel",
-            new=f"{copy.get_channel_display()} an {copy.recipient}",
+            new=f"{copy.channel} → {copy.recipient}",
         )
         copies.append(copy)
     return copies

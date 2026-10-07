@@ -30,7 +30,8 @@ LOCALE = Path(__file__).resolve().parent.parent / "src" / "locale" / "en" / "LC_
 # Words that must not survive in the English UI (umlauts are checked separately)
 GERMAN = re.compile(
     r"\b(und|oder|nicht|keine?|Risiken|Speichern|Abmelden|Bewertung|Freigabe\w*|Eskalier\w*|"
-    r"Erfass\w*|Ursprung|Schutzziel\w*|Zurück|Weiter|alle|Kennung|Verlauf|Aktion(en)?)\b"
+    r"Erfass\w*|Ursprung|Schutzziel\w*|Zurück|Weiter|alle|Kennung|Verlauf|Aktion(en)?|"
+    r"Skala|bis|von|Risikowert|Seite|Auswahl|beantragt|entschieden)\b"
 )
 
 

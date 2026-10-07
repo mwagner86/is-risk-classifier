@@ -4,7 +4,7 @@
 {% block breadcrumb %}{% url 'risk_list' as risks %}{% url 'risk_detail' risk.pk as detail %}{% translate "Risiken" as crumb_label %}{% include "_crumb.html" with url=risks label=crumb_label %}{% include "_crumb.html" with url=detail label=risk.title %}<li aria-current="page" class="text-text">{% translate "Bewertung" %}</li>{% endblock %}
 {% block content %}
   <h1 class="mb-2">{% translate "Risiko bewerten" %}</h1>
-  <p class="mb-5 text-sm text-muted">{{ risk.assessment.get_category_display }} · {{ risk.get_status_display }} · Skala 1 bis 5, Risikowert R = P × I</p>
+  <p class="mb-5 text-sm text-muted">{{ risk.assessment.get_category_display }} · {{ risk.get_status_display }} · {% translate "Skala 1 bis 5, Risikowert R = P × I" %}</p>
   <form method="post" class="card max-w-xl">
     {% csrf_token %}
     {{ form.non_field_errors }}

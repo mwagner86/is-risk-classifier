@@ -286,4 +286,5 @@ EN: dict[str, str | tuple[str, str]] = {
     "Klassifizierung": "Classification",
     "Eine Einordnung als IT-Risiko wird erst nach Freigabe durch einen anderen Risk Manager wirksam.": "A classification as IT risk takes effect only after another risk manager approves it.",
     "Risiko bewerten": "Score risk",
+    "Skala 1 bis 5, Risikowert R = P × I": "Scale 1 to 5, risk score R = P × I",
 }

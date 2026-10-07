@@ -137,7 +137,10 @@ Standalone-CLI im Compose-Dienst `css` (Watch) bzw. `make css`. Ausgabe
 `src/static/THIRD_PARTY.md`. Abweichungen von der Vorgabe wegen WCAG AA: `#69748f` nur für Deko und
 große Schrift, `#8190ac` nicht auf `#212a40`; Badges vollfarbig mit dunkler Schrift; zusätzlicher
 Token `level-medium #e8d44d`, `danger-strong #ff8095` für Text auf dem roten Grund. Kontraste prüft
-`tests/test_ui.py` — neue Farbpaare dort eintragen. Screenshots: `docs/screenshots/`.
+`tests/test_ui.py` — neue Farbpaare dort eintragen. Screenshots: `docs/screenshots/en/` (README-Galerie)
+und `de/`. Aufgenommen in einem eigenen Compose-Projekt (`COMPOSE_PROJECT_NAME=isrisk-demo`, eigene
+Volumes) mit englischen Beispieldaten und Playwright (`mcr.microsoft.com/playwright/python`),
+Cookie `language=en`; die Dev-Datenbank bleibt dabei unberührt.
 
 
 Stil nach dependencytrack.org, **ohne** Logo und Markennamen von OWASP oder Dependency-Track.
@@ -249,7 +252,8 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
   per Commit-Hash gepinnt. Dependabot (`.github/dependabot.yml`) wöchentlich; Django bleibt auf
   5.2 LTS. Nach neuen Tests `make trace` laufen lassen und die Tabelle mitcommitten.
   **Derzeit abgeschaltet** (07.10.2026, Max will erst die User Experience testen): Actions im
-  Repository deaktiviert, damit auch Dependabot-Versions-Updates; Sicherheitswarnungen bleiben.
+  Repository deaktiviert. Dependabot läuft trotzdem weiter (Versions-Updates und Warnungen);
+  pausieren hieße `open-pull-requests-limit: 0` in `.github/dependabot.yml`.
   Wieder an: `gh api -X PUT repos/mwagner86/is-risk-classifier/actions/permissions -F enabled=true`.
 - **Noch nicht vorhanden:** Kein TLS im lokalen Stack (nur `DJANGO_HTTPS` für den Betrieb hinter einem
   Proxy).
