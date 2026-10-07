@@ -1,0 +1,73 @@
+[project]
+name = "is-risk-classifier"
+version = "0.1.0"
+description = "Lightweight risk register that separates IT risks from information security risks, scores them and escalates critical ones."
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "django==5.2.18",
+    "gunicorn==26.2.0",
+    "mozilla-django-oidc==5.0.2",
+    "psycopg[binary]==3.3.6",
+]
+
+[dependency-groups]
+dev = [
+    "django-stubs[compatible-mypy]==5.2.9",
+    "mypy==1.19.1",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "pytest-django==4.14.0",
+    "ruff==0.16.10",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["src", "."]
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "S", "DJ", "SIM", "RUF", "ANN"]
+ignore = [
+    "RUF001", # German UI strings legitimately contain typographic quotes and dashes
+    "RUF012", # Django class attributes (Meta.constraints, choices) are not mutable defaults
+    "RUF002", # docstrings quote German sources with typographic dashes
+    "ANN401", # Django overrides (save, delete, handle) take *args/**kwargs: Any; mypy is strict
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "ANN"]
+"src/config/settings.py" = ["S105"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+plugins = ["mypy_django_plugin.main"]
+mypy_path = "src"
+files = ["src", "tests"]
+explicit_package_bases = true
+exclude = ["/migrations/"]
+
+[[tool.mypy.overrides]]
+module = ["mozilla_django_oidc.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[tool.django-stubs]
+django_settings_module = "config.settings"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+addopts = "--strict-markers"
+markers = [
+    "req(id): requirement this test verifies (AK-xx.x, M-xx, INV-xx, SM for the state machine)",
+]

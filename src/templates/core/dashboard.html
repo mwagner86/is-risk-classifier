@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Dashboard</h1>
+  <p>Angemeldet als <strong>{{ user.username }}</strong> mit der Rolle <strong>{{ user.get_role_display }}</strong>.</p>
+  <p>Kennzahlen, Risikomatrix und Tabellen folgen in Iteration 3.</p>
+{% endblock %}

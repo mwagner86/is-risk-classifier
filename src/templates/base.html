@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}IS-Risk Classifier{% endblock %}</title>
+</head>
+<body>
+  <header>
+    <strong>IS-Risk Classifier</strong>
+    {% if user.is_authenticated %}
+      <span>{{ user.get_full_name|default:user.username }} ({{ user.get_role_display }})</span>
+      <form action="{% url 'oidc_logout' %}" method="post" style="display:inline">
+        {% csrf_token %}
+        <button type="submit">Abmelden</button>
+      </form>
+    {% endif %}
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>

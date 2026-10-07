@@ -1,0 +1,35 @@
+# syntax=docker/dockerfile:1
+# Base images are pinned by digest (M-02); bump tag and digest together.
+ARG PYTHON_IMAGE=python:3.13-slim-trixie@sha256:bf44cdfcb76cd3b41e879bc058fc37ec5872002ccfde7fcb765e218cde0cd79c
+ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecce245946826e608e11c93ad4f5bba55b21
+
+FROM ${UV_IMAGE} AS uv
+
+FROM ${PYTHON_IMAGE} AS base
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    PYTHONPATH=/app/src:/app \
+    PATH="/opt/venv/bin:${PATH}"
+RUN groupadd --gid 1000 app \
+ && useradd --uid 1000 --gid app --home-dir /home/app --create-home --shell /usr/sbin/nologin app
+WORKDIR /app
+
+# Runtime dependencies only, resolved strictly from uv.lock
+FROM base AS deps
+COPY --from=uv /uv /usr/local/bin/uv
+COPY pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev --no-install-project
+
+# Development image: adds test and lint tooling; source is bind-mounted by compose
+FROM deps AS dev
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-install-project
+ENV UV_CACHE_DIR=/tmp/uv-cache
+COPY --chown=app:app . .
+USER app
+EXPOSE 8000
+CMD ["python", "src/manage.py", "runserver", "0.0.0.0:8000"]

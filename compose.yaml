@@ -1,0 +1,113 @@
+name: is-risk-classifier
+
+# Images pinned by tag and digest (M-02). Only web and Keycloak are published, on loopback only.
+
+x-app: &app
+  build:
+    context: .
+    dockerfile: docker/Dockerfile
+    target: dev
+  image: is-risk-classifier:dev
+  env_file: .env
+  environment:
+    DATABASE_HOST: db
+    OIDC_PUBLIC_BASE_URL: http://localhost:8080
+    OIDC_INTERNAL_BASE_URL: http://keycloak:8080
+  volumes:
+    - ./:/app
+
+services:
+  db:
+    image: postgres:17-trixie@sha256:ae69c452f483507a6b99fb654cf93aad7fe156ffd2c56247707eef4e36d3c12b
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks: [backend]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.0@sha256:b0f60d489d51c5d113390bdf5461d4c06e6051be026c05549f2e1e10ec352bcc
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      # Browser-facing URL; the app talks to Keycloak over the internal network (backchannel)
+      KC_HOSTNAME: http://localhost:8080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HEALTH_ENABLED: "true"
+      # Placeholders in the realm file are resolved from these variables on import
+      OIDC_RP_CLIENT_SECRET: ${OIDC_RP_CLIENT_SECRET}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD}
+    volumes:
+      - ./docker/keycloak/realm-is-risk.json:/opt/keycloak/data/import/realm-is-risk.json:ro
+      - keycloak-data:/opt/keycloak/data
+    ports:
+      - "127.0.0.1:8080:8080"
+    networks: [frontend]
+    healthcheck:
+      # The image ships without curl; talk HTTP to the management port directly
+      test:
+        - CMD-SHELL
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/9000 &&
+          printf 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 &&
+          grep -q '"UP"' <&3
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  web:
+    <<: *app
+    command: >-
+      sh -c "python src/manage.py migrate --noinput &&
+             python src/manage.py import_assets src/apps/cmdb/data/assets.csv &&
+             python src/manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "127.0.0.1:8000:8000"
+    networks: [frontend, backend]
+    depends_on:
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  # Test runner: real PostgreSQL, no Keycloak (tests log in directly)
+  test:
+    <<: *app
+    profiles: [tools]
+    command: ["pytest"]
+    networks: [backend]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Lint, format, type check, lockfile — no database (uv lock needs the internet)
+  tools:
+    <<: *app
+    profiles: [tools]
+    command: ["true"]
+    networks: [frontend]
+
+volumes:
+  db-data:
+  keycloak-data:
+
+networks:
+  frontend:
+  # No route to the outside world for the database network
+  backend:
+    internal: true

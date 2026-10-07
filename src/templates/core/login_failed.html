@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Anmeldung abgelehnt{% endblock %}
+{% block content %}
+  <h1>Anmeldung abgelehnt</h1>
+  <p>Ihrem Konto ist keine eindeutige Rolle zugewiesen. Wenden Sie sich an die Administration.</p>
+  <p><a href="{% url 'oidc_authentication_init' %}">Erneut anmelden</a></p>
+{% endblock %}

@@ -1,0 +1,178 @@
+{
+  "realm": "is-risk",
+  "displayName": "IS-Risk Classifier",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": false,
+  "loginWithEmailAllowed": false,
+  "bruteForceProtected": true,
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "de",
+    "en"
+  ],
+  "defaultLocale": "de",
+  "groups": [
+    {
+      "name": "NUTZER"
+    },
+    {
+      "name": "RISK_MANAGER"
+    },
+    {
+      "name": "CISO"
+    },
+    {
+      "name": "ADMIN"
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "is-risk-classifier",
+      "name": "IS-Risk Classifier",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${OIDC_RP_CLIENT_SECRET}",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "frontchannelLogout": false,
+      "redirectUris": [
+        "http://localhost:8000/oidc/callback/"
+      ],
+      "webOrigins": [
+        "http://localhost:8000"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:8000/"
+      },
+      "protocolMappers": [
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "config": {
+            "full.path": "false",
+            "claim.name": "groups",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "melder",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "melder@example.org",
+      "firstName": "Mara",
+      "lastName": "Melder",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${DEMO_USER_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/NUTZER"
+      ]
+    },
+    {
+      "username": "rm.mueller",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "rm.mueller@example.org",
+      "firstName": "Rita",
+      "lastName": "Müller",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${DEMO_USER_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/RISK_MANAGER"
+      ]
+    },
+    {
+      "username": "rm.schmidt",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "rm.schmidt@example.org",
+      "firstName": "Robin",
+      "lastName": "Schmidt",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${DEMO_USER_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/RISK_MANAGER"
+      ]
+    },
+    {
+      "username": "ciso",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "ciso@example.org",
+      "firstName": "Clara",
+      "lastName": "Sommer",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${DEMO_USER_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/CISO"
+      ]
+    },
+    {
+      "username": "app-admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "app-admin@example.org",
+      "firstName": "Alex",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${DEMO_USER_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/ADMIN"
+      ]
+    },
+    {
+      "username": "ohne-rolle",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "ohne-rolle@example.org",
+      "firstName": "Otto",
+      "lastName": "Ohnerolle",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${DEMO_USER_PASSWORD}",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

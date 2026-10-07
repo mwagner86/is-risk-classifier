@@ -1,0 +1,13 @@
+cmdb_key,name,criticality
+CI-0001,ERP-System (Finanzbuchhaltung),5
+CI-0002,Personalverwaltung (HR-Datenbank),5
+CI-0003,Kundenportal,4
+CI-0004,E-Mail-Server,4
+CI-0005,Active Directory,5
+CI-0006,Dateiserver Fachbereiche,3
+CI-0007,Produktionsplanung (MES),4
+CI-0008,Intranet,2
+CI-0009,Backup-System,5
+CI-0010,Druckerverwaltung,1
+CI-0011,Zeiterfassung,2
+CI-0012,Laborinformationssystem,3
