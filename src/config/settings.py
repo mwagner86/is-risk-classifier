@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "apps.core.security.SecurityHeadersMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -73,12 +74,18 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": env("POSTGRES_DB"),
-        "USER": env("POSTGRES_USER"),
-        "PASSWORD": env("POSTGRES_PASSWORD"),
+        # The application runs as the restricted role (setup_db_roles); migrations and tests use
+        # the owner, i.e. POSTGRES_USER, when DATABASE_USER is not set
+        "USER": env("DATABASE_USER", env("POSTGRES_USER")),
+        "PASSWORD": env("DATABASE_PASSWORD", env("POSTGRES_PASSWORD")),
         "HOST": env("DATABASE_HOST", "db"),
         "PORT": env("DATABASE_PORT", "5432"),
     }
 }
+
+# Restricted role of the application (INV-03, M-06): created by `manage.py setup_db_roles`
+DB_APP_ROLE = env("POSTGRES_APP_USER", "isrisk_app")
+DB_APP_PASSWORD = env("POSTGRES_APP_PASSWORD", "")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
@@ -94,7 +101,8 @@ LOGOUT_REDIRECT_URL = "/"
 
 # OpenID Connect (Keycloak). The browser uses the public URL, the server the internal one.
 OIDC_REALM = env("OIDC_REALM", "is-risk")
-_oidc_public = f"{env('OIDC_PUBLIC_BASE_URL', 'http://localhost:8080')}/realms/{OIDC_REALM}"
+OIDC_PUBLIC_ORIGIN = env("OIDC_PUBLIC_BASE_URL", "http://localhost:8080").rstrip("/")
+_oidc_public = f"{OIDC_PUBLIC_ORIGIN}/realms/{OIDC_REALM}"
 _oidc_internal = f"{env('OIDC_INTERNAL_BASE_URL', 'http://keycloak:8080')}/realms/{OIDC_REALM}"
 OIDC_RP_CLIENT_ID = env("OIDC_RP_CLIENT_ID", "is-risk-classifier")
 OIDC_RP_CLIENT_SECRET = env("OIDC_RP_CLIENT_SECRET")
@@ -109,9 +117,29 @@ OIDC_OP_JWKS_ENDPOINT = f"{_oidc_internal}/protocol/openid-connect/certs"
 OIDC_STORE_ID_TOKEN = True
 OIDC_OP_LOGOUT_URL_METHOD = "apps.accounts.oidc.provider_logout_url"
 
+# --- Hardening (M-05) ---------------------------------------------------------------------
+
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = 8 * 60 * 60  # one working day
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_HTTPONLY = True  # htmx takes the token from the page, not from the cookie
+X_FRAME_OPTIONS = "DENY"
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+
+# Behind a TLS-terminating proxy. Local development runs on plain http and leaves this off.
+HTTPS = env("DJANGO_HTTPS", "false").lower() == "true"
+if HTTPS:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 365 * 24 * 60 * 60
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 LANGUAGE_CODE = "de-de"
 TIME_ZONE = "Europe/Berlin"
@@ -120,6 +148,36 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+# The runtime image collects static files with hashed names; development serves them directly
+if env("STATIC_MANIFEST", "false").lower() == "true":
+    # Serve the collected files from the app server; behind the security headers middleware
+    MIDDLEWARE.insert(
+        MIDDLEWARE.index("apps.core.security.SecurityHeadersMiddleware") + 1,
+        "whitenoise.middleware.WhiteNoiseMiddleware",
+    )
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    }
+
+# No inline script or style anywhere (tests/test_hardening.py); the logout form redirects to the
+# identity provider, hence its origin in form-action
+CONTENT_SECURITY_POLICY = "; ".join(
+    [
+        "default-src 'self'",
+        "script-src 'self'",
+        "style-src 'self'",
+        "img-src 'self'",
+        "font-src 'self'",
+        "connect-src 'self'",
+        "object-src 'none'",
+        "base-uri 'none'",
+        "frame-ancestors 'none'",
+        f"form-action 'self' {OIDC_PUBLIC_ORIGIN}",
+    ]
+)
+PERMISSIONS_POLICY = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
 
 # Links in notifications point here; they lead to the risk only after login (M-09)
 APP_BASE_URL = env("APP_BASE_URL", "http://localhost:8000")

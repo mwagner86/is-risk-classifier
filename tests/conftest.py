@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from pathlib import Path
 
 import pytest
 
@@ -6,6 +7,38 @@ from apps.accounts.models import Role, User
 from apps.cmdb.models import Asset
 from apps.notifications.gateway import MockGateway, OutgoingMessage
 from apps.risks.models import CIATriad, Origin, Risk, RiskAssessment, RiskCategory, RiskStatus
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        "--trace-report", default=None, help="write requirement -> tests as Markdown to this file"
+    )
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    target = config.getoption("--trace-report")
+    if not target:
+        return
+    tests: dict[str, set[str]] = {}
+    for item in items:
+        for marker in item.iter_markers("req"):
+            tests.setdefault(marker.args[0], set()).add(item.nodeid.split("[")[0])
+    lines = [
+        "# Nachweis: Anforderung → Tests",
+        "",
+        "Erzeugt mit `make trace` aus den Markierungen `@pytest.mark.req(...)`.",
+        "Nicht von Hand ändern.",
+        "",
+        "| Anforderung | Tests | Testfälle |",
+        "| --- | --- | --- |",
+    ]
+    for req in sorted(tests):
+        names = sorted(tests[req])
+        cases = sum(1 for i in items if any(m.args[0] == req for m in i.iter_markers("req")))
+        listing = "<br>".join(f"`{n}`" for n in names)
+        lines.append(f"| {req} | {listing} | {cases} |")
+    Path(target).write_text("\n".join(lines) + "\n", encoding="utf-8")
+
 
 MakeUser = Callable[..., User]
 MakeRisk = Callable[..., Risk]

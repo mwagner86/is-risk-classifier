@@ -1,0 +1,45 @@
+# Production-like overlay: runtime image (gunicorn, no dev tools, DEBUG off, static files
+# collected), no bind mounts, read-only file systems without capabilities.
+# Start with `make prod`. TLS is not part of the local setup; behind a TLS proxy set
+# DJANGO_HTTPS=true (secure cookies, HSTS, redirect).
+
+x-runtime: &runtime
+  build:
+    context: .
+    dockerfile: docker/Dockerfile
+    target: runtime
+  image: is-risk-classifier:runtime
+  volumes: !reset []
+  read_only: true
+  tmpfs:
+    - /tmp
+  cap_drop: [ALL]
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  css:
+    profiles: [dev]
+
+  migrate:
+    <<: *runtime
+
+  web:
+    <<: *runtime
+    command: !reset []
+    environment:
+      DJANGO_DEBUG: "false"
+    depends_on: !override
+      migrate:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_started
+      pdf-renderer:
+        condition: service_healthy
+
+  worker:
+    <<: *runtime
+
+  pdf-renderer:
+    <<: *runtime
+    depends_on: !reset {}

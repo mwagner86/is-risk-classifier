@@ -13,4 +13,6 @@ htmlcov
 exports
 sbom
 data
+src/static/css/build
+src/staticfiles
 .claude

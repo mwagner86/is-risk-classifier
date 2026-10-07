@@ -33,6 +33,10 @@ zufälligen Geheimnissen an. Das Passwort der Demo-Konten steht dort unter `DEMO
 | --- | --- |
 | `make dev` | Stack bauen und starten (App, Worker, Stylesheet, PostgreSQL, Keycloak) |
 | `make css` | Stylesheet einmalig minifiziert bauen |
+| `make prod` / `make prod-down` | produktionsnaher Stack: Laufzeit-Image mit gunicorn, Debug aus, schreibgeschützt |
+| `make sbom` | SBOM im CycloneDX-Format nach `sbom/is-risk-classifier.cdx.json` |
+| `make audit` | Laufzeit-Abhängigkeiten gegen bekannte Schwachstellen prüfen (pip-audit) |
+| `make trace` | Nachweistabelle Anforderung → Tests nach `docs/traceability.md` |
 | `make test` | Tests gegen PostgreSQL, Filter mit `make test ARGS="-k m_05"` |
 | `make lint` | ruff (Lint und Format) und mypy (strict) |
 | `make fmt` | Formatierung und sichere Korrekturen anwenden |
@@ -53,7 +57,8 @@ vorhandenen Realm beim Import nicht überschreibt.
 | `css` | baut das Stylesheet mit dem Tailwind-CLI neu, sobald sich Templates ändern | — |
 | `pdf-renderer` | erzeugt die PDF-Exporte; eigener Prozess ohne Datenbanknetz und ohne Zugangsdaten, Dateisystem schreibgeschützt | nur `web` |
 | `keycloak` | Identity Provider (OIDC mit PKCE), Rollen aus Gruppen | `127.0.0.1:8080` |
-| `db` | PostgreSQL, im internen Netz ohne Route nach außen | nur `web` |
+| `migrate` | einmalig als Datenbank-Eigentümer: Migrationen, eingeschränkte Anwendungsrolle, CMDB-Beispieldaten | — |
+| `db` | PostgreSQL, im internen Netz ohne Route nach außen | nur `web`, `worker`, `migrate` |
 | `test`, `tools` | Testlauf, Lint, Lockfile (Profil `tools`) | — |
 
 ```text
@@ -71,9 +76,11 @@ vorhandenen Realm beim Import nicht überschreibt.
 │   ├── pdf_renderer/       eigenständiger PDF-Dienst ohne Django und ohne Datenbanktreiber
 │   └── templates/
 ├── tests/                  pytest; jeder Test trägt seine Anforderung: @pytest.mark.req("M-05")
-├── docker/                 Dockerfile, Keycloak-Realm
-├── docs/                   Spezifikation, Screenshots
-└── Makefile, compose.yaml, pyproject.toml, uv.lock, .env.example
+│   ├── assets/             Tailwind-Quelle mit den Design-Tokens (wird nicht ausgeliefert)
+├── tools/                  SBOM-Erzeugung
+├── docker/                 Dockerfile (dev, runtime), Keycloak-Realm
+├── docs/                   Spezifikation, Screenshots, Nachweistabelle
+└── Makefile, compose.yaml, compose.prod.yaml, pyproject.toml, uv.lock, .env.example
 ```
 
 ## Ansicht
@@ -107,8 +114,17 @@ Administration stößt sie unter **Eskalationen** an.
   genau eine Rollengruppe in Keycloak wird abgewiesen.
 - **M-06:** Das Audit-Log ist per Trigger nur anfügbar, `UPDATE` und `DELETE` scheitern in der
   Datenbank.
-- **M-02:** Abhängigkeiten sind exakt gepinnt (`uv.lock` mit Hashes), Basis-Images per Digest,
-  htmx und die Schriften liegen lokal mit Prüfsumme (`src/static/THIRD_PARTY.md`).
+- **M-02:** Abhängigkeiten exakt gepinnt (`uv.lock` mit Hashes), Images per Digest, Tailwind-CLI
+  per Prüfsumme, htmx und Schriften lokal mit Prüfsumme (`src/static/third_party.json`).
+  `make sbom` erzeugt die SBOM (CycloneDX 1.5: Python-Pakete, Front-End-Dateien, Images),
+  `make audit` prüft gegen bekannte Schwachstellen.
+- **INV-03 / M-06 auch in der Datenbank:** Die Anwendung verbindet sich mit einer eigenen Rolle
+  ohne `DELETE`, `TRUNCATE` und DDL; das Audit-Log darf sie nur ergänzen. Sie kann die Trigger
+  nicht entfernen. Migrationen laufen getrennt als Eigentümer (Dienst `migrate`).
+- **M-05 im HTTP-Layer:** Content-Security-Policy ohne `unsafe-inline`/`unsafe-eval` (htmx ohne
+  `eval`), weitere Sicherheits-Header, angemeldete Seiten mit `no-store`, Sitzungen höchstens
+  8 Stunden. Hinter einem TLS-Proxy schaltet `DJANGO_HTTPS=true` sichere Cookies, HSTS und
+  Umleitung ein; `manage.py check --deploy` läuft dann ohne Befund.
 - **M-04:** Eine Einordnung als IT-Risiko und eine Herabstufung unter 20 sind Anträge. Wirksam
   werden sie erst, wenn ein anderer Risk Manager zustimmt (auch als Prüfregel in der Datenbank).
 - **M-09:** Eskalationen enthalten nur die Kennung und einen Link, der eine Anmeldung verlangt.

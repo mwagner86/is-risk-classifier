@@ -2,7 +2,7 @@ COMPOSE := docker compose
 RUN     := $(COMPOSE) run --rm
 
 .DEFAULT_GOAL := help
-.PHONY: help dev down logs reset test lint fmt migrations lock shell import-assets css
+.PHONY: help dev down logs reset test lint fmt migrations lock shell import-assets css sbom audit trace prod prod-down
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -46,7 +46,22 @@ migrations: .env ## Create migrations after model changes
 	$(RUN) test python src/manage.py makemigrations
 
 css: .env ## Build the stylesheet once, minified (the css service rebuilds it during make dev)
-	$(RUN) --build --no-deps tools tailwindcss --input=src/static/css/app.css --output=src/static/css/build/app.css --minify
+	$(RUN) --build --no-deps tools tailwindcss --input=src/assets/app.css --output=src/static/css/build/app.css --minify
+
+sbom: .env ## Write the CycloneDX SBOM to sbom/is-risk-classifier.cdx.json (M-02)
+	$(RUN) --build --no-deps tools python tools/sbom.py --output sbom/is-risk-classifier.cdx.json
+
+audit: .env ## Check the runtime dependencies against known vulnerabilities (M-02)
+	$(RUN) --build --no-deps tools sh -c "uv export --format requirements-txt --frozen --no-dev --no-emit-project --quiet -o /tmp/requirements.txt && pip-audit --requirement /tmp/requirements.txt --require-hashes --disable-pip --strict --progress-spinner off"
+
+trace: .env ## Write docs/traceability.md: requirement -> tests
+	$(RUN) --build test pytest --collect-only --quiet --trace-report=docs/traceability.md
+
+prod: .env ## Start the production-like stack (runtime image, gunicorn, read-only)
+	$(COMPOSE) -f compose.yaml -f compose.prod.yaml up --build --detach --wait
+
+prod-down: ## Stop the production-like stack, keep data
+	$(COMPOSE) -f compose.yaml -f compose.prod.yaml down
 
 lock: .env ## Re-resolve uv.lock after editing pyproject.toml
 	$(RUN) tools uv lock

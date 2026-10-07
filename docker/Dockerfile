@@ -29,6 +29,26 @@ COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-install-project
 
+# Minified stylesheet for the runtime image
+FROM base AS assets
+COPY --from=tailwind /tailwindcss /usr/local/bin/tailwindcss
+COPY src ./src
+RUN tailwindcss --input=src/assets/app.css --output=src/static/css/build/app.css --minify
+
+# Runtime image: gunicorn, no dev tools, source owned by root and read-only for the app user
+FROM base AS runtime
+COPY --from=deps /opt/venv /opt/venv
+COPY src ./src
+COPY --from=assets /app/src/static/css/build ./src/static/css/build
+ENV DJANGO_DEBUG=false \
+    STATIC_MANIFEST=true
+RUN DJANGO_SECRET_KEY=collectstatic-only POSTGRES_DB=- POSTGRES_USER=- POSTGRES_PASSWORD=- \
+    OIDC_RP_CLIENT_SECRET=- python src/manage.py collectstatic --noinput --verbosity 0
+USER app
+EXPOSE 8000
+CMD ["gunicorn", "--chdir", "src", "config.wsgi:application", "--bind", "0.0.0.0:8000", \
+     "--workers", "3", "--access-logfile", "-"]
+
 # Development image: adds test and lint tooling; source is bind-mounted by compose
 FROM deps AS dev
 RUN --mount=type=cache,target=/root/.cache/uv \

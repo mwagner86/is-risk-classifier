@@ -18,4 +18,4 @@ npm tarballs were checked against the registry's `dist.integrity` (SHA-512) befo
 Font licences: `fonts/LICENSE-*.txt`.
 
 Update: download the new version from the npm tarball, verify the integrity, rename the file,
-update the reference (`src/templates/base.html` or `src/static/css/app.css`) and this table.
+update the reference (`src/templates/base.html` or `src/assets/app.css`) and this table.

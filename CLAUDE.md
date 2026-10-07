@@ -7,8 +7,9 @@ Softwaretechnik (SS26), Projekt der Hand-ins in Entwicklung sicherer Softwaresys
 
 ## Stand
 
-- **Phase:** Iterationen 1 (`c487c30`), 2 (`ea7cbe0`) und 3 (`55cbd40`) committet; Iteration 4
-  (Export und Audit-Log) fertig, noch nicht committet (07.10.2026). Nächste: Iteration 5 (Härtung).
+- **Phase:** Iterationen 1 (`c487c30`), 2 (`ea7cbe0`), 3 (`55cbd40`) und 4 (`445bb3a`) committet;
+  Iteration 5 (Härtung, SBOM) fertig, noch nicht committet (07.10.2026). Nächste: Iteration 6
+  (Benachrichtigungsmodul).
   INV-01 gibt es nicht (Max, 07.10.2026) — die Spezifikation kennt nur INV-02 und INV-03.
 - **Iterationen (freigegeben 07.10.2026):** 1 Gerüst, Container, Anmeldung, Modelle,
   Zustandsmaschine · 2 Kategorisierung, Risikowert, Eskalation (Benachrichtigung als Mock) ·
@@ -131,7 +132,7 @@ Einordnung als IT-Risiko **schon bei der Erfassung**.
 
 ## Design
 
-Umgesetzt in Iteration 3: Tokens in `src/static/css/app.css` (`@theme`), gebaut vom Tailwind-
+Umgesetzt in Iteration 3: Tokens in `src/assets/app.css` (`@theme`, Tailwind-Quelle, wird nicht ausgeliefert), gebaut vom Tailwind-
 Standalone-CLI im Compose-Dienst `css` (Watch) bzw. `make css`. Ausgabe
 `src/static/css/build/app.css` ist ignoriert. Schriften und htmx lokal, Inventar
 `src/static/THIRD_PARTY.md`. Abweichungen von der Vorgabe wegen WCAG AA: `#69748f` nur für Deko und
@@ -184,6 +185,17 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
   `apps.*` importieren — `tests/test_pdf_renderer.py` prüft das und die Compose-Härtung. Jeder
   Nutzertext geht durch `render.text()` (XML-Escape) in einen `Paragraph`; Kopf- und Fußzeile mit
   `drawString` (kein Markup). Tests rendern in-process (Fixture `inprocess_renderer`).
+- **Datenbankrollen (Iteration 5):** `web` und `worker` verbinden sich als `POSTGRES_APP_USER`
+  (eingeschränkt, `manage.py setup_db_roles`), `migrate` und `test` als Eigentümer. Neue Tabelle,
+  aus der die Anwendung löschen muss: in `DELETE_ALLOWED` der Rolle eintragen — sonst nie.
+- **Header/CSP:** `apps/core/security.py`, Policy in den Settings. Kein Inline-Script, kein
+  `style=`, kein `on…=`, kein `hx-on` in Templates (Test). Neue externe Ziele für Formulare
+  (z. B. ein weiterer IdP) in `form-action` eintragen.
+- **Laufzeit-Image:** Stage `runtime` im Dockerfile, gestartet über `compose.prod.yaml`
+  (`make prod`). WhiteNoise nur dort (`STATIC_MANIFEST=true`). Die Tailwind-Quelle liegt unter
+  `src/assets/`, **nicht** unter `static/`, sonst scheitert `collectstatic` am `@import`.
+- **Lieferkette:** neue ausgelieferte Front-End-Datei in `src/static/third_party.json` (mit
+  SHA-256) und `THIRD_PARTY.md` eintragen; der Test vergleicht Inventar und Dateien.
 - **Formulare:** „Speichern" prüft US-01 vollständig (AK-01.3 wörtlich), „Als Entwurf ablegen"
   speichert ohne Prüfung. Fehlerfelder fokussiert `apps.core.forms.focus_first_error`.
 - **Enum-Werte** (`NUTZER`, `IS_RISIKO`, …) folgen den Literalen des UML-Modells; Bezeichner sonst
@@ -197,6 +209,8 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
     `/opt/keycloak/data/h2` gehört es root und Keycloak startet nicht.
   - Keycloak liest `${VAR}`-Platzhalter im Realm-Export aus der Umgebung (Client-Secret,
     Demo-Passwort). Änderungen am Realm wirken erst nach `make reset`.
+  - OIDC-Abgleich darf `set_unusable_password()` nur einmal aufrufen: ein neuer Hash bei jedem
+    Login ändert den Session-Hash und meldet das Konto überall sonst ab (Test vorhanden).
   - Pythons `http.cookiejar` schickt Cookies für `localhost` nicht zurück; für
     End-to-End-Proben des Logins curl nehmen.
   - `manage.py shell -c` schreibt in Django 5.2 „N objects imported automatically" auf stdout;
@@ -209,5 +223,5 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
     einen Container im Formular hängen (`hx-include="closest form"`).
   - `select_for_update()` mit `select_related` auf eine umgekehrte 1:1-Beziehung scheitert in
     PostgreSQL („nullable side of an outer join") → `select_for_update(of=("self",))`.
-- **Noch nicht vorhanden** (laut Plan später): Laufzeit-Image mit gunicorn, CSP, getrennte DB-Rollen für Migration und
-  Betrieb (5), `notify-gateway` und Mailpit (6).
+- **Noch nicht vorhanden** (laut Plan später): `notify-gateway` und Mailpit (6). Kein CI und
+  kein GitHub-Remote; `make audit` und `make sbom` laufen bisher nur auf Abruf.

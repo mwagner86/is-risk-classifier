@@ -12,7 +12,7 @@ from apps.cmdb.models import Asset
 from apps.risks.models import RiskCategory, RiskStatus
 from tests.conftest import MakeRisk
 
-CSS = Path(__file__).resolve().parent.parent / "src" / "static" / "css" / "app.css"
+CSS = Path(__file__).resolve().parent.parent / "src" / "assets" / "app.css"
 TEMPLATES = Path(__file__).resolve().parent.parent / "src" / "templates"
 
 # (foreground token, background token, minimum ratio). 4.5 for text, 3 for large text and UI.

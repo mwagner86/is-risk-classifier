@@ -126,3 +126,16 @@ def test_m_05_role_follows_the_identity_provider_on_every_login() -> None:
     user.refresh_from_db()
     assert user.role == Role.RISK_MANAGER
     assert User.objects.filter(oidc_subject="sub-1").count() == 1
+
+
+@pytest.mark.django_db
+def test_m_05_new_login_keeps_other_sessions_of_the_user() -> None:
+    backend = RoleMappingOIDCBackend()
+    user = backend.create_user(_claims("NUTZER"))
+    session_hash = user.get_session_auth_hash()
+
+    backend.update_user(user, _claims("NUTZER"))  # second login, e.g. on another device
+
+    user.refresh_from_db()
+    assert not user.has_usable_password()
+    assert user.get_session_auth_hash() == session_hash

@@ -53,7 +53,10 @@ class RoleMappingOIDCBackend(OIDCAuthenticationBackend):  # type: ignore[misc]
         user.first_name = claims.get("given_name", "")
         user.last_name = claims.get("family_name", "")
         user.role = role
-        user.set_unusable_password()
+        # Only once: a fresh unusable hash on every login would change the session auth hash and
+        # sign the user out everywhere else
+        if user.has_usable_password():
+            user.set_unusable_password()
         user.save()
         return user
 

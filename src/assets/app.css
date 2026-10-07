@@ -1,8 +1,9 @@
 /* Design tokens and components. Style follows dependencytrack.org (dark theme, cards, badges);
    no logo or brand names of OWASP or Dependency-Track. Contrast pairs are checked in
-   tests/test_ui.py against WCAG AA. Built by the Tailwind standalone CLI (service "css"). */
+   tests/test_ui.py against WCAG AA. Built by the Tailwind standalone CLI (service "css") into
+   src/static/css/build/app.css; this source file is not served. */
 
-@import "tailwindcss" source("../..");
+@import "tailwindcss" source("..");
 
 @font-face {
   font-family: "Inter Variable";
