@@ -230,6 +230,9 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
     einen Container im Formular hängen (`hx-include="closest form"`).
   - `select_for_update()` mit `select_related` auf eine umgekehrte 1:1-Beziehung scheitert in
     PostgreSQL („nullable side of an outer join") → `select_for_update(of=("self",))`.
-- **Noch nicht vorhanden:** kein CI; `make audit` und `make sbom` laufen
-  bisher nur auf Abruf. Kein TLS im lokalen Stack (nur `DJANGO_HTTPS` für den Betrieb hinter einem
+- **CI:** `.github/workflows/ci.yml` — Lint, Tests, Nachweistabelle aktuell (`make trace` +
+  `git diff`), `make audit`, `make sbom` als Artefakt; bei Push, PR und montags 05:17 UTC. Actions
+  per Commit-Hash gepinnt. Dependabot (`.github/dependabot.yml`) wöchentlich; Django bleibt auf
+  5.2 LTS. Nach neuen Tests `make trace` laufen lassen und die Tabelle mitcommitten.
+- **Noch nicht vorhanden:** Kein TLS im lokalen Stack (nur `DJANGO_HTTPS` für den Betrieb hinter einem
   Proxy).

@@ -111,6 +111,12 @@ Administration stößt sie unter **Eskalationen** an.
    bleibt rot markiert. Nach `NOTIFY_FAILURE_MODE=none` und erneutem `docker compose up -d
    notify-gateway` stellt `app-admin` unter **Eskalationen** die Notifikation erneut zu.
 
+## Laufende Prüfung
+
+GitHub Actions führt bei jedem Push, bei Pull Requests und jeden Montag Lint, Tests, die Prüfung
+der Nachweistabelle, `make audit` und `make sbom` aus; die SBOM liegt als Artefakt am Lauf.
+Dependabot schlägt wöchentlich Updates für Python-Pakete, Docker-Images und Actions vor.
+
 ## Sicherheitsrelevante Festlegungen
 
 - **INV-03:** Kein Datensatz wird physisch gelöscht. Die ORM-Methoden werfen einen Fehler, und

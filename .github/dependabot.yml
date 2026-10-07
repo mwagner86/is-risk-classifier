@@ -1,0 +1,36 @@
+# Weekly update proposals for everything that is pinned (M-02). Security updates come as soon
+# as an advisory is published, independent of this schedule.
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      python:
+        patterns: ["*"]
+    ignore:
+      # Stay on the Django 5.2 LTS line; django-stubs must match the Django version
+      - dependency-name: django
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: django-stubs
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+
+  - package-ecosystem: docker
+    directory: /docker
+    schedule:
+      interval: weekly
+      day: monday
+
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
