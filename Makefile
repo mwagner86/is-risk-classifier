@@ -22,6 +22,7 @@ dev: .env ## Build and start the stack (app, database, Keycloak)
 	@echo ""
 	@echo "  App:       http://localhost:8000"
 	@echo "  Keycloak:  http://localhost:8080/admin  (admin / KEYCLOAK_ADMIN_PASSWORD in .env)"
+	@echo "  Mailpit:   http://localhost:8025  (e-mails of escalations and hand-overs)"
 	@echo "  Demo users: melder, rm.mueller, rm.schmidt, ciso, app-admin, ohne-rolle (DEMO_USER_PASSWORD in .env)"
 
 down: ## Stop the stack, keep data

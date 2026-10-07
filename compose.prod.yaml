@@ -43,3 +43,6 @@ services:
   pdf-renderer:
     <<: *runtime
     depends_on: !reset {}
+
+  notify-gateway:
+    <<: *runtime

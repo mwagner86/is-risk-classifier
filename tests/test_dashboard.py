@@ -16,7 +16,7 @@ from apps.risks.models import RiskCategory, RiskStatus
 from apps.risks.services import has_failed_notification, score
 from tests.conftest import MakeRisk
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("gateway")]
 
 FLAG_TEXT = "Notifikation fehlgeschlagen"
 

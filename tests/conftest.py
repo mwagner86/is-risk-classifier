@@ -1,4 +1,5 @@
-from collections.abc import Callable
+import threading
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
 import pytest
@@ -7,6 +8,7 @@ from apps.accounts.models import Role, User
 from apps.cmdb.models import Asset
 from apps.notifications.gateway import MockGateway, OutgoingMessage
 from apps.risks.models import CIATriad, Origin, Risk, RiskAssessment, RiskCategory, RiskStatus
+from notify_gateway.server import make_server as make_gateway_server
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -58,10 +60,53 @@ def notification_settings(settings) -> None:
 
 
 @pytest.fixture(autouse=True)
-def sent_messages() -> list[OutgoingMessage]:
-    """Messages the mock gateway accepted during the test."""
+def _reset_mock_gateway() -> None:
     MockGateway.sent.clear()
-    return MockGateway.sent
+
+
+@pytest.fixture(params=["mock", "http"])
+def gateway(request: pytest.FixtureRequest, settings) -> Iterator[list[OutgoingMessage]]:
+    """Run a test against the mock and against the real HTTP gateway (iteration 6).
+
+    The HTTP variant starts the notify-gateway server in-process with a recording delivery
+    instead of SMTP. NOTIFY_MOCK_MODE drives the failure mode of both, so the tests of
+    iteration 2 run unchanged against either implementation. Yields the accepted messages.
+    """
+    if request.param == "mock":
+        yield MockGateway.sent
+        return
+    delivered: list[OutgoingMessage] = []
+    server = make_gateway_server(
+        "127.0.0.1",
+        0,
+        token="test-token",
+        deliver=lambda m: delivered.append(
+            OutgoingMessage(
+                channel=m.channel, recipient=m.recipient, subject=m.subject, body=m.body
+            )
+        ),
+        failure_mode=lambda: {"ok": "none"}.get(
+            settings.NOTIFY_MOCK_MODE, settings.NOTIFY_MOCK_MODE
+        ),
+        timeout_delay=0.6,
+    )
+    thread = threading.Thread(
+        target=server.serve_forever, kwargs={"poll_interval": 0.05}, daemon=True
+    )
+    thread.start()
+    settings.NOTIFICATION_GATEWAY = "apps.notifications.gateway.HttpGateway"
+    settings.NOTIFY_GATEWAY_URL = f"http://127.0.0.1:{server.server_address[1]}/messages"
+    settings.NOTIFY_GATEWAY_TOKEN = "test-token"
+    settings.NOTIFY_GATEWAY_TIMEOUT = 0.2
+    yield delivered
+    server.shutdown()
+    server.server_close()
+
+
+@pytest.fixture
+def sent_messages(gateway: list[OutgoingMessage]) -> list[OutgoingMessage]:
+    """Messages the gateway accepted during the test (mock or HTTP, see ``gateway``)."""
+    return gateway
 
 
 @pytest.fixture

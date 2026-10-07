@@ -12,7 +12,7 @@ from apps.risks.models import RiskStatus
 from apps.risks.services import score
 from tests.conftest import MakeRisk
 
-pytestmark = [pytest.mark.req("M-09"), pytest.mark.django_db]
+pytestmark = [pytest.mark.req("M-09"), pytest.mark.django_db, pytest.mark.usefixtures("gateway")]
 
 
 def test_m_09_escalation_contains_only_identifier_and_link(

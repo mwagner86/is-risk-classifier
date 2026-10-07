@@ -7,9 +7,9 @@ Softwaretechnik (SS26), Projekt der Hand-ins in Entwicklung sicherer Softwaresys
 
 ## Stand
 
-- **Phase:** Iterationen 1 (`c487c30`), 2 (`ea7cbe0`), 3 (`55cbd40`) und 4 (`445bb3a`) committet;
-  Iteration 5 (Härtung, SBOM) fertig, noch nicht committet (07.10.2026). Nächste: Iteration 6
-  (Benachrichtigungsmodul).
+- **Phase:** Iterationen 1 (`c487c30`), 2 (`ea7cbe0`), 3 (`55cbd40`), 4 (`445bb3a`) und
+  5 (`a501040`) committet; Iteration 6 (Benachrichtigungsmodul) fertig, noch nicht committet
+  (07.10.2026). Damit ist der freigegebene Plan abgearbeitet.
   INV-01 gibt es nicht (Max, 07.10.2026) — die Spezifikation kennt nur INV-02 und INV-03.
 - **Iterationen (freigegeben 07.10.2026):** 1 Gerüst, Container, Anmeldung, Modelle,
   Zustandsmaschine · 2 Kategorisierung, Risikowert, Eskalation (Benachrichtigung als Mock) ·
@@ -149,6 +149,10 @@ WCAG AA prüfen; Animationen nur ohne `prefers-reduced-motion`.
 
 Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlich:
 
+- **Dienste:** `migrate` (einmalig, Eigentümer), `web`, `worker`, `css` (nur dev), `db`,
+  `keycloak`, `pdf-renderer` (M-03), `notify-gateway`, `mailpit`; dazu `test` und `tools` (Profil
+  `tools`). Netze: `frontend`, `backend` (DB, internal), `pdf` (internal), `notify` (internal).
+
 - **Verzeichnisse:** Code unter `src/` (`config/`, `apps/<app>/`, `templates/`), Tests unter
   `tests/`, Container-Dateien unter `docker/`, Spezifikation unter `docs/`. Im Wurzelverzeichnis
   nur Projektdateien (Makefile, compose.yaml, pyproject.toml, uv.lock, README, CLAUDE.md,
@@ -175,8 +179,12 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
   wird die *wirksame* Kategorie; eine berechnete IT-Einordnung bleibt bis zur Freigabe IS
   (ApprovalRequest). Assets sind Pflicht, wenn die *berechnete* Kategorie IS ist.
 - **Benachrichtigungen:** Outbox in `notifications_notification`, Worker
-  `python src/manage.py run_outbox`. Gateway per `NOTIFICATION_GATEWAY` (bis Iteration 6
-  `MockGateway`, Ausfall per `NOTIFY_MOCK_MODE=timeout|5xx`). Inhalt nach M-09: Kennung und Link.
+  `python src/manage.py run_outbox`. Im Stack setzt Compose für den Worker
+  `NOTIFICATION_GATEWAY=…HttpGateway` (Dienst `notify-gateway`, Token `NOTIFY_GATEWAY_TOKEN`,
+  Ausfall per `NOTIFY_FAILURE_MODE=timeout|5xx` in `.env` + `docker compose up -d notify-gateway`).
+  Settings-Standard und Tests: `MockGateway` (`NOTIFY_MOCK_MODE`). Tests mit der Fixture
+  `gateway` laufen gegen beide; der HTTP-Fall startet den Gateway-Server im Testprozess. Inhalt nach
+  M-09: Kennung und Link. `src/notify_gateway/` wie der PDF-Renderer: nie Django importieren.
 - **Export (Iteration 4):** US-04 ist geteilt in **US-04a CSV** und **US-04b PDF** — Kennungen
   vorläufig, bis Max sie im ESS-Hand-in 2 festlegt (nur Testmarker, leicht umzubenennen). Filter
   in `apps/risks/filters.py` (`RiskFilter`), gemeinsam für Liste und Export; ein leerer Filter
@@ -223,5 +231,6 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
     einen Container im Formular hängen (`hx-include="closest form"`).
   - `select_for_update()` mit `select_related` auf eine umgekehrte 1:1-Beziehung scheitert in
     PostgreSQL („nullable side of an outer join") → `select_for_update(of=("self",))`.
-- **Noch nicht vorhanden** (laut Plan später): `notify-gateway` und Mailpit (6). Kein CI und
-  kein GitHub-Remote; `make audit` und `make sbom` laufen bisher nur auf Abruf.
+- **Noch nicht vorhanden:** kein CI und kein GitHub-Remote; `make audit` und `make sbom` laufen
+  bisher nur auf Abruf. Kein TLS im lokalen Stack (nur `DJANGO_HTTPS` für den Betrieb hinter einem
+  Proxy).

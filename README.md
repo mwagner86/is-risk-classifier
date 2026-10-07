@@ -53,7 +53,9 @@ vorhandenen Realm beim Import nicht überschreibt.
 | Dienst | Aufgabe | Erreichbar |
 | --- | --- | --- |
 | `web` | Django-Anwendung | `127.0.0.1:8000` |
-| `worker` | verschickt Notifikationen aus der Warteschlange (bis Iteration 6 über einen Mock) | — |
+| `worker` | verschickt Notifikationen aus der Warteschlange über `notify-gateway` | — |
+| `notify-gateway` | Platzhalter für den externen E-Mail-/SMS-Anbieter: E-Mail an Mailpit, SMS ins Log; Ausfall per `NOTIFY_FAILURE_MODE` erzwingbar | nur `worker` |
+| `mailpit` | fängt alle E-Mails ab, Weboberfläche | `127.0.0.1:8025` |
 | `css` | baut das Stylesheet mit dem Tailwind-CLI neu, sobald sich Templates ändern | — |
 | `pdf-renderer` | erzeugt die PDF-Exporte; eigener Prozess ohne Datenbanknetz und ohne Zugangsdaten, Dateisystem schreibgeschützt | nur `web` |
 | `keycloak` | Identity Provider (OIDC mit PKCE), Rollen aus Gruppen | `127.0.0.1:8080` |
@@ -70,10 +72,11 @@ vorhandenen Realm beim Import nicht überschreibt.
 │   │   ├── accounts/       Benutzer, Rollen, Anmeldung über Keycloak
 │   │   ├── risks/          Risiko, Bewertung, CIA-Triade, Freigabeanträge, Zustandsmaschine
 │   │   ├── cmdb/           Assets, CSV-Import, Beispieldaten
-│   │   ├── notifications/  Notifikationen: Warteschlange, Gateway (Mock), Worker
+│   │   ├── notifications/  Notifikationen: Warteschlange, HttpGateway (und Mock für Tests), Worker
 │   │   ├── exports/        CSV- und PDF-Export (gefiltert, gekennzeichnet)
 │   │   └── audit/          Audit-Log, nur anfügbar, und seine Ansicht
 │   ├── pdf_renderer/       eigenständiger PDF-Dienst ohne Django und ohne Datenbanktreiber
+│   ├── notify_gateway/     eigenständiger Benachrichtigungsdienst (Platzhalter für den Anbieter)
 │   └── templates/
 ├── tests/                  pytest; jeder Test trägt seine Anforderung: @pytest.mark.req("M-05")
 │   ├── assets/             Tailwind-Quelle mit den Design-Tokens (wird nicht ausgeliefert)
@@ -97,13 +100,16 @@ Administration stößt sie unter **Eskalationen** an.
 1. Als `melder` ein Risiko erfassen. Wer nur „Verfügbarkeit“ und „Technisches Versagen /
    Verschleiß“ wählt, bekommt einen Antrag auf IT-Einordnung; bis zur Freigabe gilt das Risiko als
    IS-Risiko (M-04).
-2. Als `rm.mueller` unter **Risiken** bewerten. Ein IS-Risiko ab 20 wird sofort eskaliert, der
-   Worker meldet den Versand in `make logs`.
+2. Als `rm.mueller` unter **Risiken** bewerten. Ein IS-Risiko ab 20 wird sofort eskaliert; die
+   E-Mail an das Incident-Response-Team erscheint in Mailpit (<http://localhost:8025>), die SMS im
+   Log des Gateways (`docker compose logs notify-gateway`). Sie enthält nur Kennung und Link (M-09).
 3. Als `rm.schmidt` (oder `rm.mueller` für Anträge anderer) unter **Freigaben** entscheiden.
 4. Als Risk Manager unter **Export** filtern und als CSV oder PDF exportieren. Ohne Filter wird
    nicht exportiert; jeder Export erscheint im **Audit-Log**.
-5. Gateway-Ausfall (AK-03.3) nachstellen: in `.env` `NOTIFY_MOCK_MODE=timeout` setzen,
-   `docker compose up -d worker`, dann ein IS-Risiko mit 4 × 5 bewerten.
+5. Gateway-Ausfall (AK-03.3) nachstellen: in `.env` `NOTIFY_FAILURE_MODE=timeout` (oder `5xx`)
+   setzen, `docker compose up -d notify-gateway`, dann ein IS-Risiko mit 4 × 5 bewerten. Das Risiko
+   bleibt rot markiert. Nach `NOTIFY_FAILURE_MODE=none` und erneutem `docker compose up -d
+   notify-gateway` stellt `app-admin` unter **Eskalationen** die Notifikation erneut zu.
 
 ## Sicherheitsrelevante Festlegungen
 

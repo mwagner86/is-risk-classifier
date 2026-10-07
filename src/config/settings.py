@@ -189,6 +189,10 @@ IT_OPS_EMAIL = env("IT_OPS_EMAIL", "")
 NOTIFICATION_GATEWAY = env("NOTIFICATION_GATEWAY", "apps.notifications.gateway.MockGateway")
 # Mock only: ok, timeout or 5xx — forces the gateway failure of AK-03.3
 NOTIFY_MOCK_MODE = env("NOTIFY_MOCK_MODE", "ok")
+# HttpGateway: the notify-gateway service (the worker sets NOTIFICATION_GATEWAY in compose)
+NOTIFY_GATEWAY_URL = env("NOTIFY_GATEWAY_URL", "http://notify-gateway:8002/messages")
+NOTIFY_GATEWAY_TOKEN = env("NOTIFY_GATEWAY_TOKEN", "")
+NOTIFY_GATEWAY_TIMEOUT = float(env("NOTIFY_GATEWAY_TIMEOUT", "5"))
 
 # PDF export: rendered by the separate pdf-renderer service without database access (M-03)
 PDF_RENDERER_URL = env("PDF_RENDERER_URL", "http://pdf-renderer:8001/render")

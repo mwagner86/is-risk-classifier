@@ -12,7 +12,7 @@ from apps.risks.services import has_failed_notification, score
 from apps.risks.state_machine import transition
 from tests.conftest import IR_EMAIL, IR_PHONE, MakeRisk
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("gateway")]
 
 
 @pytest.mark.req("AK-03.1")

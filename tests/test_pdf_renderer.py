@@ -89,7 +89,9 @@ def test_m_03_renderer_container_is_locked_down() -> None:
 @pytest.fixture
 def server_url() -> Iterator[str]:
     server = make_server("127.0.0.1", 0)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread = threading.Thread(
+        target=server.serve_forever, kwargs={"poll_interval": 0.05}, daemon=True
+    )
     thread.start()
     yield f"http://127.0.0.1:{server.server_address[1]}"
     server.shutdown()

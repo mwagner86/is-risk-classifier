@@ -1,6 +1,7 @@
 name: is-risk-classifier
 
-# Images pinned by tag and digest (M-02). Only web and Keycloak are published, on loopback only.
+# Images pinned by tag and digest (M-02). Only web, Keycloak and Mailpit are published, on
+# loopback only.
 
 x-app-env: &app-env
   DATABASE_HOST: db
@@ -126,11 +127,15 @@ services:
   # Outbox worker: delivers queued notifications (mock gateway until iteration 6)
   worker:
     <<: *app
-    environment: *app-role-env
+    environment:
+      <<: *app-role-env
+      NOTIFICATION_GATEWAY: apps.notifications.gateway.HttpGateway
     command: ["python", "src/manage.py", "run_outbox"]
-    networks: [backend]
+    networks: [backend, notify]
     depends_on:
       web:
+        condition: service_healthy
+      notify-gateway:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "find /tmp/outbox-heartbeat -mmin -1 | grep -q ."]
@@ -165,6 +170,47 @@ services:
       timeout: 5s
       retries: 6
 
+  # Stand-in for the external e-mail/SMS provider: e-mail to Mailpit, SMS to the log.
+  # NOTIFY_FAILURE_MODE=timeout|5xx in .env forces the outage of AK-03.3 (then:
+  # docker compose up -d notify-gateway). Like pdf-renderer: no env_file, no database network.
+  notify-gateway:
+    image: is-risk-classifier:dev
+    command: ["python", "-m", "notify_gateway.server"]
+    environment:
+      NOTIFY_GATEWAY_TOKEN: ${NOTIFY_GATEWAY_TOKEN}
+      NOTIFY_FAILURE_MODE: ${NOTIFY_FAILURE_MODE:-none}
+      NOTIFY_GATEWAY_PORT: "8002"
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      MAIL_FROM: eskalation@is-risk.example
+      HOME: /tmp
+    volumes:
+      - ./src:/app/src:ro
+    networks: [notify]
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      mailpit:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8002/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  # Mail sink with web UI: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
+    environment:
+      MP_MAX_MESSAGES: "500"
+    ports:
+      - "127.0.0.1:8025:8025"
+    networks: [frontend, notify]
+
   # Test runner: real PostgreSQL, no Keycloak (tests log in directly)
   test:
     <<: *app
@@ -193,4 +239,7 @@ networks:
     internal: true
   # Only web and pdf-renderer; no route outside, no database (M-03)
   pdf:
+    internal: true
+  # Worker, notify-gateway and Mailpit
+  notify:
     internal: true
