@@ -37,6 +37,7 @@ zufälligen Geheimnissen an. Das Passwort der Demo-Konten steht dort unter `DEMO
 | `make sbom` | SBOM im CycloneDX-Format nach `sbom/is-risk-classifier.cdx.json` |
 | `make audit` | Laufzeit-Abhängigkeiten gegen bekannte Schwachstellen prüfen (pip-audit) |
 | `make trace` | Nachweistabelle Anforderung → Tests nach `docs/traceability.md` |
+| `make messages` | Oberflächentexte einsammeln, englische Übersetzungen eintragen, Katalog kompilieren |
 | `make test` | Tests gegen PostgreSQL, Filter mit `make test ARGS="-k m_05"` |
 | `make lint` | ruff (Lint und Format) und mypy (strict) |
 | `make fmt` | Formatierung und sichere Korrekturen anwenden |
@@ -94,6 +95,16 @@ Dunkles Thema nach dem Stil von dependencytrack.org: Kennzahlen, Risikomatrix 5 
 Risikostufe (ab 20 kritisch, 12–19 hoch, 6–11 mittel, 1–5 niedrig). Ein Risiko mit fehlgeschlagener
 Notifikation bleibt rot markiert, mit Symbol und Text, bis eine erneute Zustellung gelingt; die
 Administration stößt sie unter **Eskalationen** an.
+
+## Sprache
+
+Die Oberfläche gibt es auf Deutsch (Standard) und Englisch; umgeschaltet wird oben rechts mit
+**DE** / **EN**. Die Wahl bleibt in einem Cookie gespeichert; ohne Wahl entscheidet die Sprache des
+Browsers. Die Anmeldeseite von Keycloak folgt der gewählten Sprache, CSV- und PDF-Exporte ebenfalls.
+Deutsch ist die Quellsprache: Die Meldungen der Spezifikation stehen dort wörtlich. Die
+Benachrichtigungen an das Incident-Response-Team bleiben deutsch.
+
+![Dashboard auf Englisch](docs/screenshots/dashboard-en.png)
 
 ## Ablauf ausprobieren
 

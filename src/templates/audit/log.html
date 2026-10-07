@@ -1,30 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Audit-Log{% endblock %}
-{% block breadcrumb %}{% url 'dashboard' as home %}{% include "_crumb.html" with url=home label="Dashboard" %}<li aria-current="page" class="text-text">Audit-Log</li>{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Audit-Log" %}{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% translate "Dashboard" as crumb_label %}{% include "_crumb.html" with url=home label=crumb_label %}<li aria-current="page" class="text-text">{% translate "Audit-Log" %}</li>{% endblock %}
 {% block content %}
-  <h1 class="mb-2">Audit-Log</h1>
-  <p class="mb-5 text-sm text-muted">Einträge lassen sich nur anfügen, nicht ändern oder löschen.</p>
-  <form method="get" class="card mb-5 flex flex-wrap items-end gap-3" aria-label="Filter">
+  <h1 class="mb-2">{% translate "Audit-Log" %}</h1>
+  <p class="mb-5 text-sm text-muted">{% translate "Einträge lassen sich nur anfügen, nicht ändern oder löschen." %}</p>
+  <form method="get" class="card mb-5 flex flex-wrap items-end gap-3" aria-label="{% translate 'Filter' %}">
     <div>
-      <label for="a-action" class="field-label">Aktion</label>
+      <label for="a-action" class="field-label">{% translate "Aktion" %}</label>
       <select id="a-action" name="action" class="input">
-        <option value="">alle</option>
+        <option value="">{% translate "alle" %}</option>
         {% for value, label in actions %}<option value="{{ value }}"{% if action == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
       </select>
     </div>
     <div class="min-w-80">
-      <label for="a-risk" class="field-label">Risiko-Kennung</label>
+      <label for="a-risk" class="field-label">{% translate "Risiko-Kennung" %}</label>
       <input id="a-risk" name="risk" value="{{ risk }}" class="input mono" placeholder="UUID">
     </div>
-    <button type="submit" class="btn btn-primary">Filtern</button>
-    <a href="{% url 'audit_log' %}" class="btn">Zurücksetzen</a>
+    <button type="submit" class="btn btn-primary">{% translate "Filtern" %}</button>
+    <a href="{% url 'audit_log' %}" class="btn">{% translate "Zurücksetzen" %}</a>
   </form>
   <section class="card">
     {% include "audit/_entries.html" with entries=page.object_list with_risk=True %}
-    <nav aria-label="Seiten" class="mt-4 flex items-center gap-3 text-sm">
-      {% if page.has_previous %}<a class="btn" href="?{% if action %}action={{ action }}&amp;{% endif %}{% if risk %}risk={{ risk }}&amp;{% endif %}seite={{ page.previous_page_number }}">Zurück</a>{% endif %}
-      <span>Seite {{ page.number }} von {{ page.paginator.num_pages }}</span>
-      {% if page.has_next %}<a class="btn" href="?{% if action %}action={{ action }}&amp;{% endif %}{% if risk %}risk={{ risk }}&amp;{% endif %}seite={{ page.next_page_number }}">Weiter</a>{% endif %}
+    <nav aria-label="{% translate 'Seiten' %}" class="mt-4 flex items-center gap-3 text-sm">
+      {% if page.has_previous %}<a class="btn" href="?{% if action %}action={{ action }}&amp;{% endif %}{% if risk %}risk={{ risk }}&amp;{% endif %}seite={{ page.previous_page_number }}">{% translate "Zurück" %}</a>{% endif %}
+      <span>{% blocktranslate with number=page.number total=page.paginator.num_pages %}Seite {{ number }} von {{ total }}{% endblocktranslate %}</span>
+      {% if page.has_next %}<a class="btn" href="?{% if action %}action={{ action }}&amp;{% endif %}{% if risk %}risk={{ risk }}&amp;{% endif %}seite={{ page.next_page_number }}">{% translate "Weiter" %}</a>{% endif %}
     </nav>
   </section>
 {% endblock %}

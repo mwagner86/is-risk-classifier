@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% block title %}{% if risk %}Entwurf bearbeiten{% else %}Risiko erfassen{% endif %}{% endblock %}
-{% block breadcrumb %}{% url 'dashboard' as home %}{% url 'risk_list' as risks %}{% include "_crumb.html" with url=home label="Dashboard" %}{% include "_crumb.html" with url=risks label="Risiken" %}<li aria-current="page" class="text-text">{% if risk %}Entwurf bearbeiten{% else %}Erfassen{% endif %}</li>{% endblock %}
+{% load i18n %}
+{% block title %}{% if risk %}{% translate "Entwurf bearbeiten" %}{% else %}{% translate "Risiko erfassen" %}{% endif %}{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% url 'risk_list' as risks %}{% translate "Dashboard" as crumb_label %}{% include "_crumb.html" with url=home label=crumb_label %}{% translate "Risiken" as crumb_label %}{% include "_crumb.html" with url=risks label=crumb_label %}<li aria-current="page" class="text-text">{% if risk %}{% translate "Entwurf bearbeiten" %}{% else %}{% translate "Erfassen" %}{% endif %}</li>{% endblock %}
 {% block content %}
-  <h1 class="mb-5">{% if risk %}Entwurf bearbeiten{% else %}Risiko erfassen{% endif %}</h1>
+  <h1 class="mb-5">{% if risk %}{% translate "Entwurf bearbeiten" %}{% else %}{% translate "Risiko erfassen" %}{% endif %}</h1>
   <form method="post" class="card max-w-3xl">
     {% csrf_token %}
     {{ form.non_field_errors }}
@@ -10,8 +11,8 @@
     {% include "risks/_field.html" with field=form.description %}
     {% include "risks/_classification.html" %}
     <div class="flex flex-wrap gap-3">
-      <button type="submit" name="action" value="submit" class="btn btn-primary">Speichern</button>
-      <button type="submit" name="action" value="draft" formnovalidate class="btn">Als Entwurf ablegen</button>
+      <button type="submit" name="action" value="submit" class="btn btn-primary">{% translate "Speichern" %}</button>
+      <button type="submit" name="action" value="draft" formnovalidate class="btn">{% translate "Als Entwurf ablegen" %}</button>
     </div>
   </form>
 {% endblock %}

@@ -8,6 +8,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from django.db import transaction
+from django.utils.translation import gettext
 
 from apps.accounts.models import Role, User
 from apps.audit.models import AuditAction
@@ -35,12 +36,18 @@ class TransitionError(Exception):
 
 class TransitionNotAllowedError(TransitionError):
     def __init__(self, source: str, target: str) -> None:
-        super().__init__(f"Übergang von {source} nach {target} ist nicht zulässig.")
+        super().__init__(
+            gettext("Übergang von %(source)s nach %(target)s ist nicht zulässig.")
+            % {"source": RiskStatus(source).label, "target": RiskStatus(target).label}
+        )
 
 
 class TransitionForbiddenError(TransitionError):
     def __init__(self, source: str, target: str) -> None:
-        super().__init__(f"Keine Berechtigung für den Übergang von {source} nach {target}.")
+        super().__init__(
+            gettext("Keine Berechtigung für den Übergang von %(source)s nach %(target)s.")
+            % {"source": RiskStatus(source).label, "target": RiskStatus(target).label}
+        )
 
 
 class GuardFailedError(TransitionError):
@@ -77,26 +84,26 @@ def _cia(assessment: RiskAssessment) -> CIATriad | None:
 def is_categorized(risk: Risk) -> str | None:
     assessment = _assessment(risk)
     if assessment is None:
-        return "Es fehlt die Bewertung."
+        return gettext("Es fehlt die Bewertung.")
     cia = _cia(assessment)
     if cia is None or not cia.any_affected:
-        return "Mindestens ein Schutzziel muss ausgewählt sein."
+        return gettext("Mindestens ein Schutzziel muss ausgewählt sein.")
     if not assessment.origin:
-        return "Ursprung muss zur CIA-Klassifizierung zwingend angegeben werden"
+        return gettext("Ursprung muss zur CIA-Klassifizierung zwingend angegeben werden")
     if assessment.category is None:
-        return "Die Kategorie ist noch nicht bestimmt."
+        return gettext("Die Kategorie ist noch nicht bestimmt.")
     # Assets follow the rule's result: a requested IT categorisation needs none, even though
     # the risk counts as IS until the request is approved (M-04)
     computed = categorize(cia.confidentiality, cia.integrity, cia.availability, assessment.origin)
     if computed == RiskCategory.IS_RISIKO and not assessment.assets.exists():
-        return "Für ein IS-Risiko müssen die betroffenen Assets angegeben werden."
+        return gettext("Für ein IS-Risiko müssen die betroffenen Assets angegeben werden.")
     return None
 
 
 def is_scored(risk: Risk) -> str | None:
     assessment = _assessment(risk)
     if assessment is None or assessment.score is None:
-        return "Eintrittswahrscheinlichkeit und Schadensausmaß müssen gesetzt sein."
+        return gettext("Eintrittswahrscheinlichkeit und Schadensausmaß müssen gesetzt sein.")
     return None
 
 
@@ -112,21 +119,21 @@ def requires_escalation(risk: Risk) -> bool:
 
 def must_escalate(risk: Risk) -> str | None:
     if not requires_escalation(risk):
-        return "Eskaliert werden nur IS-Risiken mit einem Risikowert ab 20."
+        return gettext("Eskaliert werden nur IS-Risiken mit einem Risikowert ab 20.")
     return None
 
 
 def may_validate_without_escalation(risk: Risk) -> str | None:
     if requires_escalation(risk):
-        return "Ein IS-Risiko mit einem Risikowert ab 20 muss eskaliert werden."
+        return gettext("Ein IS-Risiko mit einem Risikowert ab 20 muss eskaliert werden.")
     if risk.approval_requests.filter(state=ApprovalState.PENDING).exists():
-        return "Es gibt offene Freigabeanträge."
+        return gettext("Es gibt offene Freigabeanträge.")
     return None
 
 
 def incident_response_documented(risk: Risk) -> str | None:
     if not risk.incident_response.strip():
-        return "Die Incident Response muss dokumentiert sein."
+        return gettext("Die Incident Response muss dokumentiert sein.")
     return None
 
 
@@ -219,7 +226,7 @@ def transition(
         if rule.guard is not None and (reason := rule.guard(locked)) is not None:
             raise GuardFailedError(reason)
         if create_successor and (source, target) not in SUCCESSOR_OPTIONAL:
-            raise TransitionError("Für diesen Übergang ist kein Nachfolger vorgesehen.")
+            raise TransitionError(gettext("Für diesen Übergang ist kein Nachfolger vorgesehen."))
 
         locked.status = target
         locked.save(update_fields=["status"])

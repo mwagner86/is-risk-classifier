@@ -4,6 +4,8 @@ name: is-risk-classifier
 # loopback only.
 
 x-app-env: &app-env
+  # Any UID may run the containers (see user below); HOME must be writable for caches
+  HOME: /tmp
   DATABASE_HOST: db
   OIDC_PUBLIC_BASE_URL: http://localhost:8080
   OIDC_INTERNAL_BASE_URL: http://keycloak:8080
@@ -22,6 +24,9 @@ x-app: &app
   image: is-risk-classifier:dev
   env_file: .env
   environment: *app-env
+  # The source is bind-mounted: run as the owner of the working tree (make passes the IDs),
+  # so caches, SBOM and catalogues can be written also where that is not UID 1000 (CI)
+  user: "${APP_UID:-1000}:${APP_GID:-1000}"
   volumes:
     - ./:/app
 

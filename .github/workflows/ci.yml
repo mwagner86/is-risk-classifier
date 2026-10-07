@@ -37,6 +37,9 @@ jobs:
       - name: Tests (PostgreSQL in Docker)
         run: make test
 
+      - name: Every UI text has an English translation
+        run: make messages-check
+
       - name: Traceability table is up to date
         run: |
           make trace

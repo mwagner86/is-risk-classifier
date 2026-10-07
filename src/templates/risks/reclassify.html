@@ -1,13 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Klassifizierung ändern{% endblock %}
-{% block breadcrumb %}{% url 'risk_list' as risks %}{% url 'risk_detail' risk.pk as detail %}{% include "_crumb.html" with url=risks label="Risiken" %}{% include "_crumb.html" with url=detail label=risk.title %}<li aria-current="page" class="text-text">Klassifizierung</li>{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Klassifizierung ändern" %}{% endblock %}
+{% block breadcrumb %}{% url 'risk_list' as risks %}{% url 'risk_detail' risk.pk as detail %}{% translate "Risiken" as crumb_label %}{% include "_crumb.html" with url=risks label=crumb_label %}{% include "_crumb.html" with url=detail label=risk.title %}<li aria-current="page" class="text-text">{% translate "Klassifizierung" %}</li>{% endblock %}
 {% block content %}
-  <h1 class="mb-2">Klassifizierung ändern</h1>
-  <p class="mb-5 text-sm text-muted">Eine Einordnung als IT-Risiko wird erst nach Freigabe durch einen anderen Risk Manager wirksam.</p>
+  <h1 class="mb-2">{% translate "Klassifizierung ändern" %}</h1>
+  <p class="mb-5 text-sm text-muted">{% translate "Eine Einordnung als IT-Risiko wird erst nach Freigabe durch einen anderen Risk Manager wirksam." %}</p>
   <form method="post" class="card max-w-3xl">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {% include "risks/_classification.html" %}
-    <div class="flex gap-3"><button type="submit" class="btn btn-primary">Speichern</button><a href="{% url 'risk_detail' risk.pk %}" class="btn">Abbrechen</a></div>
+    <div class="flex gap-3"><button type="submit" class="btn btn-primary">{% translate "Speichern" %}</button><a href="{% url 'risk_detail' risk.pk %}" class="btn">{% translate "Abbrechen" %}</a></div>
   </form>
 {% endblock %}

@@ -1,1 +1,1 @@
-{% load risk_tags %}<output id="score-preview" aria-live="polite" class="mb-4 flex items-center gap-2 text-sm">Risikowert: {% if preview is not None %}{% level_badge preview %}{% else %}<strong>Nicht berechenbar</strong>{% endif %}</output>
+{% load i18n risk_tags %}<output id="score-preview" aria-live="polite" class="mb-4 flex items-center gap-2 text-sm">{% translate "Risikowert:" %} {% if preview is not None %}{% level_badge preview %}{% else %}<strong>{% translate "Nicht berechenbar" %}</strong>{% endif %}</output>

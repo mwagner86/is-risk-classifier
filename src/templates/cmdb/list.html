@@ -1,12 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Assets{% endblock %}
-{% block breadcrumb %}{% url 'dashboard' as home %}{% include "_crumb.html" with url=home label="Dashboard" %}<li aria-current="page" class="text-text">Assets</li>{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Assets" %}{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% translate "Dashboard" as crumb_label %}{% include "_crumb.html" with url=home label=crumb_label %}<li aria-current="page" class="text-text">{% translate "Assets" %}</li>{% endblock %}
 {% block content %}
-  <h1 class="mb-2">Assets</h1>
-  <p class="mb-5 text-sm text-muted">Gespiegelt aus der CMDB, hier nur lesbar.</p>
+  <h1 class="mb-2">{% translate "Assets" %}</h1>
+  <p class="mb-5 text-sm text-muted">{% translate "Gespiegelt aus der CMDB, hier nur lesbar." %}</p>
   <section class="card overflow-x-auto">
     <table class="table">
-      <thead><tr><th scope="col">CMDB-Kennung</th><th scope="col">Name</th><th scope="col">Kritikalität (1–5)</th></tr></thead>
+      <thead><tr><th scope="col">{% translate "CMDB-Kennung" %}</th><th scope="col">{% translate "Name" %}</th><th scope="col">{% translate "Kritikalität (1–5)" %}</th></tr></thead>
       <tbody>
         {% for asset in assets %}
           <tr>
@@ -15,7 +16,7 @@
             <td><span class="badge badge-status">{{ asset.criticality }}</span></td>
           </tr>
         {% empty %}
-          <tr><td colspan="3" class="text-muted">Keine Assets importiert.</td></tr>
+          <tr><td colspan="3" class="text-muted">{% translate "Keine Assets importiert." %}</td></tr>
         {% endfor %}
       </tbody>
     </table>

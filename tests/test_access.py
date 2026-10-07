@@ -19,6 +19,7 @@ PUBLIC_ROUTES = {
     "oidc_authentication_init",
     "oidc_authentication_callback",
     "oidc_logout",
+    "set_language",
 }
 
 

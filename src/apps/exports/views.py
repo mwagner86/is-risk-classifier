@@ -9,6 +9,8 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import get_language, ngettext
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_safe
 
 from apps.accounts.models import Role, User
@@ -23,7 +25,7 @@ from apps.risks.levels import RiskLevel
 from apps.risks.models import RiskCategory, RiskStatus
 from apps.risks.services import visible_risks
 
-FILTER_REQUIRED = (
+FILTER_REQUIRED = _(
     "Bitte mindestens einen Filter setzen. Ein Export des gesamten Registers ist nicht vorgesehen."
 )
 
@@ -70,12 +72,12 @@ def _export(request: HttpRequest, fmt: ExportFormat) -> HttpResponse:
     if fmt == ExportFormat.CSV:
         content, content_type = to_csv(records, exporter, exported_at), "text/csv; charset=utf-8"
     else:
-        payload = pdf_payload(records, exporter, exported_at, filters.describe())
+        payload = pdf_payload(records, exporter, exported_at, filters.describe(), get_language())
         try:
             content = pdf_client.render_pdf(payload)
         except pdf_client.PdfRenderError:
             messages.error(
-                request, "Das PDF konnte nicht erzeugt werden. Bitte später erneut versuchen."
+                request, _("Das PDF konnte nicht erzeugt werden. Bitte später erneut versuchen.")
             )
             return redirect(f"{reverse('export_page')}?{filters.query_string()}")
         content_type = "application/pdf"
@@ -93,7 +95,9 @@ def _export(request: HttpRequest, fmt: ExportFormat) -> HttpResponse:
             action=AuditAction.EXPORTED,
             obj=export,
             field=fmt,
-            new=f"{filters.describe()} · {len(records)} Risiken",
+            new=f"{filters.describe()} · "
+            + ngettext("%(count)d Risiko", "%(count)d Risiken", len(records))
+            % {"count": len(records)},
         )
 
     safe_name = re.sub(r"[^A-Za-z0-9._-]", "_", user.username)

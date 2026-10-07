@@ -80,7 +80,7 @@ def test_ak_03_3_gateway_failure_is_logged_and_flagged(
     assert all(n.status == NotificationStatus.FAILED for n in risk.notifications.all())
     failures = AuditEntry.objects.filter(risk=risk, action=AuditAction.NOTIFICATION_FAILED)
     assert failures.count() == 2
-    assert AuditAction.NOTIFICATION_FAILED.label == "Notifikation fehlgeschlagen"
+    assert str(AuditAction.NOTIFICATION_FAILED.label) == "Notifikation fehlgeschlagen"
     assert has_failed_notification(risk)
 
 

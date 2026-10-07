@@ -9,6 +9,7 @@ from typing import Any
 
 from django.db import models
 from django.db.models import F, Q
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import BaseModel
 
@@ -17,33 +18,33 @@ SCALE_MIN, SCALE_MAX = 1, 5
 
 
 class RiskStatus(models.TextChoices):
-    DRAFT = "DRAFT", "Entwurf"
-    CATEGORIZED = "CATEGORIZED", "Kategorisiert"
-    SCORED = "SCORED", "Bewertet"
-    ESCALATED = "ESCALATED", "Eskaliert"
-    VALIDATED = "VALIDATED", "Validiert"
-    CLOSED = "CLOSED", "Geschlossen"
-    OBSOLETE = "OBSOLETE", "Obsolet"
+    DRAFT = "DRAFT", _("Entwurf")
+    CATEGORIZED = "CATEGORIZED", _("Kategorisiert")
+    SCORED = "SCORED", _("Bewertet")
+    ESCALATED = "ESCALATED", _("Eskaliert")
+    VALIDATED = "VALIDATED", _("Validiert")
+    CLOSED = "CLOSED", _("Geschlossen")
+    OBSOLETE = "OBSOLETE", _("Obsolet")
 
 
 class RiskCategory(models.TextChoices):
     """INV-02: exactly these two values, never both, never a third."""
 
-    IS_RISIKO = "IS_RISIKO", "IS-Risiko"
-    IT_RISIKO = "IT_RISIKO", "Allgemeines IT-Risiko"
+    IS_RISIKO = "IS_RISIKO", _("IS-Risiko")
+    IT_RISIKO = "IT_RISIKO", _("Allgemeines IT-Risiko")
 
 
 class Origin(models.TextChoices):
-    TECHNICAL_FAILURE = "TECHNICAL_FAILURE", "Technisches Versagen / Verschleiß"
-    DELIBERATE_ATTACK = "DELIBERATE_ATTACK", "Vorsätzlicher Angriff"
-    HUMAN_ERROR = "HUMAN_ERROR", "Menschliches Versehen"
-    ENVIRONMENTAL = "ENVIRONMENTAL", "Umwelt / höhere Gewalt"
-    UNKNOWN = "UNKNOWN", "Unbekannt"
+    TECHNICAL_FAILURE = "TECHNICAL_FAILURE", _("Technisches Versagen / Verschleiß")
+    DELIBERATE_ATTACK = "DELIBERATE_ATTACK", _("Vorsätzlicher Angriff")
+    HUMAN_ERROR = "HUMAN_ERROR", _("Menschliches Versehen")
+    ENVIRONMENTAL = "ENVIRONMENTAL", _("Umwelt / höhere Gewalt")
+    UNKNOWN = "UNKNOWN", _("Unbekannt")
 
 
 class Risk(BaseModel):
-    title = models.CharField("Titel", max_length=200)
-    description = models.TextField("Beschreibung")
+    title = models.CharField(_("Titel"), max_length=200)
+    description = models.TextField(_("Beschreibung"))
     status = models.CharField(max_length=16, choices=RiskStatus.choices, default=RiskStatus.DRAFT)
     reporter = models.ForeignKey(
         "accounts.User", on_delete=models.PROTECT, related_name="reported_risks"
@@ -52,11 +53,11 @@ class Risk(BaseModel):
     predecessor = models.OneToOneField(
         "self", null=True, blank=True, on_delete=models.PROTECT, related_name="successor"
     )
-    incident_response = models.TextField("Dokumentierte Incident Response", blank=True)
+    incident_response = models.TextField(_("Dokumentierte Incident Response"), blank=True)
 
     class Meta(BaseModel.Meta):
-        verbose_name = "Risiko"
-        verbose_name_plural = "Risiken"
+        verbose_name = _("Risiko")
+        verbose_name_plural = _("Risiken")
         constraints = [
             models.CheckConstraint(
                 condition=Q(status__in=RiskStatus.values), name="risk_status_valid"
@@ -69,19 +70,19 @@ class Risk(BaseModel):
 
 class RiskAssessment(BaseModel):
     risk = models.OneToOneField(Risk, on_delete=models.PROTECT, related_name="assessment")
-    origin = models.CharField("Ursprung", max_length=32, choices=Origin.choices, blank=True)
+    origin = models.CharField(_("Ursprung"), max_length=32, choices=Origin.choices, blank=True)
     # Effective category; NULL only while the risk is a DRAFT
     category = models.CharField(  # noqa: DJ001 - NULL means "not yet categorised", not a third value
-        "Kategorie", max_length=16, choices=RiskCategory.choices, null=True, blank=True
+        _("Kategorie"), max_length=16, choices=RiskCategory.choices, null=True, blank=True
     )
-    probability = models.PositiveSmallIntegerField("Eintrittswahrscheinlichkeit", null=True)
-    impact = models.PositiveSmallIntegerField("Schadensausmaß", null=True)
-    score = models.PositiveSmallIntegerField("Risikowert", null=True, editable=False)
+    probability = models.PositiveSmallIntegerField(_("Eintrittswahrscheinlichkeit"), null=True)
+    impact = models.PositiveSmallIntegerField(_("Schadensausmaß"), null=True)
+    score = models.PositiveSmallIntegerField(_("Risikowert"), null=True, editable=False)
     assets = models.ManyToManyField("cmdb.Asset", blank=True, related_name="assessments")
 
     class Meta(BaseModel.Meta):
-        verbose_name = "Risikobewertung"
-        verbose_name_plural = "Risikobewertungen"
+        verbose_name = _("Risikobewertung")
+        verbose_name_plural = _("Risikobewertungen")
         constraints = [
             models.CheckConstraint(
                 condition=Q(category__isnull=True) | Q(category__in=RiskCategory.values),
@@ -127,13 +128,13 @@ class CIATriad(BaseModel):
     """Affected protection goals; several may be set at once."""
 
     assessment = models.OneToOneField(RiskAssessment, on_delete=models.PROTECT, related_name="cia")
-    confidentiality = models.BooleanField("Vertraulichkeit", default=False)
-    integrity = models.BooleanField("Integrität", default=False)
-    availability = models.BooleanField("Verfügbarkeit", default=False)
+    confidentiality = models.BooleanField(_("Vertraulichkeit"), default=False)
+    integrity = models.BooleanField(_("Integrität"), default=False)
+    availability = models.BooleanField(_("Verfügbarkeit"), default=False)
 
     class Meta(BaseModel.Meta):
-        verbose_name = "CIA-Triade"
-        verbose_name_plural = "CIA-Triaden"
+        verbose_name = _("CIA-Triade")
+        verbose_name_plural = _("CIA-Triaden")
 
     @property
     def any_affected(self) -> bool:
@@ -141,16 +142,16 @@ class CIATriad(BaseModel):
 
 
 class ApprovalKind(models.TextChoices):
-    CATEGORY_TO_IT = "CATEGORY_TO_IT", "Einordnung als IT-Risiko"
-    SCORE_DOWNGRADE = "SCORE_DOWNGRADE", "Herabstufung unter 20"
+    CATEGORY_TO_IT = "CATEGORY_TO_IT", _("Einordnung als IT-Risiko")
+    SCORE_DOWNGRADE = "SCORE_DOWNGRADE", _("Herabstufung unter 20")
 
 
 class ApprovalState(models.TextChoices):
-    PENDING = "PENDING", "Offen"
-    APPROVED = "APPROVED", "Freigegeben"
-    REJECTED = "REJECTED", "Abgelehnt"
+    PENDING = "PENDING", _("Offen")
+    APPROVED = "APPROVED", _("Freigegeben")
+    REJECTED = "REJECTED", _("Abgelehnt")
     # Superseded by a later change (e.g. reclassified as IS risk); no decision was taken
-    WITHDRAWN = "WITHDRAWN", "Zurückgezogen"
+    WITHDRAWN = "WITHDRAWN", _("Zurückgezogen")
 
 
 class ApprovalRequest(BaseModel):
@@ -179,8 +180,8 @@ class ApprovalRequest(BaseModel):
     decided_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(BaseModel.Meta):
-        verbose_name = "Freigabeantrag"
-        verbose_name_plural = "Freigabeanträge"
+        verbose_name = _("Freigabeantrag")
+        verbose_name_plural = _("Freigabeanträge")
         constraints = [
             # M-04: nobody approves their own request
             models.CheckConstraint(

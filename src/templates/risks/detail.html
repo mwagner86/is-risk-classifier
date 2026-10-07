@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load risk_tags ui %}
 {% block title %}{{ risk.title }}{% endblock %}
-{% block breadcrumb %}{% url 'dashboard' as home %}{% url 'risk_list' as risks %}{% include "_crumb.html" with url=home label="Dashboard" %}{% include "_crumb.html" with url=risks label="Risiken" %}<li aria-current="page" class="text-text">{{ risk.title }}</li>{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% url 'risk_list' as risks %}{% translate "Dashboard" as crumb_label %}{% include "_crumb.html" with url=home label=crumb_label %}{% translate "Risiken" as crumb_label %}{% include "_crumb.html" with url=risks label=crumb_label %}<li aria-current="page" class="text-text">{{ risk.title }}</li>{% endblock %}
 {% block content %}
   <div class="mb-5 flex flex-wrap items-start justify-between gap-3">
     <div>
@@ -16,75 +17,75 @@
 
   {% if notification_failed %}
     <div class="card risk-failed mb-5" role="alert">
-      <span class="flag-failed">{% icon "alert" label="Warnung" %}Notifikation fehlgeschlagen</span>
-      <p class="mt-1 text-sm">Das Incident-Response-Team wurde nicht erreicht. Die Markierung bleibt, bis eine erneute Zustellung gelingt.</p>
+      <span class="flag-failed">{% translate "Warnung" as warning %}{% icon "alert" label=warning %}{% translate "Notifikation fehlgeschlagen" %}</span>
+      <p class="mt-1 text-sm">{% translate "Das Incident-Response-Team wurde nicht erreicht. Die Markierung bleibt, bis eine erneute Zustellung gelingt." %}</p>
     </div>
   {% endif %}
 
   <div class="grid gap-6 lg:grid-cols-[1fr_20rem]">
     <section class="card" aria-labelledby="facts">
-      <h2 id="facts" class="card-title">Bewertung</h2>
+      <h2 id="facts" class="card-title">{% translate "Bewertung" %}</h2>
       <dl class="grid gap-x-6 gap-y-3 sm:grid-cols-[12rem_1fr]">
-        <dt class="text-muted">Kategorie</dt>
-        <dd>{{ assessment.get_category_display|default:"–" }}{% if pending_approval %} <span class="badge badge-status">Freigabe offen</span>{% endif %}</dd>
-        <dt class="text-muted">Beschreibung</dt><dd>{{ risk.description|linebreaksbr }}</dd>
-        <dt class="text-muted">Schutzziele</dt>
+        <dt class="text-muted">{% translate "Kategorie" %}</dt>
+        <dd>{{ assessment.get_category_display|default:"–" }}{% if pending_approval %} <span class="badge badge-status">{% translate "Freigabe offen" %}</span>{% endif %}</dd>
+        <dt class="text-muted">{% translate "Beschreibung" %}</dt><dd>{{ risk.description|linebreaksbr }}</dd>
+        <dt class="text-muted">{% translate "Schutzziele" %}</dt>
         <dd class="flex flex-wrap gap-2">
-          {% if assessment.cia.confidentiality %}<span class="badge badge-status">Vertraulichkeit</span>{% endif %}
-          {% if assessment.cia.integrity %}<span class="badge badge-status">Integrität</span>{% endif %}
-          {% if assessment.cia.availability %}<span class="badge badge-status">Verfügbarkeit</span>{% endif %}
+          {% if assessment.cia.confidentiality %}<span class="badge badge-status">{% translate "Vertraulichkeit" %}</span>{% endif %}
+          {% if assessment.cia.integrity %}<span class="badge badge-status">{% translate "Integrität" %}</span>{% endif %}
+          {% if assessment.cia.availability %}<span class="badge badge-status">{% translate "Verfügbarkeit" %}</span>{% endif %}
         </dd>
-        <dt class="text-muted">Ursprung</dt><dd>{{ assessment.get_origin_display|default:"–" }}</dd>
-        <dt class="text-muted">Betroffene Assets</dt>
+        <dt class="text-muted">{% translate "Ursprung" %}</dt><dd>{{ assessment.get_origin_display|default:"–" }}</dd>
+        <dt class="text-muted">{% translate "Betroffene Assets" %}</dt>
         <dd>{% for asset in assessment.assets.all %}<span class="mono">{{ asset.cmdb_key }}</span> {{ asset.name }}{% if not forloop.last %}<br>{% endif %}{% empty %}–{% endfor %}</dd>
-        <dt class="text-muted">P × I</dt>
-        <dd>{% if assessment.score %}{{ assessment.probability }} × {{ assessment.impact }} = <strong>{{ assessment.score }}</strong>{% else %}noch nicht bewertet{% endif %}</dd>
-        <dt class="text-muted">Erfasst</dt><dd>{{ risk.created_at|date:"d.m.Y H:i" }} von {{ risk.reporter }}</dd>
-        {% if risk.predecessor %}<dt class="text-muted">Neubewertung von</dt><dd><a href="{% url 'risk_detail' risk.predecessor.pk %}" class="mono">{{ risk.predecessor.pk }}</a></dd>{% endif %}
-        {% if risk.incident_response %}<dt class="text-muted">Incident Response</dt><dd>{{ risk.incident_response|linebreaksbr }}</dd>{% endif %}
+        <dt class="text-muted">{% translate "P × I" %}</dt>
+        <dd>{% if assessment.score %}{{ assessment.probability }} × {{ assessment.impact }} = <strong>{{ assessment.score }}</strong>{% else %}{% translate "noch nicht bewertet" %}{% endif %}</dd>
+        <dt class="text-muted">{% translate "Erfasst" %}</dt><dd>{% blocktranslate with date=risk.created_at|date:"SHORT_DATETIME_FORMAT" reporter=risk.reporter %}{{ date }} von {{ reporter }}{% endblocktranslate %}</dd>
+        {% if risk.predecessor %}<dt class="text-muted">{% translate "Neubewertung von" %}</dt><dd><a href="{% url 'risk_detail' risk.predecessor.pk %}" class="mono">{{ risk.predecessor.pk }}</a></dd>{% endif %}
+        {% if risk.incident_response %}<dt class="text-muted">{% translate "Incident Response" %}</dt><dd>{{ risk.incident_response|linebreaksbr }}</dd>{% endif %}
       </dl>
     </section>
 
     <aside class="space-y-6">
       <section class="card" aria-labelledby="actions">
-        <h2 id="actions" class="card-title">Aktionen</h2>
+        <h2 id="actions" class="card-title">{% translate "Aktionen" %}</h2>
         <div class="flex flex-col gap-2">
-          {% if can_edit_draft %}<a href="{% url 'risk_edit' risk.pk %}" class="btn btn-primary">Entwurf bearbeiten und einreichen</a>{% endif %}
+          {% if can_edit_draft %}<a href="{% url 'risk_edit' risk.pk %}" class="btn btn-primary">{% translate "Entwurf bearbeiten und einreichen" %}</a>{% endif %}
           {% if can_assess %}
-            <a href="{% url 'risk_score' risk.pk %}" class="btn btn-primary">Bewerten (P, I)</a>
-            <a href="{% url 'risk_reclassify' risk.pk %}" class="btn">Klassifizierung ändern</a>
+            <a href="{% url 'risk_score' risk.pk %}" class="btn btn-primary">{% translate "Bewerten (P, I)" %}</a>
+            <a href="{% url 'risk_reclassify' risk.pk %}" class="btn">{% translate "Klassifizierung ändern" %}</a>
           {% endif %}
-          {% if can_document_ir %}<a href="{% url 'risk_incident_response' risk.pk %}" class="btn btn-primary">Incident Response dokumentieren</a>{% endif %}
+          {% if can_document_ir %}<a href="{% url 'risk_incident_response' risk.pk %}" class="btn btn-primary">{% translate "Incident Response dokumentieren" %}</a>{% endif %}
           {% for target in transitions %}
             <form method="post" action="{% url 'risk_change_status' risk.pk %}" class="flex flex-col gap-2">
               {% csrf_token %}
               <input type="hidden" name="target" value="{{ target.value }}">
               {% if target.value == "OBSOLETE" and risk.status == "VALIDATED" %}
-                <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="successor" class="size-4 accent-primary"> Neubewertung anlegen</label>
+                <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="successor" class="size-4 accent-primary"> {% translate "Neubewertung anlegen" %}</label>
               {% endif %}
               <button type="submit" class="btn {% if target.value == 'OBSOLETE' %}btn-danger{% endif %}">
-                {% if target.value == "VALIDATED" %}Bewertung abschließen{% elif target.value == "CLOSED" %}Schließen{% elif target.value == "OBSOLETE" %}{% if risk.status == "CLOSED" %}Neu bewerten (obsolet setzen){% else %}Obsolet setzen{% endif %}{% else %}{{ target.label }}{% endif %}
+                {% if target.value == "VALIDATED" %}{% translate "Bewertung abschließen" %}{% elif target.value == "CLOSED" %}{% translate "Schließen" %}{% elif target.value == "OBSOLETE" %}{% if risk.status == "CLOSED" %}{% translate "Neu bewerten (obsolet setzen)" %}{% else %}{% translate "Obsolet setzen" %}{% endif %}{% else %}{{ target.label }}{% endif %}
               </button>
             </form>
           {% empty %}
-            {% if not can_edit_draft and not can_assess and not can_document_ir %}<p class="text-sm text-muted">Keine Aktionen für Ihre Rolle.</p>{% endif %}
+            {% if not can_edit_draft and not can_assess and not can_document_ir %}<p class="text-sm text-muted">{% translate "Keine Aktionen für Ihre Rolle." %}</p>{% endif %}
           {% endfor %}
         </div>
       </section>
 
       {% if approvals %}
         <section class="card" aria-labelledby="approvals">
-          <h2 id="approvals" class="card-title">Freigabeanträge</h2>
-          <ul class="space-y-2 text-sm">{% for a in approvals %}<li>{{ a.get_kind_display }}: <strong>{{ a.get_state_display }}</strong><br><span class="text-muted">beantragt von {{ a.requested_by }}{% if a.decided_by %}, entschieden von {{ a.decided_by }}{% endif %}</span></li>{% endfor %}</ul>
+          <h2 id="approvals" class="card-title">{% translate "Freigabeanträge" %}</h2>
+          <ul class="space-y-2 text-sm">{% for a in approvals %}<li>{{ a.get_kind_display }}: <strong>{{ a.get_state_display }}</strong><br><span class="text-muted">{% blocktranslate with by=a.requested_by %}beantragt von {{ by }}{% endblocktranslate %}{% if a.decided_by %}, {% blocktranslate with by=a.decided_by %}entschieden von {{ by }}{% endblocktranslate %}{% endif %}</span></li>{% endfor %}</ul>
         </section>
       {% endif %}
 
       {% if notifications %}
         <section class="card" aria-labelledby="notifications">
-          <h2 id="notifications" class="card-title">Notifikationen</h2>
+          <h2 id="notifications" class="card-title">{% translate "Notifikationen" %}</h2>
           <ul class="space-y-2 text-sm">
             {% for n in notifications %}
-              <li>{{ n.get_kind_display }} per {{ n.get_channel_display }}<br>
+              <li>{% blocktranslate with kind=n.get_kind_display channel=n.get_channel_display %}{{ kind }} per {{ channel }}{% endblocktranslate %}<br>
                 <span class="{% if n.status == 'FAILED' %}text-danger-strong font-semibold{% else %}text-muted{% endif %}">{{ n.get_status_display }}{% if n.last_error %} ({{ n.last_error }}){% endif %}</span>
               </li>
             {% endfor %}
@@ -96,9 +97,9 @@
 
   {% if history is not None %}
     <section class="card mt-6" aria-labelledby="history-heading">
-      <h2 id="history-heading" class="card-title">Verlauf</h2>
+      <h2 id="history-heading" class="card-title">{% translate "Verlauf" %}</h2>
       {% include "audit/_entries.html" with entries=history with_risk=False %}
-      <p class="mt-3 text-sm"><a href="{% url 'audit_log' %}?risk={{ risk.pk }}">Vollständiger Verlauf im Audit-Log</a></p>
+      <p class="mt-3 text-sm"><a href="{% url 'audit_log' %}?risk={{ risk.pk }}">{% translate "Vollständiger Verlauf im Audit-Log" %}</a></p>
     </section>
   {% endif %}
 {% endblock %}

@@ -8,6 +8,7 @@ from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Exists, OuterRef, QuerySet
 from django.utils import timezone
+from django.utils.translation import gettext
 
 from apps.accounts.models import Role, User
 from apps.audit.models import AuditAction
@@ -146,7 +147,7 @@ def unresolved_failures() -> QuerySet[Notification]:
 def resend_failed(risk: "Risk", actor: User) -> list[Notification]:
     """Queue one new attempt per failed recipient (administration only)."""
     if not actor.is_active or actor.role != Role.ADMIN:
-        raise PermissionDenied("Nur die Administration kann Notifikationen erneut senden.")
+        raise PermissionDenied(gettext("Nur die Administration kann Notifikationen erneut senden."))
     latest_failures = (
         unresolved_failures()
         .filter(risk=risk)

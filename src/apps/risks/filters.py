@@ -5,6 +5,7 @@ from dataclasses import asdict, dataclass
 from urllib.parse import urlencode
 
 from django.db.models import QuerySet
+from django.utils.translation import gettext
 
 from apps.risks.levels import RiskLevel, score_filter
 from apps.risks.models import Risk, RiskCategory, RiskStatus
@@ -64,16 +65,16 @@ class RiskFilter:
     def describe(self) -> str:
         parts = []
         if self.status:
-            parts.append(f"Status: {RiskStatus(self.status).label}")
+            parts.append(gettext("Status: %s") % RiskStatus(self.status).label)
         if self.category:
-            parts.append(f"Kategorie: {RiskCategory(self.category).label}")
+            parts.append(gettext("Kategorie: %s") % RiskCategory(self.category).label)
         if self.level:
-            parts.append(f"Risikostufe: {RiskLevel(self.level).label}")
+            parts.append(gettext("Risikostufe: %s") % RiskLevel(self.level).label)
         if self.probability:
             parts.append(f"P = {self.probability}")
         if self.impact:
             parts.append(f"I = {self.impact}")
-        return "; ".join(parts) or "ohne Filter"
+        return "; ".join(parts) or gettext("ohne Filter")
 
     def query_string(self) -> str:
         return urlencode({PARAMS[k]: v for k, v in asdict(self).items() if v})

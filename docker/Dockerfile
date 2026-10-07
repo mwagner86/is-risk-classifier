@@ -51,6 +51,11 @@ CMD ["gunicorn", "--chdir", "src", "config.wsgi:application", "--bind", "0.0.0.0
 
 # Development image: adds test and lint tooling; source is bind-mounted by compose
 FROM deps AS dev
+# GNU gettext for makemessages/compilemessages; development only, the runtime image ships the
+# compiled catalogues from the repository
+RUN apt-get update \
+ && apt-get install --yes --no-install-recommends gettext \
+ && rm -rf /var/lib/apt/lists/*
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-install-project
 ENV UV_CACHE_DIR=/tmp/uv-cache

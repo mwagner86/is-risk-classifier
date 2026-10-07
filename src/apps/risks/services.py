@@ -8,12 +8,13 @@ P and I to the audit log (M-06).
 
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import Role, User
 from apps.audit.models import AuditAction
@@ -42,17 +43,22 @@ from apps.risks.models import (
 )
 from apps.risks.state_machine import requires_escalation, transition
 
-ORIGIN_MISSING = "Ursprung muss zur CIA-Klassifizierung zwingend angegeben werden"
-ORIGIN_UNKNOWN = "Unbekannter Ursprung."
-GOAL_MISSING = "Mindestens ein Schutzziel muss ausgewählt werden."
-ASSETS_MISSING = "Für ein IS-Risiko müssen die betroffenen Assets angegeben werden."
-TITLE_MISSING = "Bitte einen Titel angeben."
-DESCRIPTION_MISSING = "Bitte eine Beschreibung angeben."
+if TYPE_CHECKING:
+    from django_stubs_ext import StrOrPromise
+else:
+    StrOrPromise = str
+
+ORIGIN_MISSING = _("Ursprung muss zur CIA-Klassifizierung zwingend angegeben werden")
+ORIGIN_UNKNOWN = _("Unbekannter Ursprung.")
+GOAL_MISSING = _("Mindestens ein Schutzziel muss ausgewählt werden.")
+ASSETS_MISSING = _("Für ein IS-Risiko müssen die betroffenen Assets angegeben werden.")
+TITLE_MISSING = _("Bitte einen Titel angeben.")
+DESCRIPTION_MISSING = _("Bitte eine Beschreibung angeben.")
 RANGE_MESSAGES = {
-    "probability": "Zulässiger Wertebereich für die Eintrittswahrscheinlichkeit ist 1 bis 5",
-    "impact": "Zulässiger Wertebereich für das Schadensausmaß ist 1 bis 5",
+    "probability": _("Zulässiger Wertebereich für die Eintrittswahrscheinlichkeit ist 1 bis 5"),
+    "impact": _("Zulässiger Wertebereich für das Schadensausmaß ist 1 bis 5"),
 }
-NOT_EDITABLE = "In diesem Status kann die Bewertung nicht mehr geändert werden."
+NOT_EDITABLE = _("In diesem Status kann die Bewertung nicht mehr geändert werden.")
 
 CAPTURE_ROLES = frozenset({Role.NUTZER, Role.RISK_MANAGER})
 RM = frozenset({Role.RISK_MANAGER})
@@ -73,8 +79,8 @@ class Classification:
     def category(self) -> RiskCategory | None:
         return categorize(self.confidentiality, self.integrity, self.availability, self.origin)
 
-    def errors(self) -> dict[str, list[str]]:
-        errors: dict[str, list[str]] = {}
+    def errors(self) -> dict[str, list[StrOrPromise]]:
+        errors: dict[str, list[StrOrPromise]] = {}
         if not (self.confidentiality or self.integrity or self.availability):
             errors["cia"] = [GOAL_MISSING]
         if not self.origin:
@@ -96,11 +102,11 @@ def _classification(
 
 def _require_role(actor: User, roles: frozenset[Role]) -> None:
     if not actor.is_active or actor.role not in roles:
-        raise PermissionDenied("Keine Berechtigung für diese Aktion.")
+        raise PermissionDenied(_("Keine Berechtigung für diese Aktion."))
 
 
-def _text_errors(title: str, description: str) -> dict[str, list[str]]:
-    errors: dict[str, list[str]] = {}
+def _text_errors(title: str, description: str) -> dict[str, list[StrOrPromise]]:
+    errors: dict[str, list[StrOrPromise]] = {}
     if not title.strip():
         errors["title"] = [TITLE_MISSING]
     if not description.strip():
@@ -300,9 +306,9 @@ def save_draft(
 def _check_draft_access(risk: Risk, actor: User) -> Risk:
     locked = _lock(risk)
     if locked.status != RiskStatus.DRAFT:
-        raise ValidationError("Nur Entwürfe können bearbeitet werden.")
+        raise ValidationError(_("Nur Entwürfe können bearbeitet werden."))
     if actor.role == Role.NUTZER and locked.reporter_id != actor.pk:
-        raise PermissionDenied("Keine Berechtigung für diese Aktion.")
+        raise PermissionDenied(_("Keine Berechtigung für diese Aktion."))
     return locked
 
 
@@ -452,9 +458,9 @@ def decide(request: ApprovalRequest, actor: User, *, approve: bool) -> None:
     _require_role(actor, RM)
     request = ApprovalRequest.objects.select_for_update().get(pk=request.pk)
     if request.state != ApprovalState.PENDING:
-        raise ValidationError("Über diesen Antrag wurde bereits entschieden.")
+        raise ValidationError(_("Über diesen Antrag wurde bereits entschieden."))
     if request.requested_by_id == actor.pk:
-        raise PermissionDenied("Eigene Anträge gibt ein anderer Risk Manager frei.")
+        raise PermissionDenied(_("Eigene Anträge gibt ein anderer Risk Manager frei."))
     risk = _lock(request.risk)
     if approve and risk.status not in EDITABLE:
         raise ValidationError(NOT_EDITABLE)
@@ -498,9 +504,11 @@ def document_incident_response(risk: Risk, actor: User, text: str) -> None:
     """ESCALATED -> VALIDATED, only with documented incident response."""
     _require_role(actor, INCIDENT_ROLES)
     if not text.strip():
-        raise ValidationError({"incident_response": ["Bitte die Incident Response dokumentieren."]})
+        raise ValidationError(
+            {"incident_response": [_("Bitte die Incident Response dokumentieren.")]}
+        )
     risk = _lock(risk)
     if risk.status != RiskStatus.ESCALATED:
-        raise ValidationError("Nur eskalierte Risiken erhalten eine Incident Response.")
+        raise ValidationError(_("Nur eskalierte Risiken erhalten eine Incident Response."))
     _apply(actor, risk, risk, {"incident_response": text.strip()})
     transition(risk, RiskStatus.VALIDATED, actor)

@@ -1,26 +1,32 @@
 """Forms only collect input; every rule is checked again in ``apps.risks.services``."""
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from apps.cmdb.models import Asset
 from apps.core.forms import style_widgets
 from apps.risks.classification import categorize
 from apps.risks.models import Origin, RiskCategory
 
-ASSETS_LOCKED_HINT = "Wird freigeschaltet, sobald das Risiko als IS-Risiko eingestuft ist."
+if TYPE_CHECKING:
+    from django_stubs_ext import StrOrPromise
+else:
+    StrOrPromise = str
+
+ASSETS_LOCKED_HINT = _("Wird freigeschaltet, sobald das Risiko als IS-Risiko eingestuft ist.")
 
 
 class ClassificationForm(forms.Form):
-    confidentiality = forms.BooleanField(label="Vertraulichkeit", required=False)
-    integrity = forms.BooleanField(label="Integrität", required=False)
-    availability = forms.BooleanField(label="Verfügbarkeit", required=False)
+    confidentiality = forms.BooleanField(label=_("Vertraulichkeit"), required=False)
+    integrity = forms.BooleanField(label=_("Integrität"), required=False)
+    availability = forms.BooleanField(label=_("Verfügbarkeit"), required=False)
     origin = forms.ChoiceField(
-        label="Ursprung", choices=[("", "– bitte wählen –"), *Origin.choices], required=False
+        label=_("Ursprung"), choices=[("", _("– bitte wählen –")), *Origin.choices], required=False
     )
     assets = forms.ModelMultipleChoiceField(
-        label="Betroffene Assets", queryset=Asset.objects.all(), required=False
+        label=_("Betroffene Assets"), queryset=Asset.objects.all(), required=False
     )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -67,8 +73,8 @@ class ClassificationForm(forms.Form):
 
 
 class RiskForm(ClassificationForm):
-    title = forms.CharField(label="Titel", max_length=200, required=False)
-    description = forms.CharField(label="Beschreibung", widget=forms.Textarea, required=False)
+    title = forms.CharField(label=_("Titel"), max_length=200, required=False)
+    description = forms.CharField(label=_("Beschreibung"), widget=forms.Textarea, required=False)
 
     field_order = [
         "title",
@@ -81,7 +87,7 @@ class RiskForm(ClassificationForm):
     ]
 
 
-def _scale_field(label: str, message: str) -> forms.IntegerField:
+def _scale_field(label: StrOrPromise, message: StrOrPromise) -> forms.IntegerField:
     return forms.IntegerField(
         label=label,
         min_value=1,
@@ -94,11 +100,11 @@ def _scale_field(label: str, message: str) -> forms.IntegerField:
 
 class ScoreForm(forms.Form):
     probability = _scale_field(
-        "Eintrittswahrscheinlichkeit",
-        "Zulässiger Wertebereich für die Eintrittswahrscheinlichkeit ist 1 bis 5",
+        _("Eintrittswahrscheinlichkeit"),
+        _("Zulässiger Wertebereich für die Eintrittswahrscheinlichkeit ist 1 bis 5"),
     )
     impact = _scale_field(
-        "Schadensausmaß", "Zulässiger Wertebereich für das Schadensausmaß ist 1 bis 5"
+        _("Schadensausmaß"), _("Zulässiger Wertebereich für das Schadensausmaß ist 1 bis 5")
     )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -114,7 +120,7 @@ class ScoreForm(forms.Form):
 
 class IncidentResponseForm(forms.Form):
     incident_response = forms.CharField(
-        label="Dokumentierte Incident Response", widget=forms.Textarea, required=False
+        label=_("Dokumentierte Incident Response"), widget=forms.Textarea, required=False
     )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:

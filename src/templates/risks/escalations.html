@@ -1,42 +1,43 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load ui %}
-{% block title %}Eskalationen{% endblock %}
-{% block breadcrumb %}{% url 'dashboard' as home %}{% include "_crumb.html" with url=home label="Dashboard" %}<li aria-current="page" class="text-text">Eskalationen</li>{% endblock %}
+{% block title %}{% translate "Eskalationen" %}{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% translate "Dashboard" as crumb_label %}{% include "_crumb.html" with url=home label=crumb_label %}<li aria-current="page" class="text-text">{% translate "Eskalationen" %}</li>{% endblock %}
 {% block content %}
-  <h1 class="mb-5">Eskalationen</h1>
+  <h1 class="mb-5">{% translate "Eskalationen" %}</h1>
   <section class="card mb-6" aria-labelledby="failed-heading">
-    <h2 id="failed-heading" class="mb-3 flex items-center gap-2">{% icon "alert" %}Notifikation fehlgeschlagen</h2>
+    <h2 id="failed-heading" class="mb-3 flex items-center gap-2">{% icon "alert" %}{% translate "Notifikation fehlgeschlagen" %}</h2>
     <div class="overflow-x-auto">
       <table class="table">
-        <thead><tr><th scope="col">Risiko</th><th scope="col">Status</th><th scope="col">Aktion</th></tr></thead>
+        <thead><tr><th scope="col">{% translate "Risiko" %}</th><th scope="col">{% translate "Status" %}</th><th scope="col">{% translate "Aktion" %}</th></tr></thead>
         <tbody>
           {% for risk in failed_risks %}
             <tr class="risk-failed">
               <td>
                 <a href="{% url 'risk_detail' risk.pk %}" class="font-medium">{{ risk.title }}</a>
-                <span class="flag-failed mt-1">{% icon "alert" label="Warnung" size=16 %}Notifikation fehlgeschlagen</span>
+                <span class="flag-failed mt-1">{% translate "Warnung" as warning %}{% icon "alert" label=warning size=16 %}{% translate "Notifikation fehlgeschlagen" %}</span>
               </td>
               <td><span class="badge badge-status">{{ risk.get_status_display }}</span></td>
               <td>
                 {% if can_resend %}
                   <form method="post" action="{% url 'escalation_resend' risk.pk %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Erneut senden</button>
+                    <button type="submit" class="btn btn-danger">{% translate "Erneut senden" %}</button>
                   </form>
                 {% else %}
-                  <span class="text-sm text-muted">Erneutes Senden durch die Administration</span>
+                  <span class="text-sm text-muted">{% translate "Erneutes Senden durch die Administration" %}</span>
                 {% endif %}
               </td>
             </tr>
           {% empty %}
-            <tr><td colspan="3" class="text-muted">Keine fehlgeschlagenen Notifikationen.</td></tr>
+            <tr><td colspan="3" class="text-muted">{% translate "Keine fehlgeschlagenen Notifikationen." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </section>
   <section class="card" aria-labelledby="escalated-heading">
-    <h2 id="escalated-heading" class="card-title">Eskalierte Risiken</h2>
-    {% include "risks/_risk_table.html" with risks=escalated_risks show_failures=True empty="Keine eskalierten Risiken." %}
+    <h2 id="escalated-heading" class="card-title">{% translate "Eskalierte Risiken" %}</h2>
+    {% translate "Keine eskalierten Risiken." as none_escalated %}{% include "risks/_risk_table.html" with risks=escalated_risks show_failures=True empty=none_escalated %}
   </section>
 {% endblock %}

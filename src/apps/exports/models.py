@@ -1,13 +1,14 @@
 """Record of every export (M-07); the audit entry points here."""
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import BaseModel
 
 
 class ExportFormat(models.TextChoices):
-    CSV = "csv", "CSV"
-    PDF = "pdf", "PDF"
+    CSV = "csv", _("CSV")
+    PDF = "pdf", _("PDF")
 
 
 class Export(BaseModel):
@@ -20,5 +21,5 @@ class Export(BaseModel):
     row_count = models.PositiveIntegerField()
 
     class Meta(BaseModel.Meta):
-        verbose_name = "Export"
-        verbose_name_plural = "Exporte"
+        verbose_name = _("Export")
+        verbose_name_plural = _("Exporte")

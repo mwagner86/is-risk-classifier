@@ -2,24 +2,25 @@
 transaction as the escalation and sent afterwards by the worker (asynchronous, AK-03.1)."""
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import BaseModel
 
 
 class NotificationKind(models.TextChoices):
-    ESCALATION = "ESCALATION", "Eskalation"
-    IT_OPS_HANDOVER = "IT_OPS_HANDOVER", "Weitergabe an IT-Operations"
+    ESCALATION = "ESCALATION", _("Eskalation")
+    IT_OPS_HANDOVER = "IT_OPS_HANDOVER", _("Weitergabe an IT-Operations")
 
 
 class Channel(models.TextChoices):
-    EMAIL = "EMAIL", "E-Mail"
-    SMS = "SMS", "SMS"
+    EMAIL = "EMAIL", _("E-Mail")
+    SMS = "SMS", _("SMS")
 
 
 class NotificationStatus(models.TextChoices):
-    PENDING = "PENDING", "Ausstehend"
-    DELIVERED = "DELIVERED", "Zugestellt"
-    FAILED = "FAILED", "Fehlgeschlagen"
+    PENDING = "PENDING", _("Ausstehend")
+    DELIVERED = "DELIVERED", _("Zugestellt")
+    FAILED = "FAILED", _("Fehlgeschlagen")
 
 
 class Notification(BaseModel):
@@ -35,11 +36,11 @@ class Notification(BaseModel):
     )
     attempts = models.PositiveSmallIntegerField(default=0)
     last_error = models.TextField(blank=True)
-    dispatched_at = models.DateTimeField("Versendet am", null=True, blank=True)
+    dispatched_at = models.DateTimeField(_("Versendet am"), null=True, blank=True)
 
     class Meta(BaseModel.Meta):
-        verbose_name = "Notifikation"
-        verbose_name_plural = "Notifikationen"
+        verbose_name = _("Notifikation")
+        verbose_name_plural = _("Notifikationen")
         indexes = [models.Index(fields=["status", "created_at"], name="notification_outbox_idx")]
 
     @property

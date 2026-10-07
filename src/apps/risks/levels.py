@@ -3,13 +3,14 @@ critical from 20 (escalation threshold), high from 12 (counter-measure mandatory
 
 from django.db import models
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 
 class RiskLevel(models.TextChoices):
-    CRITICAL = "critical", "kritisch"
-    HIGH = "high", "hoch"
-    MEDIUM = "medium", "mittel"
-    LOW = "low", "niedrig"
+    CRITICAL = "critical", _("kritisch")
+    HIGH = "high", _("hoch")
+    MEDIUM = "medium", _("mittel")
+    LOW = "low", _("niedrig")
 
 
 # Lower bound of each band, highest first

@@ -11,6 +11,7 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
+from django.utils.translation import gettext
 
 from apps.accounts.models import Role
 
@@ -62,5 +63,5 @@ class DenyByDefaultMiddleware:
         if not request.user.is_authenticated:
             return redirect_to_login(request.get_full_path(), settings.LOGIN_URL)
         if not access or getattr(request.user, "role", None) not in access:
-            return HttpResponseForbidden("Zugriff verweigert.")
+            return HttpResponseForbidden(gettext("Zugriff verweigert."))
         return None

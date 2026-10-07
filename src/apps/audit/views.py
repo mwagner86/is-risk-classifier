@@ -1,38 +1,45 @@
 """Read-only view of the audit log (M-06, M-07)."""
 
 import uuid
+from typing import TYPE_CHECKING
 
 from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_safe
 
 from apps.accounts.models import Role
 from apps.audit.models import AuditAction, AuditEntry
 from apps.core.access import allow_roles
 
+if TYPE_CHECKING:
+    from django_stubs_ext import StrOrPromise
+else:
+    StrOrPromise = str
+
 OVERSIGHT_ROLES = (Role.RISK_MANAGER, Role.CISO, Role.ADMIN)
 PAGE_SIZE = 50
 
 # Technical field names in the log, shown in German
-FIELD_LABELS = {
-    "status": "Status",
-    "probability": "Eintrittswahrscheinlichkeit",
-    "impact": "Schadensausmaß",
-    "origin": "Ursprung",
-    "category": "Kategorie",
-    "confidentiality": "Vertraulichkeit",
-    "integrity": "Integrität",
-    "availability": "Verfügbarkeit",
-    "assets": "Assets",
-    "title": "Titel",
-    "description": "Beschreibung",
-    "incident_response": "Incident Response",
-    "state": "Antragsstatus",
-    "kind": "Antrag",
-    "channel": "Kanal",
-    "csv": "CSV",
-    "pdf": "PDF",
+FIELD_LABELS: dict[str, StrOrPromise] = {
+    "status": _("Status"),
+    "probability": _("Eintrittswahrscheinlichkeit"),
+    "impact": _("Schadensausmaß"),
+    "origin": _("Ursprung"),
+    "category": _("Kategorie"),
+    "confidentiality": _("Vertraulichkeit"),
+    "integrity": _("Integrität"),
+    "availability": _("Verfügbarkeit"),
+    "assets": _("Assets"),
+    "title": _("Titel"),
+    "description": _("Beschreibung"),
+    "incident_response": _("Incident Response"),
+    "state": _("Antragsstatus"),
+    "kind": _("Antrag"),
+    "channel": _("Kanal"),
+    "csv": _("CSV"),
+    "pdf": _("PDF"),
 }
 
 

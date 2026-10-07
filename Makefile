@@ -1,8 +1,12 @@
 COMPOSE := docker compose
 RUN     := $(COMPOSE) run --rm
 
+# Containers with the bind-mounted source run as the owner of the working tree
+export APP_UID := $(shell id -u)
+export APP_GID := $(shell id -g)
+
 .DEFAULT_GOAL := help
-.PHONY: help dev down logs reset test lint fmt migrations lock shell import-assets css sbom audit trace prod prod-down
+.PHONY: help dev down logs reset test lint fmt migrations lock shell import-assets css sbom audit trace prod prod-down messages messages-check
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -63,6 +67,12 @@ prod: .env ## Start the production-like stack (runtime image, gunicorn, read-onl
 
 prod-down: ## Stop the production-like stack, keep data
 	$(COMPOSE) -f compose.yaml -f compose.prod.yaml down
+
+messages: .env ## Extract UI texts, apply tools/translations_en.py, compile the English catalogue
+	$(RUN) --build --no-deps tools sh -c "cd src && python manage.py makemessages --locale en --no-obsolete --add-location file --ignore 'staticfiles/*' --ignore 'pdf_renderer/*' --ignore 'notify_gateway/*' && cd .. && python tools/fill_po.py && cd src && python manage.py compilemessages --locale en"
+
+messages-check: .env ## Fail if a UI text has no English translation (CI)
+	$(RUN) --build --no-deps tools sh -c "cd src && python manage.py makemessages --locale en --no-obsolete --add-location file --ignore 'staticfiles/*' --ignore 'pdf_renderer/*' --ignore 'notify_gateway/*' && cd .. && python tools/fill_po.py --check"
 
 lock: .env ## Re-resolve uv.lock after editing pyproject.toml
 	$(RUN) tools uv lock

@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext, ngettext
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import Role, User
@@ -107,11 +108,18 @@ def escalation_resend(request: HttpRequest, pk: UUID) -> HttpResponse:
     copies = resend_failed(risk, _user(request))
     if copies:
         messages.success(
-            request, f"{len(copies)} Notifikation(en) erneut in die Warteschlange gestellt."
+            request,
+            ngettext(
+                "%(count)d Notifikation erneut in die Warteschlange gestellt.",
+                "%(count)d Notifikationen erneut in die Warteschlange gestellt.",
+                len(copies),
+            )
+            % {"count": len(copies)},
         )
     else:
         messages.info(
-            request, "Keine fehlgeschlagene Notifikation offen oder bereits in der Warteschlange."
+            request,
+            gettext("Keine fehlgeschlagene Notifikation offen oder bereits in der Warteschlange."),
         )
     return redirect("escalation_list")
 
@@ -158,20 +166,20 @@ def _save_risk_form(request: HttpRequest, form: RiskForm, risk: Risk | None) -> 
     user = _user(request)
     action = request.POST.get("action")
     if action not in {"submit", "draft"}:
-        return HttpResponseBadRequest("Unbekannte Aktion.")
+        return HttpResponseBadRequest(gettext("Unbekannte Aktion."))
     data = {"title": form.cleaned_data["title"], "description": form.cleaned_data["description"]}
     data |= form.classification()
     try:
         if action == "draft":
             risk = services.save_draft(user, risk=risk, **data)
-            messages.success(request, "Entwurf gespeichert.")
+            messages.success(request, gettext("Entwurf gespeichert."))
         elif risk is None:
             risk = services.capture(user, **data)
-            messages.success(request, "Risiko gespeichert und kategorisiert.")
+            messages.success(request, gettext("Risiko gespeichert und kategorisiert."))
         else:
             services.save_draft(user, risk=risk, **data)
             services.submit(risk, user)
-            messages.success(request, "Risiko gespeichert und kategorisiert.")
+            messages.success(request, gettext("Risiko gespeichert und kategorisiert."))
     except ValidationError as exc:
         form.add_service_errors(_error_dict(exc))
         return _risk_form_response(request, form, risk)
@@ -235,7 +243,7 @@ def risk_reclassify(request: HttpRequest, pk: UUID) -> HttpResponse:
         except ValidationError as exc:
             form.add_service_errors(_error_dict(exc))
         else:
-            messages.success(request, "Klassifizierung gespeichert.")
+            messages.success(request, gettext("Klassifizierung gespeichert."))
             return redirect("risk_detail", pk=risk.pk)
     focus_first_error(form)
     return render(request, "risks/reclassify.html", {"form": form, "risk": risk})
@@ -270,11 +278,13 @@ def risk_score(request: HttpRequest, pk: UUID) -> HttpResponse:
             if pending:
                 messages.warning(
                     request,
-                    "Herabstufung unter 20 beantragt. Sie wird wirksam, sobald ein anderer "
-                    "Risk Manager sie freigibt.",
+                    gettext(
+                        "Herabstufung unter 20 beantragt. Sie wird wirksam, sobald ein anderer "
+                        "Risk Manager sie freigibt."
+                    ),
                 )
             else:
-                messages.success(request, "Bewertung gespeichert.")
+                messages.success(request, gettext("Bewertung gespeichert."))
             return redirect("risk_detail", pk=risk.pk)
     focus_first_error(form)
     preview = form.preview() if form.is_bound else assessment.score
@@ -300,7 +310,7 @@ def risk_change_status(request: HttpRequest, pk: UUID) -> HttpResponse:
     try:
         target = RiskStatus(request.POST.get("target", ""))
     except ValueError:
-        return HttpResponseBadRequest("Unbekannter Zielstatus.")
+        return HttpResponseBadRequest(gettext("Unbekannter Zielstatus."))
     try:
         successor = transition(
             risk, target, _user(request), create_successor=request.POST.get("successor") == "on"
@@ -312,10 +322,11 @@ def risk_change_status(request: HttpRequest, pk: UUID) -> HttpResponse:
         return redirect("risk_detail", pk=risk.pk)
     if successor is not None:
         messages.success(
-            request, "Risiko ist obsolet. Ein neuer Entwurf zur Neubewertung liegt an."
+            request,
+            gettext("Risiko ist obsolet. Ein neuer Entwurf zur Neubewertung liegt an."),
         )
         return redirect("risk_detail", pk=successor.pk)
-    messages.success(request, f"Status: {target.label}.")
+    messages.success(request, gettext("Status: %(status)s.") % {"status": target.label})
     return redirect("risk_detail", pk=risk.pk)
 
 
@@ -335,7 +346,7 @@ def risk_incident_response(request: HttpRequest, pk: UUID) -> HttpResponse:
                 for error in errors:
                     form.add_error(field if field in form.fields else None, error)
         else:
-            messages.success(request, "Incident Response dokumentiert, Risiko validiert.")
+            messages.success(request, gettext("Incident Response dokumentiert, Risiko validiert."))
             return redirect("risk_detail", pk=risk.pk)
     focus_first_error(form)
     return render(request, "risks/incident_response.html", {"form": form, "risk": risk})
@@ -356,11 +367,13 @@ def approval_decide(request: HttpRequest, pk: UUID) -> HttpResponse:
     approval = get_object_or_404(services.pending_approvals_for(_user(request)), pk=pk)
     decision = request.POST.get("decision")
     if decision not in {"approve", "reject"}:
-        return HttpResponseBadRequest("Unbekannte Entscheidung.")
+        return HttpResponseBadRequest(gettext("Unbekannte Entscheidung."))
     try:
         services.decide(approval, _user(request), approve=decision == "approve")
     except ValidationError as exc:
         messages.error(request, " ".join(exc.messages))
     else:
-        messages.success(request, "Freigegeben." if decision == "approve" else "Abgelehnt.")
+        messages.success(
+            request, gettext("Freigegeben.") if decision == "approve" else gettext("Abgelehnt.")
+        )
     return redirect("approval_list")

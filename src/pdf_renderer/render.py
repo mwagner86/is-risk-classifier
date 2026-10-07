@@ -49,15 +49,46 @@ TEXT_FIELDS = {
 NUMBER_FIELDS = ("probability", "impact", "score")
 MAX_RISKS = 2_000
 
-FIELD_LABELS = (
-    ("id", "Kennung"),
-    ("category", "Kategorie"),
-    ("status", "Status"),
-    ("goals", "Schutzziele"),
-    ("origin", "Ursprung"),
-    ("assets", "Betroffene Assets"),
-    ("created_at", "Erfasst am"),
-)
+# The renderer has no Django and therefore no gettext; its few labels live here
+LABELS: dict[str, dict[str, str]] = {
+    "de": {
+        "id": "Kennung",
+        "category": "Kategorie",
+        "status": "Status",
+        "goals": "Schutzziele",
+        "origin": "Ursprung",
+        "assets": "Betroffene Assets",
+        "created_at": "Erfasst am",
+        "score": "Risikowert",
+        "description": "Beschreibung",
+        "not_scored": "nicht bewertet",
+        "title": "Risikoexport",
+        "marking": "Exportiert von {by} am {at}",
+        "filter": "Filter: {filter}",
+        "summary": "Filter: {filter} · {count} Risiken",
+        "page": "Seite {page}",
+        "empty": "Keine Risiken für diesen Filter.",
+    },
+    "en": {
+        "id": "Identifier",
+        "category": "Category",
+        "status": "Status",
+        "goals": "Protection goals",
+        "origin": "Origin",
+        "assets": "Affected assets",
+        "created_at": "Reported on",
+        "score": "Risk score",
+        "description": "Description",
+        "not_scored": "not scored",
+        "title": "Risk export",
+        "marking": "Exported by {by} on {at}",
+        "filter": "Filter: {filter}",
+        "summary": "Filter: {filter} · {count} risks",
+        "page": "Page {page}",
+        "empty": "No risks for this filter.",
+    },
+}
+FIELD_ORDER = ("id", "category", "status", "goals", "origin", "assets", "created_at")
 
 
 def _check_text(container: dict[str, Any], name: str, limit: int, *, required: bool) -> str:
@@ -74,6 +105,10 @@ def validate(payload: Any) -> dict[str, Any]:
         name: _check_text(payload, name, limit, required=True)
         for name, limit in META_FIELDS.items()
     }
+    language = payload.get("language", "de")
+    if language not in LABELS:
+        raise PayloadError("unknown language")
+    clean["language"] = language
     risks = payload.get("risks")
     if not isinstance(risks, list) or len(risks) > MAX_RISKS:
         raise PayloadError("risks must be a list")
@@ -116,18 +151,20 @@ def _styles() -> dict[str, ParagraphStyle]:
     }
 
 
-def _risk_block(risk: dict[str, Any], styles: dict[str, ParagraphStyle]) -> Flowable:
-    score = "nicht bewertet"
+def _risk_block(
+    risk: dict[str, Any], styles: dict[str, ParagraphStyle], labels: dict[str, str]
+) -> Flowable:
+    score = labels["not_scored"]
     if risk["score"] is not None:
         score = f"{risk['probability']} × {risk['impact']} = {risk['score']} ({risk['level']})"
-    rows = [[Paragraph("Risikowert", styles["label"]), Paragraph(text(score), styles["body"])]]
+    rows = [[Paragraph(labels["score"], styles["label"]), Paragraph(text(score), styles["body"])]]
     rows += [
-        [Paragraph(label, styles["label"]), Paragraph(text(risk[key] or "–"), styles["body"])]
-        for key, label in FIELD_LABELS
+        [Paragraph(labels[key], styles["label"]), Paragraph(text(risk[key] or "–"), styles["body"])]
+        for key in FIELD_ORDER
     ]
     rows.append(
         [
-            Paragraph("Beschreibung", styles["label"]),
+            Paragraph(labels["description"], styles["label"]),
             Paragraph(text(risk["description"] or "–"), styles["body"]),
         ]
     )
@@ -146,7 +183,8 @@ def _risk_block(risk: dict[str, Any], styles: dict[str, ParagraphStyle]) -> Flow
 
 def render(payload: Any) -> bytes:
     data = validate(payload)
-    marking = f"Exportiert von {data['exported_by']} am {data['exported_at']}"
+    labels = LABELS[data["language"]]
+    marking = labels["marking"].format(by=data["exported_by"], at=data["exported_at"])
     buffer = BytesIO()
     page_width, page_height = landscape(A4)
     margin = 15 * mm
@@ -158,18 +196,20 @@ def render(payload: Any) -> bytes:
         canvas.setFillColor(colors.HexColor("#4a5568"))
         canvas.drawString(margin, page_height - 10 * mm, marking)
         canvas.drawRightString(
-            page_width - margin, page_height - 10 * mm, f"Filter: {data['filter']}"
+            page_width - margin,
+            page_height - 10 * mm,
+            labels["filter"].format(filter=data["filter"]),
         )
         canvas.drawString(margin, 8 * mm, marking)
-        canvas.drawRightString(page_width - margin, 8 * mm, f"Seite {doc.page}")
+        canvas.drawRightString(page_width - margin, 8 * mm, labels["page"].format(page=doc.page))
         canvas.restoreState()
 
     doc = BaseDocTemplate(
         buffer,
         pagesize=(page_width, page_height),
-        title="Risikoexport",
+        title=labels["title"],
         author=data["exported_by"],
-        subject=f"Filter: {data['filter']}",
+        subject=labels["filter"].format(filter=data["filter"]),
         creator="IS-Risk Classifier",
     )
     frame = Frame(margin, 15 * mm, page_width - 2 * margin, page_height - 32 * mm, id="content")
@@ -177,12 +217,15 @@ def render(payload: Any) -> bytes:
 
     styles = _styles()
     story: list[Flowable] = [
-        Paragraph("Risikoexport", styles["title"]),
-        Paragraph(text(f"Filter: {data['filter']} · {len(data['risks'])} Risiken"), styles["body"]),
+        Paragraph(text(labels["title"]), styles["title"]),
+        Paragraph(
+            text(labels["summary"].format(filter=data["filter"], count=len(data["risks"]))),
+            styles["body"],
+        ),
         Spacer(1, 6 * mm),
     ]
-    story += [_risk_block(risk, styles) for risk in data["risks"]]
+    story += [_risk_block(risk, styles, labels) for risk in data["risks"]]
     if not data["risks"]:
-        story.append(Paragraph("Keine Risiken für diesen Filter.", styles["body"]))
+        story.append(Paragraph(text(labels["empty"]), styles["body"]))
     doc.build(story)
     return buffer.getvalue()

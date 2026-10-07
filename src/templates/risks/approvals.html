@@ -1,12 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Freigaben{% endblock %}
-{% block breadcrumb %}{% url 'dashboard' as home %}{% include "_crumb.html" with url=home label="Dashboard" %}<li aria-current="page" class="text-text">Freigaben</li>{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Freigaben" %}{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% translate "Dashboard" as crumb_label %}{% include "_crumb.html" with url=home label=crumb_label %}<li aria-current="page" class="text-text">{% translate "Freigaben" %}</li>{% endblock %}
 {% block content %}
-  <h1 class="mb-2">Offene Freigaben</h1>
-  <p class="mb-5 text-sm text-muted">Angezeigt werden Anträge anderer. Eigene Anträge gibt ein anderer Risk Manager frei (M-04).</p>
+  <h1 class="mb-2">{% translate "Offene Freigaben" %}</h1>
+  <p class="mb-5 text-sm text-muted">{% translate "Angezeigt werden Anträge anderer. Eigene Anträge gibt ein anderer Risk Manager frei (M-04)." %}</p>
   <section class="card overflow-x-auto">
     <table class="table">
-      <thead><tr><th scope="col">Risiko</th><th scope="col">Antrag</th><th scope="col">Vorschlag</th><th scope="col">Beantragt von</th><th scope="col">Entscheidung</th></tr></thead>
+      <thead><tr><th scope="col">{% translate "Risiko" %}</th><th scope="col">{% translate "Antrag" %}</th><th scope="col">{% translate "Vorschlag" %}</th><th scope="col">{% translate "Beantragt von" %}</th><th scope="col">{% translate "Entscheidung" %}</th></tr></thead>
       <tbody>
         {% for approval in approvals %}
           <tr>
@@ -17,13 +18,13 @@
             <td>
               <form method="post" action="{% url 'approval_decide' approval.pk %}" class="flex gap-2">
                 {% csrf_token %}
-                <button type="submit" name="decision" value="approve" class="btn btn-primary">Freigeben</button>
-                <button type="submit" name="decision" value="reject" class="btn">Ablehnen</button>
+                <button type="submit" name="decision" value="approve" class="btn btn-primary">{% translate "Freigeben" %}</button>
+                <button type="submit" name="decision" value="reject" class="btn">{% translate "Ablehnen" %}</button>
               </form>
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="5" class="text-muted">Keine offenen Freigaben.</td></tr>
+          <tr><td colspan="5" class="text-muted">{% translate "Keine offenen Freigaben." %}</td></tr>
         {% endfor %}
       </tbody>
     </table>

@@ -1,35 +1,36 @@
 {% extends "base.html" %}
-{% block title %}Risiken{% endblock %}
-{% block breadcrumb %}{% url 'dashboard' as home %}{% include "_crumb.html" with url=home label="Dashboard" %}<li aria-current="page" class="text-text">Risiken</li>{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Risiken" %}{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% translate "Dashboard" as crumb_label %}{% include "_crumb.html" with url=home label=crumb_label %}<li aria-current="page" class="text-text">{% translate "Risiken" %}</li>{% endblock %}
 {% block content %}
   <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-    <h1>Risiken</h1>
+    <h1>{% translate "Risiken" %}</h1>
     {% if user.role == "NUTZER" or user.role == "RISK_MANAGER" %}
-      <a href="{% url 'risk_create' %}" class="btn btn-primary">Risiko erfassen</a>
+      <a href="{% url 'risk_create' %}" class="btn btn-primary">{% translate "Risiko erfassen" %}</a>
     {% endif %}
     {% if user.role == "RISK_MANAGER" and not filters.is_empty %}
-      <a href="{% url 'export_page' %}?{{ filters.query_string }}" class="btn">Diese Auswahl exportieren</a>
+      <a href="{% url 'export_page' %}?{{ filters.query_string }}" class="btn">{% translate "Diese Auswahl exportieren" %}</a>
     {% endif %}
   </div>
-  <form method="get" class="card mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6" aria-label="Filter">
+  <form method="get" class="card mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6" aria-label="{% translate 'Filter' %}">
     <div>
-      <label for="f-status" class="field-label">Status</label>
+      <label for="f-status" class="field-label">{% translate "Status" %}</label>
       <select id="f-status" name="status" class="input">
-        <option value="">alle</option>
+        <option value="">{% translate "alle" %}</option>
         {% for value, label in statuses %}<option value="{{ value }}"{% if filters.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
       </select>
     </div>
     <div>
-      <label for="f-category" class="field-label">Kategorie</label>
+      <label for="f-category" class="field-label">{% translate "Kategorie" %}</label>
       <select id="f-category" name="category" class="input">
-        <option value="">alle</option>
+        <option value="">{% translate "alle" %}</option>
         {% for value, label in categories %}<option value="{{ value }}"{% if filters.category == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
       </select>
     </div>
     <div>
-      <label for="f-level" class="field-label">Risikostufe</label>
+      <label for="f-level" class="field-label">{% translate "Risikostufe" %}</label>
       <select id="f-level" name="level" class="input">
-        <option value="">alle</option>
+        <option value="">{% translate "alle" %}</option>
         {% for value, label in levels %}<option value="{{ value }}"{% if filters.level == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
       </select>
     </div>
@@ -42,8 +43,8 @@
       <input id="f-i" name="i" type="number" min="1" max="5" step="1" value="{{ filters.impact }}" class="input">
     </div>
     <div class="flex items-end gap-2">
-      <button type="submit" class="btn btn-primary">Filtern</button>
-      <a href="{% url 'risk_list' %}" class="btn">Zurücksetzen</a>
+      <button type="submit" class="btn btn-primary">{% translate "Filtern" %}</button>
+      <a href="{% url 'risk_list' %}" class="btn">{% translate "Zurücksetzen" %}</a>
     </div>
   </form>
   <section class="card">

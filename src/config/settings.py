@@ -43,6 +43,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "apps.core.security.SecurityHeadersMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -133,6 +134,7 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
 # Behind a TLS-terminating proxy. Local development runs on plain http and leaves this off.
 HTTPS = env("DJANGO_HTTPS", "false").lower() == "true"
 if HTTPS:
+    LANGUAGE_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -141,7 +143,16 @@ if HTTPS:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-LANGUAGE_CODE = "de-de"
+# German is the source language and the default; English comes from locale/en. The choice is
+# kept in a cookie (language switch in the header); without it the browser's language decides.
+LANGUAGE_CODE = "de"
+LANGUAGES = [("de", "Deutsch"), ("en", "English")]
+LOCALE_PATHS = [BASE_DIR / "locale"]
+FORMAT_MODULE_PATH = ["config.formats"]
+LANGUAGE_COOKIE_NAME = "language"
+LANGUAGE_COOKIE_AGE = 365 * 24 * 60 * 60
+LANGUAGE_COOKIE_SAMESITE = "Lax"
+LANGUAGE_COOKIE_HTTPONLY = True
 TIME_ZONE = "Europe/Berlin"
 USE_I18N = True
 USE_TZ = True

@@ -9,6 +9,7 @@ x-runtime: &runtime
     dockerfile: docker/Dockerfile
     target: runtime
   image: is-risk-classifier:runtime
+  user: app
   volumes: !reset []
   read_only: true
   tmpfs:

@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Anmeldung abgelehnt{% endblock %}
-{% block breadcrumb %}<li aria-current="page" class="text-text">Anmeldung</li>{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Anmeldung abgelehnt" %}{% endblock %}
+{% block breadcrumb %}<li aria-current="page" class="text-text">{% translate "Anmeldung" %}</li>{% endblock %}
 {% block content %}
   <div class="card mx-auto mt-10 max-w-lg">
-    <h1 class="mb-3">Anmeldung abgelehnt</h1>
-    <p class="mb-4 text-muted">Ihrem Konto ist keine eindeutige Rolle zugewiesen. Wenden Sie sich an die Administration.</p>
-    <a href="{% url 'oidc_authentication_init' %}" class="btn btn-primary">Erneut anmelden</a>
+    <h1 class="mb-3">{% translate "Anmeldung abgelehnt" %}</h1>
+    <p class="mb-4 text-muted">{% translate "Ihrem Konto ist keine eindeutige Rolle zugewiesen. Wenden Sie sich an die Administration." %}</p>
+    <a href="{% url 'oidc_authentication_init' %}" class="btn btn-primary">{% translate "Erneut anmelden" %}</a>
   </div>
 {% endblock %}

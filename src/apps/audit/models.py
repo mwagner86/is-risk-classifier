@@ -3,19 +3,20 @@
 from typing import Any
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import BaseModel
 
 
 class AuditAction(models.TextChoices):
-    CREATED = "CREATED", "Angelegt"
-    FIELD_CHANGED = "FIELD_CHANGED", "Wert geändert"
-    STATUS_CHANGED = "STATUS_CHANGED", "Status geändert"
-    APPROVAL_REQUESTED = "APPROVAL_REQUESTED", "Freigabe beantragt"
-    APPROVAL_DECIDED = "APPROVAL_DECIDED", "Freigabe entschieden"
-    NOTIFICATION_FAILED = "NOTIFICATION_FAILED", "Notifikation fehlgeschlagen"
-    NOTIFICATION_RESENT = "NOTIFICATION_RESENT", "Notifikation erneut gesendet"
-    EXPORTED = "EXPORTED", "Exportiert"
+    CREATED = "CREATED", _("Angelegt")
+    FIELD_CHANGED = "FIELD_CHANGED", _("Wert geändert")
+    STATUS_CHANGED = "STATUS_CHANGED", _("Status geändert")
+    APPROVAL_REQUESTED = "APPROVAL_REQUESTED", _("Freigabe beantragt")
+    APPROVAL_DECIDED = "APPROVAL_DECIDED", _("Freigabe entschieden")
+    NOTIFICATION_FAILED = "NOTIFICATION_FAILED", _("Notifikation fehlgeschlagen")
+    NOTIFICATION_RESENT = "NOTIFICATION_RESENT", _("Notifikation erneut gesendet")
+    EXPORTED = "EXPORTED", _("Exportiert")
 
 
 class AppendOnlyError(Exception):
@@ -39,8 +40,8 @@ class AuditEntry(BaseModel):
     new_value = models.TextField(blank=True)
 
     class Meta(BaseModel.Meta):
-        verbose_name = "Audit-Eintrag"
-        verbose_name_plural = "Audit-Log"
+        verbose_name = _("Audit-Eintrag")
+        verbose_name_plural = _("Audit-Log")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         if not self._state.adding:

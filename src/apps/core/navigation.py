@@ -2,19 +2,25 @@
 itself (M-05)."""
 
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.http import HttpRequest
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import Role
+
+if TYPE_CHECKING:
+    from django_stubs_ext import StrOrPromise
+else:
+    StrOrPromise = str
 
 ALL = frozenset(Role)
 
 
 @dataclass(frozen=True)
 class NavItem:
-    label: str
+    label: StrOrPromise
     url_name: str
     icon: str
     roles: frozenset[Role]
@@ -23,9 +29,9 @@ class NavItem:
 
 
 NAVIGATION = (
-    NavItem("Dashboard", "dashboard", "grid", ALL),
+    NavItem(_("Dashboard"), "dashboard", "grid", ALL),
     NavItem(
-        "Risiken",
+        _("Risiken"),
         "risk_list",
         "list",
         ALL,
@@ -38,18 +44,21 @@ NAVIGATION = (
             "risk_incident_response",
         ),
     ),
-    NavItem("Assets", "asset_list", "server", ALL),
+    NavItem(_("Assets"), "asset_list", "server", ALL),
     NavItem(
-        "Eskalationen",
+        _("Eskalationen"),
         "escalation_list",
         "alert",
         frozenset({Role.RISK_MANAGER, Role.CISO, Role.ADMIN}),
     ),
-    NavItem("Freigaben", "approval_list", "check", frozenset({Role.RISK_MANAGER})),
+    NavItem(_("Freigaben"), "approval_list", "check", frozenset({Role.RISK_MANAGER})),
     NavItem(
-        "Audit-Log", "audit_log", "history", frozenset({Role.RISK_MANAGER, Role.CISO, Role.ADMIN})
+        _("Audit-Log"),
+        "audit_log",
+        "history",
+        frozenset({Role.RISK_MANAGER, Role.CISO, Role.ADMIN}),
     ),
-    NavItem("Export", "export_page", "download", frozenset({Role.RISK_MANAGER})),
+    NavItem(_("Export"), "export_page", "download", frozenset({Role.RISK_MANAGER})),
 )
 
 

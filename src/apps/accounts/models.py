@@ -2,6 +2,7 @@ from typing import Any, ClassVar
 
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import BaseModel, NonDeletingQuerySet
 
@@ -9,10 +10,10 @@ from apps.core.models import BaseModel, NonDeletingQuerySet
 class Role(models.TextChoices):
     """Roles from the class model (ESA 2). Values double as Keycloak group names."""
 
-    NUTZER = "NUTZER", "Risikomelder"
-    RISK_MANAGER = "RISK_MANAGER", "Risk Manager"
-    CISO = "CISO", "CISO"
-    ADMIN = "ADMIN", "Administration"
+    NUTZER = "NUTZER", _("Risikomelder")
+    RISK_MANAGER = "RISK_MANAGER", _("Risk Manager")
+    CISO = "CISO", _("CISO")
+    ADMIN = "ADMIN", _("Administration")
 
 
 class AppUserManager(UserManager.from_queryset(NonDeletingQuerySet)):  # type: ignore[misc]

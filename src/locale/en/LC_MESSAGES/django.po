@@ -1,0 +1,1139 @@
+# English UI of the IS-Risk Classifier.
+# German is the source language; translations come from tools/translations_en.py.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-07 12:16+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apps/accounts/models.py
+msgid "Risikomelder"
+msgstr "Risk reporter"
+
+#: apps/accounts/models.py
+msgid "Risk Manager"
+msgstr "Risk manager"
+
+#: apps/accounts/models.py
+msgid "CISO"
+msgstr "CISO"
+
+#: apps/accounts/models.py
+msgid "Administration"
+msgstr "Administration"
+
+#: apps/audit/models.py
+msgid "Angelegt"
+msgstr "Created"
+
+#: apps/audit/models.py
+msgid "Wert geändert"
+msgstr "Value changed"
+
+#: apps/audit/models.py
+msgid "Status geändert"
+msgstr "Status changed"
+
+#: apps/audit/models.py
+msgid "Freigabe beantragt"
+msgstr "Approval requested"
+
+#: apps/audit/models.py
+msgid "Freigabe entschieden"
+msgstr "Approval decided"
+
+#: apps/audit/models.py templates/risks/_risk_row.html
+#: templates/risks/dashboard.html templates/risks/detail.html
+#: templates/risks/escalations.html
+msgid "Notifikation fehlgeschlagen"
+msgstr "Notification failed"
+
+#: apps/audit/models.py
+msgid "Notifikation erneut gesendet"
+msgstr "Notification resent"
+
+#: apps/audit/models.py
+msgid "Exportiert"
+msgstr "Exported"
+
+#: apps/audit/models.py
+msgid "Audit-Eintrag"
+msgstr "Audit entry"
+
+#: apps/audit/models.py apps/core/navigation.py templates/audit/log.html
+msgid "Audit-Log"
+msgstr "Audit log"
+
+#: apps/audit/templatetags/audit_tags.py apps/exports/rows.py
+msgid "ja"
+msgstr "yes"
+
+#: apps/audit/templatetags/audit_tags.py apps/exports/rows.py
+msgid "nein"
+msgstr "no"
+
+#: apps/audit/views.py apps/exports/rows.py templates/exports/page.html
+#: templates/risks/_risk_table.html templates/risks/escalations.html
+#: templates/risks/list.html
+msgid "Status"
+msgstr "Status"
+
+#: apps/audit/views.py apps/exports/rows.py apps/risks/forms.py
+#: apps/risks/models.py
+msgid "Eintrittswahrscheinlichkeit"
+msgstr "Probability"
+
+#: apps/audit/views.py apps/exports/rows.py apps/risks/forms.py
+#: apps/risks/models.py
+msgid "Schadensausmaß"
+msgstr "Impact"
+
+#: apps/audit/views.py apps/exports/rows.py apps/risks/forms.py
+#: apps/risks/models.py templates/risks/detail.html
+msgid "Ursprung"
+msgstr "Origin"
+
+#: apps/audit/views.py apps/exports/rows.py apps/risks/models.py
+#: templates/exports/page.html templates/risks/_risk_table.html
+#: templates/risks/detail.html templates/risks/list.html
+msgid "Kategorie"
+msgstr "Category"
+
+#: apps/audit/views.py apps/exports/rows.py apps/risks/forms.py
+#: apps/risks/models.py templates/risks/detail.html
+msgid "Vertraulichkeit"
+msgstr "Confidentiality"
+
+#: apps/audit/views.py apps/exports/rows.py apps/risks/forms.py
+#: apps/risks/models.py templates/risks/detail.html
+msgid "Integrität"
+msgstr "Integrity"
+
+#: apps/audit/views.py apps/exports/rows.py apps/risks/forms.py
+#: apps/risks/models.py templates/risks/detail.html
+msgid "Verfügbarkeit"
+msgstr "Availability"
+
+#: apps/audit/views.py apps/core/navigation.py apps/exports/rows.py
+#: templates/cmdb/list.html
+msgid "Assets"
+msgstr "Assets"
+
+#: apps/audit/views.py apps/exports/rows.py apps/risks/forms.py
+#: apps/risks/models.py
+msgid "Titel"
+msgstr "Title"
+
+#: apps/audit/views.py apps/exports/rows.py apps/risks/forms.py
+#: apps/risks/models.py templates/risks/detail.html
+msgid "Beschreibung"
+msgstr "Description"
+
+#: apps/audit/views.py templates/risks/detail.html
+#: templates/risks/incident_response.html
+msgid "Incident Response"
+msgstr "Incident response"
+
+#: apps/audit/views.py
+msgid "Antragsstatus"
+msgstr "Request status"
+
+#: apps/audit/views.py templates/risks/approvals.html
+msgid "Antrag"
+msgstr "Request"
+
+#: apps/audit/views.py
+msgid "Kanal"
+msgstr "Channel"
+
+#: apps/audit/views.py apps/exports/models.py
+msgid "CSV"
+msgstr "CSV"
+
+#: apps/audit/views.py apps/exports/models.py
+msgid "PDF"
+msgstr "PDF"
+
+#: apps/cmdb/models.py templates/cmdb/list.html
+msgid "CMDB-Kennung"
+msgstr "CMDB key"
+
+#: apps/cmdb/models.py
+msgid "Kritikalität"
+msgstr "Criticality"
+
+#: apps/core/access.py
+msgid "Zugriff verweigert."
+msgstr "Access denied."
+
+#: apps/core/navigation.py templates/audit/log.html templates/base.html
+#: templates/cmdb/list.html templates/exports/page.html
+#: templates/risks/approvals.html templates/risks/dashboard.html
+#: templates/risks/detail.html templates/risks/escalations.html
+#: templates/risks/form.html templates/risks/list.html
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: apps/core/navigation.py apps/risks/models.py templates/exports/page.html
+#: templates/risks/detail.html templates/risks/form.html
+#: templates/risks/incident_response.html templates/risks/list.html
+#: templates/risks/reclassify.html templates/risks/score.html
+msgid "Risiken"
+msgstr "Risks"
+
+#: apps/core/navigation.py templates/risks/escalations.html
+msgid "Eskalationen"
+msgstr "Escalations"
+
+#: apps/core/navigation.py templates/risks/approvals.html
+msgid "Freigaben"
+msgstr "Approvals"
+
+#: apps/core/navigation.py apps/exports/models.py templates/exports/page.html
+msgid "Export"
+msgstr "Export"
+
+#: apps/exports/models.py
+msgid "Exporte"
+msgstr "Exports"
+
+#: apps/exports/rows.py
+msgid "Kennung"
+msgstr "Identifier"
+
+#: apps/exports/rows.py apps/risks/models.py templates/risks/_risk_table.html
+msgid "Risikowert"
+msgstr "Risk score"
+
+#: apps/exports/rows.py templates/exports/page.html templates/risks/list.html
+msgid "Risikostufe"
+msgstr "Risk level"
+
+#: apps/exports/rows.py
+msgid "Erfasst am"
+msgstr "Reported on"
+
+#: apps/exports/rows.py
+msgid "Erfasst von"
+msgstr "Reported by"
+
+#: apps/exports/rows.py
+msgid "Exportiert von"
+msgstr "Exported by"
+
+#: apps/exports/rows.py
+msgid "Exportiert am"
+msgstr "Exported on"
+
+#: apps/exports/views.py
+msgid ""
+"Bitte mindestens einen Filter setzen. Ein Export des gesamten Registers ist "
+"nicht vorgesehen."
+msgstr ""
+"Please set at least one filter. Exporting the entire register is not "
+"intended."
+
+#: apps/exports/views.py
+msgid "Das PDF konnte nicht erzeugt werden. Bitte später erneut versuchen."
+msgstr "The PDF could not be generated. Please try again later."
+
+#: apps/exports/views.py
+#, python-format
+msgid "%(count)d Risiko"
+msgid_plural "%(count)d Risiken"
+msgstr[0] "%(count)d risk"
+msgstr[1] "%(count)d risks"
+
+#: apps/notifications/models.py
+msgid "Eskalation"
+msgstr "Escalation"
+
+#: apps/notifications/models.py
+msgid "Weitergabe an IT-Operations"
+msgstr "Hand-over to IT operations"
+
+#: apps/notifications/models.py
+msgid "E-Mail"
+msgstr "E-mail"
+
+#: apps/notifications/models.py
+msgid "SMS"
+msgstr "SMS"
+
+#: apps/notifications/models.py
+msgid "Ausstehend"
+msgstr "Pending"
+
+#: apps/notifications/models.py
+msgid "Zugestellt"
+msgstr "Delivered"
+
+#: apps/notifications/models.py
+msgid "Fehlgeschlagen"
+msgstr "Failed"
+
+#: apps/notifications/models.py
+msgid "Versendet am"
+msgstr "Sent on"
+
+#: apps/notifications/models.py
+msgid "Notifikation"
+msgstr "Notification"
+
+#: apps/notifications/models.py templates/risks/detail.html
+msgid "Notifikationen"
+msgstr "Notifications"
+
+#: apps/notifications/services.py
+msgid "Nur die Administration kann Notifikationen erneut senden."
+msgstr "Only administration can resend notifications."
+
+#: apps/risks/filters.py
+#, python-format
+msgid "Status: %s"
+msgstr "Status: %s"
+
+#: apps/risks/filters.py
+#, python-format
+msgid "Kategorie: %s"
+msgstr "Category: %s"
+
+#: apps/risks/filters.py
+#, python-format
+msgid "Risikostufe: %s"
+msgstr "Risk level: %s"
+
+#: apps/risks/filters.py
+msgid "ohne Filter"
+msgstr "no filter"
+
+#: apps/risks/forms.py
+msgid "Wird freigeschaltet, sobald das Risiko als IS-Risiko eingestuft ist."
+msgstr "Becomes available as soon as the risk is classified as an IS risk."
+
+#: apps/risks/forms.py
+msgid "– bitte wählen –"
+msgstr "– please choose –"
+
+#: apps/risks/forms.py templates/risks/detail.html
+msgid "Betroffene Assets"
+msgstr "Affected assets"
+
+#: apps/risks/forms.py apps/risks/services.py
+msgid "Zulässiger Wertebereich für die Eintrittswahrscheinlichkeit ist 1 bis 5"
+msgstr "The permitted range for the probability is 1 to 5"
+
+#: apps/risks/forms.py apps/risks/services.py
+msgid "Zulässiger Wertebereich für das Schadensausmaß ist 1 bis 5"
+msgstr "The permitted range for the impact is 1 to 5"
+
+#: apps/risks/forms.py apps/risks/models.py
+msgid "Dokumentierte Incident Response"
+msgstr "Documented incident response"
+
+#: apps/risks/levels.py
+msgid "kritisch"
+msgstr "critical"
+
+#: apps/risks/levels.py
+msgid "hoch"
+msgstr "high"
+
+#: apps/risks/levels.py
+msgid "mittel"
+msgstr "medium"
+
+#: apps/risks/levels.py
+msgid "niedrig"
+msgstr "low"
+
+#: apps/risks/models.py
+msgid "Entwurf"
+msgstr "Draft"
+
+#: apps/risks/models.py
+msgid "Kategorisiert"
+msgstr "Categorized"
+
+#: apps/risks/models.py
+msgid "Bewertet"
+msgstr "Scored"
+
+#: apps/risks/models.py templates/risks/dashboard.html
+msgid "Eskaliert"
+msgstr "Escalated"
+
+#: apps/risks/models.py
+msgid "Validiert"
+msgstr "Validated"
+
+#: apps/risks/models.py
+msgid "Geschlossen"
+msgstr "Closed"
+
+#: apps/risks/models.py
+msgid "Obsolet"
+msgstr "Obsolete"
+
+#: apps/risks/models.py templates/risks/_classification.html
+msgid "IS-Risiko"
+msgstr "IS risk"
+
+#: apps/risks/models.py templates/risks/_classification.html
+msgid "Allgemeines IT-Risiko"
+msgstr "General IT risk"
+
+#: apps/risks/models.py
+msgid "Technisches Versagen / Verschleiß"
+msgstr "Technical failure / wear"
+
+#: apps/risks/models.py
+msgid "Vorsätzlicher Angriff"
+msgstr "Deliberate attack"
+
+#: apps/risks/models.py
+msgid "Menschliches Versehen"
+msgstr "Human error"
+
+#: apps/risks/models.py
+msgid "Umwelt / höhere Gewalt"
+msgstr "Environment / force majeure"
+
+#: apps/risks/models.py
+msgid "Unbekannt"
+msgstr "Unknown"
+
+#: apps/risks/models.py templates/audit/_entries.html
+#: templates/risks/_risk_table.html templates/risks/approvals.html
+#: templates/risks/escalations.html
+msgid "Risiko"
+msgstr "Risk"
+
+#: apps/risks/models.py
+msgid "Risikobewertung"
+msgstr "Risk assessment"
+
+#: apps/risks/models.py
+msgid "Risikobewertungen"
+msgstr "Risk assessments"
+
+#: apps/risks/models.py
+msgid "CIA-Triade"
+msgstr "CIA triad"
+
+#: apps/risks/models.py
+msgid "CIA-Triaden"
+msgstr "CIA triads"
+
+#: apps/risks/models.py
+msgid "Einordnung als IT-Risiko"
+msgstr "Classification as IT risk"
+
+#: apps/risks/models.py
+msgid "Herabstufung unter 20"
+msgstr "Downgrade below 20"
+
+#: apps/risks/models.py
+msgid "Offen"
+msgstr "Pending"
+
+#: apps/risks/models.py
+msgid "Freigegeben"
+msgstr "Approved"
+
+#: apps/risks/models.py
+msgid "Abgelehnt"
+msgstr "Rejected"
+
+#: apps/risks/models.py
+msgid "Zurückgezogen"
+msgstr "Withdrawn"
+
+#: apps/risks/models.py
+msgid "Freigabeantrag"
+msgstr "Approval request"
+
+#: apps/risks/models.py templates/risks/detail.html
+msgid "Freigabeanträge"
+msgstr "Approval requests"
+
+#: apps/risks/services.py apps/risks/state_machine.py
+msgid "Ursprung muss zur CIA-Klassifizierung zwingend angegeben werden"
+msgstr "The origin must be specified for the CIA classification"
+
+#: apps/risks/services.py
+msgid "Unbekannter Ursprung."
+msgstr "Unknown origin."
+
+#: apps/risks/services.py
+msgid "Mindestens ein Schutzziel muss ausgewählt werden."
+msgstr "At least one protection goal must be selected."
+
+#: apps/risks/services.py apps/risks/state_machine.py
+msgid "Für ein IS-Risiko müssen die betroffenen Assets angegeben werden."
+msgstr "An IS risk requires the affected assets."
+
+#: apps/risks/services.py
+msgid "Bitte einen Titel angeben."
+msgstr "Please enter a title."
+
+#: apps/risks/services.py
+msgid "Bitte eine Beschreibung angeben."
+msgstr "Please enter a description."
+
+#: apps/risks/services.py
+msgid "In diesem Status kann die Bewertung nicht mehr geändert werden."
+msgstr "The assessment can no longer be changed in this status."
+
+#: apps/risks/services.py
+msgid "Keine Berechtigung für diese Aktion."
+msgstr "You are not permitted to do this."
+
+#: apps/risks/services.py
+msgid "Nur Entwürfe können bearbeitet werden."
+msgstr "Only drafts can be edited."
+
+#: apps/risks/services.py
+msgid "Über diesen Antrag wurde bereits entschieden."
+msgstr "This request has already been decided."
+
+#: apps/risks/services.py
+msgid "Eigene Anträge gibt ein anderer Risk Manager frei."
+msgstr "Your own requests are approved by another risk manager."
+
+#: apps/risks/services.py
+msgid "Bitte die Incident Response dokumentieren."
+msgstr "Please document the incident response."
+
+#: apps/risks/services.py
+msgid "Nur eskalierte Risiken erhalten eine Incident Response."
+msgstr "Only escalated risks receive an incident response."
+
+#: apps/risks/state_machine.py
+#, python-format
+msgid "Übergang von %(source)s nach %(target)s ist nicht zulässig."
+msgstr "The transition from %(source)s to %(target)s is not allowed."
+
+#: apps/risks/state_machine.py
+#, python-format
+msgid "Keine Berechtigung für den Übergang von %(source)s nach %(target)s."
+msgstr "You are not permitted to move from %(source)s to %(target)s."
+
+#: apps/risks/state_machine.py
+msgid "Es fehlt die Bewertung."
+msgstr "The assessment is missing."
+
+#: apps/risks/state_machine.py
+msgid "Mindestens ein Schutzziel muss ausgewählt sein."
+msgstr "At least one protection goal must be selected."
+
+#: apps/risks/state_machine.py
+msgid "Die Kategorie ist noch nicht bestimmt."
+msgstr "The category has not been determined yet."
+
+#: apps/risks/state_machine.py
+msgid "Eintrittswahrscheinlichkeit und Schadensausmaß müssen gesetzt sein."
+msgstr "Probability and impact must be set."
+
+#: apps/risks/state_machine.py
+msgid "Eskaliert werden nur IS-Risiken mit einem Risikowert ab 20."
+msgstr "Only IS risks with a risk score of 20 or more are escalated."
+
+#: apps/risks/state_machine.py
+msgid "Ein IS-Risiko mit einem Risikowert ab 20 muss eskaliert werden."
+msgstr "An IS risk with a risk score of 20 or more must be escalated."
+
+#: apps/risks/state_machine.py
+msgid "Es gibt offene Freigabeanträge."
+msgstr "There are pending approval requests."
+
+#: apps/risks/state_machine.py
+msgid "Die Incident Response muss dokumentiert sein."
+msgstr "The incident response must be documented."
+
+#: apps/risks/state_machine.py
+msgid "Für diesen Übergang ist kein Nachfolger vorgesehen."
+msgstr "This transition does not create a successor."
+
+#: apps/risks/templatetags/risk_tags.py
+msgid "nicht bewertet"
+msgstr "not scored"
+
+#: apps/risks/views.py
+#, python-format
+msgid "%(count)d Notifikation erneut in die Warteschlange gestellt."
+msgid_plural "%(count)d Notifikationen erneut in die Warteschlange gestellt."
+msgstr[0] "%(count)d notification queued again."
+msgstr[1] "%(count)d notifications queued again."
+
+#: apps/risks/views.py
+msgid ""
+"Keine fehlgeschlagene Notifikation offen oder bereits in der Warteschlange."
+msgstr "No failed notification open, or already queued."
+
+#: apps/risks/views.py
+msgid "Unbekannte Aktion."
+msgstr "Unknown action."
+
+#: apps/risks/views.py
+msgid "Entwurf gespeichert."
+msgstr "Draft saved."
+
+#: apps/risks/views.py
+msgid "Risiko gespeichert und kategorisiert."
+msgstr "Risk saved and categorized."
+
+#: apps/risks/views.py
+msgid "Klassifizierung gespeichert."
+msgstr "Classification saved."
+
+#: apps/risks/views.py
+msgid ""
+"Herabstufung unter 20 beantragt. Sie wird wirksam, sobald ein anderer Risk "
+"Manager sie freigibt."
+msgstr ""
+"Downgrade below 20 requested. It takes effect once another risk manager "
+"approves it."
+
+#: apps/risks/views.py
+msgid "Bewertung gespeichert."
+msgstr "Assessment saved."
+
+#: apps/risks/views.py
+msgid "Unbekannter Zielstatus."
+msgstr "Unknown target status."
+
+#: apps/risks/views.py
+msgid "Risiko ist obsolet. Ein neuer Entwurf zur Neubewertung liegt an."
+msgstr "The risk is obsolete. A new draft for re-evaluation has been created."
+
+#: apps/risks/views.py
+#, python-format
+msgid "Status: %(status)s."
+msgstr "Status: %(status)s."
+
+#: apps/risks/views.py
+msgid "Incident Response dokumentiert, Risiko validiert."
+msgstr "Incident response documented, risk validated."
+
+#: apps/risks/views.py
+msgid "Unbekannte Entscheidung."
+msgstr "Unknown decision."
+
+#: apps/risks/views.py
+msgid "Freigegeben."
+msgstr "Approved."
+
+#: apps/risks/views.py
+msgid "Abgelehnt."
+msgstr "Rejected."
+
+#: templates/audit/_entries.html templates/exports/page.html
+msgid "Zeitpunkt"
+msgstr "Time"
+
+#: templates/audit/_entries.html
+msgid "Urheber"
+msgstr "Author"
+
+#: templates/audit/_entries.html templates/audit/log.html
+#: templates/risks/escalations.html
+msgid "Aktion"
+msgstr "Action"
+
+#: templates/audit/_entries.html
+msgid "Feld"
+msgstr "Field"
+
+#: templates/audit/_entries.html
+msgid "Alt"
+msgstr "Old"
+
+#: templates/audit/_entries.html
+msgid "Neu"
+msgstr "New"
+
+#: templates/audit/_entries.html
+msgid "System"
+msgstr "System"
+
+#: templates/audit/_entries.html
+msgid "Keine Einträge."
+msgstr "No entries."
+
+#: templates/audit/log.html
+msgid "Einträge lassen sich nur anfügen, nicht ändern oder löschen."
+msgstr "Entries can only be appended, never changed or deleted."
+
+#: templates/audit/log.html templates/exports/page.html
+#: templates/risks/list.html
+msgid "Filter"
+msgstr "Filter"
+
+#: templates/audit/log.html templates/exports/page.html
+#: templates/risks/list.html
+msgid "alle"
+msgstr "all"
+
+#: templates/audit/log.html
+msgid "Risiko-Kennung"
+msgstr "Risk identifier"
+
+#: templates/audit/log.html templates/risks/list.html
+msgid "Filtern"
+msgstr "Filter"
+
+#: templates/audit/log.html templates/risks/list.html
+msgid "Zurücksetzen"
+msgstr "Reset"
+
+#: templates/audit/log.html
+msgid "Seiten"
+msgstr "Pages"
+
+#: templates/audit/log.html
+msgid "Zurück"
+msgstr "Previous"
+
+#: templates/audit/log.html
+#, python-format
+msgid "Seite %(number)s von %(total)s"
+msgstr "Page %(number)s of %(total)s"
+
+#: templates/audit/log.html
+msgid "Weiter"
+msgstr "Next"
+
+#: templates/base.html
+msgid "Zum Inhalt springen"
+msgstr "Skip to content"
+
+#: templates/base.html
+msgid "Hauptnavigation"
+msgstr "Main navigation"
+
+#: templates/base.html
+msgid "Brotkrumen"
+msgstr "Breadcrumbs"
+
+#: templates/base.html
+msgid "Sprache wählen"
+msgstr "Choose language"
+
+#: templates/base.html
+msgid "Abmelden"
+msgstr "Sign out"
+
+#: templates/cmdb/list.html
+msgid "Gespiegelt aus der CMDB, hier nur lesbar."
+msgstr "Mirrored from the CMDB, read-only here."
+
+#: templates/cmdb/list.html
+msgid "Name"
+msgstr "Name"
+
+#: templates/cmdb/list.html
+msgid "Kritikalität (1–5)"
+msgstr "Criticality (1–5)"
+
+#: templates/cmdb/list.html
+msgid "Keine Assets importiert."
+msgstr "No assets imported."
+
+#: templates/core/login_failed.html
+msgid "Anmeldung abgelehnt"
+msgstr "Sign-in refused"
+
+#: templates/core/login_failed.html
+msgid "Anmeldung"
+msgstr "Sign-in"
+
+#: templates/core/login_failed.html
+msgid ""
+"Ihrem Konto ist keine eindeutige Rolle zugewiesen. Wenden Sie sich an die "
+"Administration."
+msgstr ""
+"Your account has no unique role assigned. Please contact administration."
+
+#: templates/core/login_failed.html
+msgid "Erneut anmelden"
+msgstr "Sign in again"
+
+#: templates/exports/page.html
+msgid ""
+"Exportiert wird nur eine gefilterte Auswahl. Jede Datei nennt die "
+"exportierende Person und den Zeitpunkt; jeder Export steht im Audit-Log."
+msgstr ""
+"Only a filtered selection is exported. Every file names the exporting person "
+"and the time; every export is recorded in the audit log."
+
+#: templates/exports/page.html
+msgid "Exportfilter"
+msgstr "Export filter"
+
+#: templates/exports/page.html
+msgid "Noch kein Filter gesetzt."
+msgstr "No filter set yet."
+
+#: templates/exports/page.html
+#, python-format
+msgid "Auswahl: <strong>%(count)s</strong> Risiken (%(description)s)"
+msgstr "Selection: <strong>%(count)s</strong> risks (%(description)s)"
+
+#: templates/exports/page.html
+msgid "Auswahl prüfen"
+msgstr "Check selection"
+
+#: templates/exports/page.html
+msgid "Als CSV exportieren"
+msgstr "Export as CSV"
+
+#: templates/exports/page.html
+msgid "Als PDF exportieren"
+msgstr "Export as PDF"
+
+#: templates/exports/page.html
+msgid "Letzte Exporte"
+msgstr "Recent exports"
+
+#: templates/exports/page.html
+msgid "Person"
+msgstr "Person"
+
+#: templates/exports/page.html
+msgid "Format"
+msgstr "Format"
+
+#: templates/exports/page.html
+msgid "Noch keine Exporte."
+msgstr "No exports yet."
+
+#: templates/risks/_classification.html
+msgid "Betroffene Schutzziele"
+msgstr "Affected protection goals"
+
+#: templates/risks/_classification.html
+msgid "Einstufung:"
+msgstr "Classification:"
+
+#: templates/risks/_classification.html
+msgid ""
+"– wird erst nach Freigabe durch einen Risk Manager wirksam, bis dahin gilt "
+"es als IS-Risiko. Danach Weitergabe an das IT-Operations-Management."
+msgstr ""
+"– takes effect only after a risk manager approves it; until then it counts "
+"as an IS risk. Afterwards it is handed over to IT operations management."
+
+#: templates/risks/_classification.html
+msgid "noch offen – Schutzziel und Ursprung angeben"
+msgstr "still open – specify protection goal and origin"
+
+#: templates/risks/_risk_row.html templates/risks/detail.html
+#: templates/risks/escalations.html
+msgid "Warnung"
+msgstr "Warning"
+
+#: templates/risks/_risk_table.html templates/risks/detail.html
+msgid "Erfasst"
+msgstr "Reported"
+
+#: templates/risks/_risk_table.html
+msgid "Keine Risiken."
+msgstr "No risks."
+
+#: templates/risks/_score_preview.html
+msgid "Risikowert:"
+msgstr "Risk score:"
+
+#: templates/risks/_score_preview.html
+msgid "Nicht berechenbar"
+msgstr "Cannot be calculated"
+
+#: templates/risks/approvals.html
+msgid "Offene Freigaben"
+msgstr "Pending approvals"
+
+#: templates/risks/approvals.html
+msgid ""
+"Angezeigt werden Anträge anderer. Eigene Anträge gibt ein anderer Risk "
+"Manager frei (M-04)."
+msgstr ""
+"Shown are requests by others. Your own requests are approved by another risk "
+"manager (M-04)."
+
+#: templates/risks/approvals.html
+msgid "Vorschlag"
+msgstr "Proposal"
+
+#: templates/risks/approvals.html
+msgid "Beantragt von"
+msgstr "Requested by"
+
+#: templates/risks/approvals.html
+msgid "Entscheidung"
+msgstr "Decision"
+
+#: templates/risks/approvals.html
+msgid "Freigeben"
+msgstr "Approve"
+
+#: templates/risks/approvals.html
+msgid "Ablehnen"
+msgstr "Reject"
+
+#: templates/risks/approvals.html
+msgid "Keine offenen Freigaben."
+msgstr "No pending approvals."
+
+#: templates/risks/dashboard.html
+msgid "Kennzahlen"
+msgstr "Key figures"
+
+#: templates/risks/dashboard.html
+msgid "Offene Risiken"
+msgstr "Open risks"
+
+#: templates/risks/dashboard.html
+msgid "IS- gegenüber IT-Risiken"
+msgstr "IS versus IT risks"
+
+#: templates/risks/dashboard.html
+msgid "IS-Risiken / IT-Risiken (offen)"
+msgstr "IS risks / IT risks (open)"
+
+#: templates/risks/dashboard.html
+msgid ""
+"Die Eskalation steht, aber das Incident-Response-Team wurde nicht erreicht. "
+"Die Markierung bleibt, bis eine erneute Zustellung gelingt."
+msgstr ""
+"The escalation stands, but the incident response team was not reached. The "
+"flag remains until a redelivery succeeds."
+
+#: templates/risks/dashboard.html
+msgid "Risikomatrix (offene, bewertete Risiken)"
+msgstr "Risk matrix (open, scored risks)"
+
+#: templates/risks/dashboard.html
+msgid "Anzahl der Risiken je Eintrittswahrscheinlichkeit und Schadensausmaß"
+msgstr "Number of risks per probability and impact"
+
+#: templates/risks/dashboard.html
+#, python-format
+msgid "P %(p)s, I %(i)s: %(n)s Risiken, %(level)s"
+msgstr "P %(p)s, I %(i)s: %(n)s risks, %(level)s"
+
+#: templates/risks/dashboard.html
+#, python-format
+msgid "P %(p)s, I %(i)s: keine Risiken"
+msgstr "P %(p)s, I %(i)s: no risks"
+
+#: templates/risks/dashboard.html
+msgid "Zeilen: Eintrittswahrscheinlichkeit P · Spalten: Schadensausmaß I"
+msgstr "Rows: probability P · columns: impact I"
+
+#: templates/risks/dashboard.html
+msgid "ab 20 kritisch"
+msgstr "20 and above critical"
+
+#: templates/risks/dashboard.html
+msgid "12–19 hoch"
+msgstr "12–19 high"
+
+#: templates/risks/dashboard.html
+msgid "6–11 mittel"
+msgstr "6–11 medium"
+
+#: templates/risks/dashboard.html
+msgid "1–5 niedrig"
+msgstr "1–5 low"
+
+#: templates/risks/dashboard.html
+msgid "Zuletzt erfasst"
+msgstr "Recently reported"
+
+#: templates/risks/dashboard.html
+msgid "Noch keine offenen Risiken."
+msgstr "No open risks yet."
+
+#: templates/risks/detail.html
+msgid ""
+"Das Incident-Response-Team wurde nicht erreicht. Die Markierung bleibt, bis "
+"eine erneute Zustellung gelingt."
+msgstr ""
+"The incident response team was not reached. The flag remains until a "
+"redelivery succeeds."
+
+#: templates/risks/detail.html templates/risks/score.html
+msgid "Bewertung"
+msgstr "Assessment"
+
+#: templates/risks/detail.html
+msgid "Freigabe offen"
+msgstr "Approval pending"
+
+#: templates/risks/detail.html
+msgid "Schutzziele"
+msgstr "Protection goals"
+
+#: templates/risks/detail.html
+msgid "P × I"
+msgstr "P × I"
+
+#: templates/risks/detail.html
+msgid "noch nicht bewertet"
+msgstr "not scored yet"
+
+#: templates/risks/detail.html
+#, python-format
+msgid "%(date)s von %(reporter)s"
+msgstr "%(date)s by %(reporter)s"
+
+#: templates/risks/detail.html
+msgid "Neubewertung von"
+msgstr "Re-evaluation of"
+
+#: templates/risks/detail.html
+msgid "Aktionen"
+msgstr "Actions"
+
+#: templates/risks/detail.html
+msgid "Entwurf bearbeiten und einreichen"
+msgstr "Edit and submit draft"
+
+#: templates/risks/detail.html
+msgid "Bewerten (P, I)"
+msgstr "Score (P, I)"
+
+#: templates/risks/detail.html templates/risks/reclassify.html
+msgid "Klassifizierung ändern"
+msgstr "Change classification"
+
+#: templates/risks/detail.html templates/risks/incident_response.html
+msgid "Incident Response dokumentieren"
+msgstr "Document incident response"
+
+#: templates/risks/detail.html
+msgid "Neubewertung anlegen"
+msgstr "Create re-evaluation"
+
+#: templates/risks/detail.html
+msgid "Bewertung abschließen"
+msgstr "Complete assessment"
+
+#: templates/risks/detail.html
+msgid "Schließen"
+msgstr "Close"
+
+#: templates/risks/detail.html
+msgid "Neu bewerten (obsolet setzen)"
+msgstr "Re-evaluate (set obsolete)"
+
+#: templates/risks/detail.html
+msgid "Obsolet setzen"
+msgstr "Set obsolete"
+
+#: templates/risks/detail.html
+msgid "Keine Aktionen für Ihre Rolle."
+msgstr "No actions for your role."
+
+#: templates/risks/detail.html
+#, python-format
+msgid "beantragt von %(by)s"
+msgstr "requested by %(by)s"
+
+#: templates/risks/detail.html
+#, python-format
+msgid "entschieden von %(by)s"
+msgstr "decided by %(by)s"
+
+#: templates/risks/detail.html
+#, python-format
+msgid "%(kind)s per %(channel)s"
+msgstr "%(kind)s by %(channel)s"
+
+#: templates/risks/detail.html
+msgid "Verlauf"
+msgstr "History"
+
+#: templates/risks/detail.html
+msgid "Vollständiger Verlauf im Audit-Log"
+msgstr "Full history in the audit log"
+
+#: templates/risks/escalations.html
+msgid "Erneut senden"
+msgstr "Resend"
+
+#: templates/risks/escalations.html
+msgid "Erneutes Senden durch die Administration"
+msgstr "Resending is done by administration"
+
+#: templates/risks/escalations.html
+msgid "Keine fehlgeschlagenen Notifikationen."
+msgstr "No failed notifications."
+
+#: templates/risks/escalations.html
+msgid "Eskalierte Risiken"
+msgstr "Escalated risks"
+
+#: templates/risks/escalations.html
+msgid "Keine eskalierten Risiken."
+msgstr "No escalated risks."
+
+#: templates/risks/form.html
+msgid "Entwurf bearbeiten"
+msgstr "Edit draft"
+
+#: templates/risks/form.html templates/risks/list.html
+msgid "Risiko erfassen"
+msgstr "Report risk"
+
+#: templates/risks/form.html
+msgid "Erfassen"
+msgstr "Report"
+
+#: templates/risks/form.html templates/risks/reclassify.html
+#: templates/risks/score.html
+msgid "Speichern"
+msgstr "Save"
+
+#: templates/risks/form.html
+msgid "Als Entwurf ablegen"
+msgstr "Save as draft"
+
+#: templates/risks/incident_response.html
+msgid "Dokumentieren und validieren"
+msgstr "Document and validate"
+
+#: templates/risks/incident_response.html templates/risks/reclassify.html
+#: templates/risks/score.html
+msgid "Abbrechen"
+msgstr "Cancel"
+
+#: templates/risks/list.html
+msgid "Diese Auswahl exportieren"
+msgstr "Export this selection"
+
+#: templates/risks/reclassify.html
+msgid "Klassifizierung"
+msgstr "Classification"
+
+#: templates/risks/reclassify.html
+msgid ""
+"Eine Einordnung als IT-Risiko wird erst nach Freigabe durch einen anderen "
+"Risk Manager wirksam."
+msgstr ""
+"A classification as IT risk takes effect only after another risk manager "
+"approves it."
+
+#: templates/risks/score.html
+msgid "Risiko bewerten"
+msgstr "Score risk"

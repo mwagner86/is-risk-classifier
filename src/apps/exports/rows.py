@@ -7,35 +7,36 @@ from datetime import datetime
 from typing import Any
 
 from django.utils import timezone
+from django.utils.formats import date_format
+from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import User
 from apps.risks.levels import level_for
 from apps.risks.models import Risk
 
 CSV_COLUMNS = (
-    "Kennung",
-    "Titel",
-    "Beschreibung",
-    "Kategorie",
-    "Status",
-    "Vertraulichkeit",
-    "Integrität",
-    "Verfügbarkeit",
-    "Ursprung",
-    "Eintrittswahrscheinlichkeit",
-    "Schadensausmaß",
-    "Risikowert",
-    "Risikostufe",
-    "Assets",
-    "Erfasst am",
-    "Erfasst von",
+    _("Kennung"),
+    _("Titel"),
+    _("Beschreibung"),
+    _("Kategorie"),
+    _("Status"),
+    _("Vertraulichkeit"),
+    _("Integrität"),
+    _("Verfügbarkeit"),
+    _("Ursprung"),
+    _("Eintrittswahrscheinlichkeit"),
+    _("Schadensausmaß"),
+    _("Risikowert"),
+    _("Risikostufe"),
+    _("Assets"),
+    _("Erfasst am"),
+    _("Erfasst von"),
     # M-08: every row names who exported it and when
-    "Exportiert von",
-    "Exportiert am",
+    _("Exportiert von"),
+    _("Exportiert am"),
 )
 # Leading characters that make spreadsheet programs evaluate a cell (CWE-1236, T-04)
 FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
-TIMESTAMP = "%d.%m.%Y %H:%M"
 
 
 def exporter_label(user: User) -> str:
@@ -44,7 +45,8 @@ def exporter_label(user: User) -> str:
 
 
 def stamp(moment: datetime) -> str:
-    return timezone.localtime(moment).strftime(TIMESTAMP)
+    """Date and time in the active language (de: 07.10.2026 09:20, en: 2026-10-07 09:20)."""
+    return date_format(timezone.localtime(moment), "SHORT_DATETIME_FORMAT")
 
 
 def neutralise(value: str) -> str:
@@ -53,7 +55,7 @@ def neutralise(value: str) -> str:
 
 
 def _yes(flag: bool) -> str:
-    return "ja" if flag else "nein"
+    return str(_("ja") if flag else _("nein"))
 
 
 def risk_record(risk: Risk) -> dict[str, Any]:
@@ -62,9 +64,9 @@ def risk_record(risk: Risk) -> dict[str, Any]:
     goals = [
         label
         for flag, label in (
-            (cia.confidentiality, "Vertraulichkeit"),
-            (cia.integrity, "Integrität"),
-            (cia.availability, "Verfügbarkeit"),
+            (cia.confidentiality, _("Vertraulichkeit")),
+            (cia.integrity, _("Integrität")),
+            (cia.availability, _("Verfügbarkeit")),
         )
         if flag
     ]
@@ -73,17 +75,17 @@ def risk_record(risk: Risk) -> dict[str, Any]:
         "id": str(risk.pk),
         "title": risk.title,
         "description": risk.description,
-        "category": assessment.get_category_display() or "",
-        "status": risk.get_status_display(),
+        "category": str(assessment.get_category_display() or ""),
+        "status": str(risk.get_status_display()),
         "confidentiality": cia.confidentiality,
         "integrity": cia.integrity,
         "availability": cia.availability,
-        "goals": ", ".join(goals),
-        "origin": assessment.get_origin_display() if assessment.origin else "",
+        "goals": ", ".join(str(g) for g in goals),
+        "origin": str(assessment.get_origin_display()) if assessment.origin else "",
         "probability": assessment.probability,
         "impact": assessment.impact,
         "score": assessment.score,
-        "level": level.label if level else "",
+        "level": str(level.label) if level else "",
         "assets": ", ".join(f"{a.cmdb_key} {a.name}" for a in assessment.assets.all()),
         "created_at": stamp(risk.created_at),
         "reporter": risk.reporter.username,
@@ -94,7 +96,7 @@ def to_csv(records: Iterable[dict[str, Any]], exporter: str, exported_at: str) -
     """Semicolon-separated UTF-8 with BOM, as German spreadsheet programs expect it."""
     buffer = io.StringIO()
     writer = csv.writer(buffer, delimiter=";", lineterminator="\r\n")
-    writer.writerow(CSV_COLUMNS)
+    writer.writerow([str(column) for column in CSV_COLUMNS])
     for r in records:
         cells: list[Any] = [
             r["id"],
@@ -121,7 +123,11 @@ def to_csv(records: Iterable[dict[str, Any]], exporter: str, exported_at: str) -
 
 
 def pdf_payload(
-    records: Iterable[dict[str, Any]], exporter: str, exported_at: str, filter_text: str
+    records: Iterable[dict[str, Any]],
+    exporter: str,
+    exported_at: str,
+    filter_text: str,
+    language: str | None = "de",
 ) -> dict[str, Any]:
     keys = (
         "id", "title", "description", "category", "status", "goals", "origin",
@@ -131,5 +137,6 @@ def pdf_payload(
         "exported_by": exporter,
         "exported_at": exported_at,
         "filter": filter_text,
+        "language": "en" if language == "en" else "de",
         "risks": [{key: r[key] for key in keys} for r in records],
     }

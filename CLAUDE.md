@@ -203,6 +203,15 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
   `src/assets/`, **nicht** unter `static/`, sonst scheitert `collectstatic` am `@import`.
 - **Lieferkette:** neue ausgelieferte Front-End-Datei in `src/static/third_party.json` (mit
   SHA-256) und `THIRD_PARTY.md` eintragen; der Test vergleicht Inventar und Dateien.
+- **Sprachen (DE/EN):** Deutsch ist Quellsprache und Standard (`LANGUAGE_CODE = "de"`), die
+  deutschen Texte sind die msgids. Jeden neuen Oberflächentext markieren: Templates
+  `{% translate %}`/`{% blocktranslate %}`, Python auf Modul-/Klassenebene `gettext_lazy as _`, in
+  Funktionen `gettext`. Danach die englische Fassung in `tools/translations_en.py` eintragen und
+  `make messages` laufen lassen (`.po` und `.mo` werden versioniert). CI (`make messages-check`)
+  scheitert an unübersetzten Texten; `tests/test_i18n.py` findet deutsche Reste auf englischen
+  Seiten. Typ für übersetzbare Texte: `StrOrPromise` aus `django_stubs_ext`, nur unter
+  `TYPE_CHECKING` importieren (im Laufzeit-Image nicht vorhanden). Der PDF-Renderer hat eigene
+  Labels (`LABELS` in `render.py`), die Mails an das IR-Team bleiben deutsch.
 - **Formulare:** „Speichern" prüft US-01 vollständig (AK-01.3 wörtlich), „Als Entwurf ablegen"
   speichert ohne Prüfung. Fehlerfelder fokussiert `apps.core.forms.focus_first_error`.
 - **Enum-Werte** (`NUTZER`, `IS_RISIKO`, …) folgen den Literalen des UML-Modells; Bezeichner sonst
@@ -228,6 +237,11 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
   - **htmx:** Ein `<form>` als auslösendes Element wird vor der Anfrage per HTML-Validierung
     geprüft; ungültige Werte (z. B. Impact 6) lösen dann gar keine Anfrage aus. Live-Vorschauen an
     einen Container im Formular hängen (`hx-include="closest form"`).
+  - Container mit eingebundenem Quellcode laufen als Eigentümer des Arbeitsverzeichnisses
+    (`APP_UID`/`APP_GID` aus dem Makefile). Mit fester UID 1000 scheiterte die CI: Der Checkout
+    gehört dort UID 1001, ruff und das SBOM-Skript durften nicht schreiben.
+  - `pkill -f`/`pgrep -f` mit einem Muster, das in der eigenen Befehlszeile steht, beendet die
+    eigene Shell (Exit 144) — Prozesse über die PID beenden.
   - `select_for_update()` mit `select_related` auf eine umgekehrte 1:1-Beziehung scheitert in
     PostgreSQL („nullable side of an outer join") → `select_for_update(of=("self",))`.
 - **CI:** `.github/workflows/ci.yml` — Lint, Tests, Nachweistabelle aktuell (`make trace` +

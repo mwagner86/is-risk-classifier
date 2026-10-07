@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Risiko bewerten{% endblock %}
-{% block breadcrumb %}{% url 'risk_list' as risks %}{% url 'risk_detail' risk.pk as detail %}{% include "_crumb.html" with url=risks label="Risiken" %}{% include "_crumb.html" with url=detail label=risk.title %}<li aria-current="page" class="text-text">Bewertung</li>{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Risiko bewerten" %}{% endblock %}
+{% block breadcrumb %}{% url 'risk_list' as risks %}{% url 'risk_detail' risk.pk as detail %}{% translate "Risiken" as crumb_label %}{% include "_crumb.html" with url=risks label=crumb_label %}{% include "_crumb.html" with url=detail label=risk.title %}<li aria-current="page" class="text-text">{% translate "Bewertung" %}</li>{% endblock %}
 {% block content %}
-  <h1 class="mb-2">Risiko bewerten</h1>
+  <h1 class="mb-2">{% translate "Risiko bewerten" %}</h1>
   <p class="mb-5 text-sm text-muted">{{ risk.assessment.get_category_display }} · {{ risk.get_status_display }} · Skala 1 bis 5, Risikowert R = P × I</p>
   <form method="post" class="card max-w-xl">
     {% csrf_token %}
@@ -16,6 +17,6 @@
       {% include "risks/_field.html" with field=form.impact %}
     </div>
     {% include "risks/_score_preview.html" %}
-    <div class="flex gap-3"><button type="submit" class="btn btn-primary">Speichern</button><a href="{% url 'risk_detail' risk.pk %}" class="btn">Abbrechen</a></div>
+    <div class="flex gap-3"><button type="submit" class="btn btn-primary">{% translate "Speichern" %}</button><a href="{% url 'risk_detail' risk.pk %}" class="btn">{% translate "Abbrechen" %}</a></div>
   </form>
 {% endblock %}

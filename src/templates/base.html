@@ -1,16 +1,16 @@
-{% load static ui %}<!doctype html>
-<html lang="de">
+{% load i18n static ui %}<!doctype html>
+{% get_current_language as LANGUAGE_CODE %}<html lang="{{ LANGUAGE_CODE }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="htmx-config" content='{"allowEval": false, "allowScriptTags": false, "includeIndicatorStyles": false}'>
-  <title>{% block title %}Dashboard{% endblock %} · IS-Risk Classifier</title>
+  <title>{% block title %}{% translate "Dashboard" %}{% endblock %} · IS-Risk Classifier</title>
   <link rel="stylesheet" href="{% static 'css/build/app.css' %}">
   <script src="{% static 'vendor/htmx-2.0.11.min.js' %}" defer></script>
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 btn">Zum Inhalt springen</a>
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 btn">{% translate "Zum Inhalt springen" %}</a>
   <div class="flex min-h-screen flex-col md:flex-row">
     {% if user.is_authenticated %}
       <aside class="border-b border-border bg-bg-2 md:w-60 md:shrink-0 md:border-b-0 md:border-r">
@@ -19,7 +19,7 @@
           <span class="text-brand-3">{% icon "shield" size=26 %}</span>
           <span class="brand-text text-lg leading-tight">IS-Risk<br>Classifier</span>
         </div>
-        <nav aria-label="Hauptnavigation" class="px-3 pb-4">
+        <nav aria-label="{% translate 'Hauptnavigation' %}" class="px-3 pb-4">
           <ul class="flex flex-wrap gap-1 md:flex-col">
             {% for item in nav_items %}
               <li>
@@ -37,11 +37,22 @@
     {% endif %}
     <div class="flex min-w-0 flex-1 flex-col">
       <header class="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-bg px-6 py-3">
-        <nav aria-label="Brotkrumen" class="text-sm text-muted">
+        <nav aria-label="{% translate 'Brotkrumen' %}" class="text-sm text-muted">
           <ol class="flex flex-wrap items-center gap-2">
-            {% block breadcrumb %}<li aria-current="page" class="text-text">Dashboard</li>{% endblock %}
+            {% block breadcrumb %}<li aria-current="page" class="text-text">{% translate "Dashboard" %}</li>{% endblock %}
           </ol>
         </nav>
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+        {% get_available_languages as languages %}
+        <form action="{% url 'set_language' %}" method="post" class="flex items-center gap-1" aria-label="{% translate 'Sprache wählen' %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          {% for code, name in languages %}
+            <button type="submit" name="language" value="{{ code }}" lang="{{ code }}" title="{{ name }}"
+                    aria-pressed="{% if code == LANGUAGE_CODE %}true{% else %}false{% endif %}"
+                    class="rounded-md px-2 py-1 text-xs font-semibold uppercase {% if code == LANGUAGE_CODE %}bg-surface-3 text-text{% else %}text-muted hover:text-text{% endif %}">{{ code }}</button>
+          {% endfor %}
+        </form>
         {% if user.is_authenticated %}
           <div class="flex items-center gap-3 text-sm">
             <span class="text-right leading-tight">
@@ -50,10 +61,11 @@
             </span>
             <form action="{% url 'oidc_logout' %}" method="post">
               {% csrf_token %}
-              <button type="submit" class="btn">{% icon "logout" %}Abmelden</button>
+              <button type="submit" class="btn">{% icon "logout" %}{% translate "Abmelden" %}</button>
             </form>
           </div>
         {% endif %}
+        </div>
       </header>
       <main id="main" class="flex-1 px-6 py-6">
         {% if messages %}
