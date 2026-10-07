@@ -7,9 +7,8 @@ Softwaretechnik (SS26), Projekt der Hand-ins in Entwicklung sicherer Softwaresys
 
 ## Stand
 
-- **Phase:** Iterationen 1 (`c487c30`), 2 (`ea7cbe0`), 3 (`55cbd40`), 4 (`445bb3a`) und
-  5 (`a501040`) committet; Iteration 6 (Benachrichtigungsmodul) fertig, noch nicht committet
-  (07.10.2026). Damit ist der freigegebene Plan abgearbeitet.
+- **Phase:** Iterationen 1 (`c487c30`), 2 (`ea7cbe0`), 3 (`55cbd40`), 4 (`445bb3a`),
+  5 (`a501040`) und 6 (`b16d76e`) committet (07.10.2026). Der freigegebene Plan ist abgearbeitet.
   INV-01 gibt es nicht (Max, 07.10.2026) — die Spezifikation kennt nur INV-02 und INV-03.
 - **Iterationen (freigegeben 07.10.2026):** 1 Gerüst, Container, Anmeldung, Modelle,
   Zustandsmaschine · 2 Kategorisierung, Risikowert, Eskalation (Benachrichtigung als Mock) ·
@@ -123,8 +122,8 @@ Einordnung als IT-Risiko **schon bei der Erfassung**.
   gepinnt; `.env.example` statt Geheimnissen; README mit Start in drei Befehlen.
 - **Docker:** Kontext `default` auf der Workstation. **Nicht** auf dem Homeserver
   (Kontext `homeserver`) starten.
-- **Git:** Commits und Pushes nur auf Anweisung. Remote (geplant): privat,
-  `mwagner86/is-risk-classifier`, noch nicht angelegt.
+- **Git:** Commits und Pushes nur auf Anweisung. Remote `origin`:
+  `git@github.com:mwagner86/is-risk-classifier.git` (privat, angelegt am 07.10.2026).
 - **Systemänderungen** (Pakete, Docker-Volumes, Ports, Konfiguration außerhalb des Repos) in
   `~/CHANGELOG.md` protokollieren — mit Befehl, Verifikation und Rückbau.
 - **Hand-ins in `~/Uni/ESS` bleiben unberührt.** Ob und wie die Implementierung dort vorkommt,
@@ -231,6 +230,6 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
     einen Container im Formular hängen (`hx-include="closest form"`).
   - `select_for_update()` mit `select_related` auf eine umgekehrte 1:1-Beziehung scheitert in
     PostgreSQL („nullable side of an outer join") → `select_for_update(of=("self",))`.
-- **Noch nicht vorhanden:** kein CI und kein GitHub-Remote; `make audit` und `make sbom` laufen
+- **Noch nicht vorhanden:** kein CI; `make audit` und `make sbom` laufen
   bisher nur auf Abruf. Kein TLS im lokalen Stack (nur `DJANGO_HTTPS` für den Betrieb hinter einem
   Proxy).
