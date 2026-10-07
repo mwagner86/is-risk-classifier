@@ -7,8 +7,8 @@ Softwaretechnik (SS26), Projekt der Hand-ins in Entwicklung sicherer Softwaresys
 
 ## Stand
 
-- **Phase:** Iteration 1 (`c487c30`) und 2 (`ea7cbe0`) committet, Iteration 3 fertig, noch nicht
-  committet (07.10.2026). Nächste: Iteration 4 (Export und Audit-Log).
+- **Phase:** Iterationen 1 (`c487c30`), 2 (`ea7cbe0`) und 3 (`55cbd40`) committet; Iteration 4
+  (Export und Audit-Log) fertig, noch nicht committet (07.10.2026). Nächste: Iteration 5 (Härtung).
   INV-01 gibt es nicht (Max, 07.10.2026) — die Spezifikation kennt nur INV-02 und INV-03.
 - **Iterationen (freigegeben 07.10.2026):** 1 Gerüst, Container, Anmeldung, Modelle,
   Zustandsmaschine · 2 Kategorisierung, Risikowert, Eskalation (Benachrichtigung als Mock) ·
@@ -176,6 +176,14 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
 - **Benachrichtigungen:** Outbox in `notifications_notification`, Worker
   `python src/manage.py run_outbox`. Gateway per `NOTIFICATION_GATEWAY` (bis Iteration 6
   `MockGateway`, Ausfall per `NOTIFY_MOCK_MODE=timeout|5xx`). Inhalt nach M-09: Kennung und Link.
+- **Export (Iteration 4):** US-04 ist geteilt in **US-04a CSV** und **US-04b PDF** — Kennungen
+  vorläufig, bis Max sie im ESS-Hand-in 2 festlegt (nur Testmarker, leicht umzubenennen). Filter
+  in `apps/risks/filters.py` (`RiskFilter`), gemeinsam für Liste und Export; ein leerer Filter
+  verweigert den Export (M-07). Jeder Export legt ein `Export` an und einen Audit-Eintrag.
+- **PDF-Renderer** (`src/pdf_renderer/`): nur Standardbibliothek und ReportLab, **nie** Django oder
+  `apps.*` importieren — `tests/test_pdf_renderer.py` prüft das und die Compose-Härtung. Jeder
+  Nutzertext geht durch `render.text()` (XML-Escape) in einen `Paragraph`; Kopf- und Fußzeile mit
+  `drawString` (kein Markup). Tests rendern in-process (Fixture `inprocess_renderer`).
 - **Formulare:** „Speichern" prüft US-01 vollständig (AK-01.3 wörtlich), „Als Entwurf ablegen"
   speichert ohne Prüfung. Fehlerfelder fokussiert `apps.core.forms.focus_first_error`.
 - **Enum-Werte** (`NUTZER`, `IS_RISIKO`, …) folgen den Literalen des UML-Modells; Bezeichner sonst
@@ -201,5 +209,5 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
     einen Container im Formular hängen (`hx-include="closest form"`).
   - `select_for_update()` mit `select_related` auf eine umgekehrte 1:1-Beziehung scheitert in
     PostgreSQL („nullable side of an outer join") → `select_for_update(of=("self",))`.
-- **Noch nicht vorhanden** (laut Plan später):   `pdf-renderer` (4), Laufzeit-Image mit gunicorn, CSP, getrennte DB-Rollen für Migration und
+- **Noch nicht vorhanden** (laut Plan später): Laufzeit-Image mit gunicorn, CSP, getrennte DB-Rollen für Migration und
   Betrieb (5), `notify-gateway` und Mailpit (6).

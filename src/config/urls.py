@@ -13,6 +13,8 @@ urlpatterns = [
     path("anmeldung-abgelehnt/", views.login_failed, name="login_failed"),
     path("", include("apps.risks.urls")),
     path("", include("apps.cmdb.urls")),
+    path("", include("apps.exports.urls")),
+    path("", include("apps.audit.urls")),
     # OIDC endpoints have to be reachable without a session
     path(
         "oidc/authenticate/",

@@ -8,16 +8,20 @@ dependencies = [
     "gunicorn==26.2.0",
     "mozilla-django-oidc==5.0.2",
     "psycopg[binary]==3.3.6",
+    "reportlab==5.0.1",
 ]
 
 [dependency-groups]
 dev = [
     "django-stubs[compatible-mypy]==5.2.9",
     "mypy==1.19.1",
+    "pypdf==6.19.0",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "pytest-django==4.14.0",
+    "pyyaml==6.0.3",
     "ruff==0.16.10",
+    "types-pyyaml==6.0.12.20260906",
 ]
 
 [tool.uv]
@@ -52,7 +56,7 @@ explicit_package_bases = true
 exclude = ["/migrations/"]
 
 [[tool.mypy.overrides]]
-module = ["mozilla_django_oidc.*"]
+module = ["mozilla_django_oidc.*", "reportlab.*"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]

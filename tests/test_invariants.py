@@ -8,6 +8,7 @@ from apps.accounts.models import User
 from apps.audit.models import AuditAction, AuditEntry
 from apps.cmdb.models import Asset
 from apps.core.models import DeletionForbiddenError
+from apps.exports.models import Export
 from apps.notifications.models import Notification
 from apps.risks.models import (
     ApprovalKind,
@@ -31,6 +32,7 @@ PROTECTED_MODELS: list[type[Model]] = [
     Asset,
     User,
     AuditEntry,
+    Export,
 ]
 
 
@@ -45,6 +47,9 @@ def one_of_each(make_risk: MakeRisk, users: dict[str, User]) -> dict[type[Model]
         requested_by=users["rm"],
     )
     notification = Notification.objects.create(risk=risk)
+    export = Export.objects.create(
+        exported_by=users["rm"], format="csv", filter_description="x", query="x", row_count=0
+    )
     entry = AuditEntry.objects.create(
         action=AuditAction.CREATED, risk=risk, object_type="Risk", object_id=risk.pk
     )
@@ -57,6 +62,7 @@ def one_of_each(make_risk: MakeRisk, users: dict[str, User]) -> dict[type[Model]
         Asset: risk.assessment.assets.get(),
         User: users["nutzer"],
         AuditEntry: entry,
+        Export: export,
     }
 
 

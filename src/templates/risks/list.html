@@ -7,6 +7,9 @@
     {% if user.role == "NUTZER" or user.role == "RISK_MANAGER" %}
       <a href="{% url 'risk_create' %}" class="btn btn-primary">Risiko erfassen</a>
     {% endif %}
+    {% if user.role == "RISK_MANAGER" and not filters.is_empty %}
+      <a href="{% url 'export_page' %}?{{ filters.query_string }}" class="btn">Diese Auswahl exportieren</a>
+    {% endif %}
   </div>
   <form method="get" class="card mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6" aria-label="Filter">
     <div>
@@ -32,11 +35,11 @@
     </div>
     <div>
       <label for="f-p" class="field-label">P</label>
-      <input id="f-p" name="p" type="number" min="1" max="5" step="1" value="{{ filters.p }}" class="input">
+      <input id="f-p" name="p" type="number" min="1" max="5" step="1" value="{{ filters.probability }}" class="input">
     </div>
     <div>
       <label for="f-i" class="field-label">I</label>
-      <input id="f-i" name="i" type="number" min="1" max="5" step="1" value="{{ filters.i }}" class="input">
+      <input id="f-i" name="i" type="number" min="1" max="5" step="1" value="{{ filters.impact }}" class="input">
     </div>
     <div class="flex items-end gap-2">
       <button type="submit" class="btn btn-primary">Filtern</button>

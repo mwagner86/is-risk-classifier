@@ -93,4 +93,12 @@
       {% endif %}
     </aside>
   </div>
+
+  {% if history is not None %}
+    <section class="card mt-6" aria-labelledby="history-heading">
+      <h2 id="history-heading" class="card-title">Verlauf</h2>
+      {% include "audit/_entries.html" with entries=history with_risk=False %}
+      <p class="mt-3 text-sm"><a href="{% url 'audit_log' %}?risk={{ risk.pk }}">Vollständiger Verlauf im Audit-Log</a></p>
+    </section>
+  {% endif %}
 {% endblock %}

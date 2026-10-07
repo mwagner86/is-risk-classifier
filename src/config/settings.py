@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "apps.cmdb",
     "apps.risks",
     "apps.notifications",
+    "apps.exports",
 ]
 
 MIDDLEWARE = [
@@ -130,6 +131,10 @@ IT_OPS_EMAIL = env("IT_OPS_EMAIL", "")
 NOTIFICATION_GATEWAY = env("NOTIFICATION_GATEWAY", "apps.notifications.gateway.MockGateway")
 # Mock only: ok, timeout or 5xx — forces the gateway failure of AK-03.3
 NOTIFY_MOCK_MODE = env("NOTIFY_MOCK_MODE", "ok")
+
+# PDF export: rendered by the separate pdf-renderer service without database access (M-03)
+PDF_RENDERER_URL = env("PDF_RENDERER_URL", "http://pdf-renderer:8001/render")
+PDF_RENDERER_TIMEOUT = int(env("PDF_RENDERER_TIMEOUT", "30"))
 
 LOGGING = {
     "version": 1,

@@ -1,0 +1,21 @@
+{% load audit_tags %}
+<div class="overflow-x-auto">
+  <table class="table">
+    <thead><tr><th scope="col">Zeitpunkt</th><th scope="col">Urheber</th><th scope="col">Aktion</th>{% if with_risk %}<th scope="col">Risiko</th>{% endif %}<th scope="col">Feld</th><th scope="col">Alt</th><th scope="col">Neu</th></tr></thead>
+    <tbody>
+      {% for entry in entries %}
+        <tr class="audit-row">
+          <td class="whitespace-nowrap">{{ entry.created_at|date:"d.m.Y H:i:s" }}</td>
+          <td>{% if entry.actor %}{{ entry.actor.username }}{% else %}<span class="text-muted">System</span>{% endif %}</td>
+          <td>{{ entry.get_action_display }}</td>
+          {% if with_risk %}<td>{% if entry.risk %}<a href="{% url 'risk_detail' entry.risk.pk %}">{{ entry.risk.title }}</a>{% else %}<span class="text-muted">–</span>{% endif %}</td>{% endif %}
+          <td>{{ field_labels|lookup:entry.field|default:"–" }}</td>
+          <td class="text-muted">{% if entry.old_value %}{% audit_value entry.field entry.old_value %}{% else %}–{% endif %}</td>
+          <td>{% if entry.new_value %}{% audit_value entry.field entry.new_value %}{% else %}–{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" class="text-muted">Keine Einträge.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

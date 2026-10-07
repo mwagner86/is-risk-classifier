@@ -51,6 +51,7 @@ vorhandenen Realm beim Import nicht überschreibt.
 | `web` | Django-Anwendung | `127.0.0.1:8000` |
 | `worker` | verschickt Notifikationen aus der Warteschlange (bis Iteration 6 über einen Mock) | — |
 | `css` | baut das Stylesheet mit dem Tailwind-CLI neu, sobald sich Templates ändern | — |
+| `pdf-renderer` | erzeugt die PDF-Exporte; eigener Prozess ohne Datenbanknetz und ohne Zugangsdaten, Dateisystem schreibgeschützt | nur `web` |
 | `keycloak` | Identity Provider (OIDC mit PKCE), Rollen aus Gruppen | `127.0.0.1:8080` |
 | `db` | PostgreSQL, im internen Netz ohne Route nach außen | nur `web` |
 | `test`, `tools` | Testlauf, Lint, Lockfile (Profil `tools`) | — |
@@ -65,7 +66,9 @@ vorhandenen Realm beim Import nicht überschreibt.
 │   │   ├── risks/          Risiko, Bewertung, CIA-Triade, Freigabeanträge, Zustandsmaschine
 │   │   ├── cmdb/           Assets, CSV-Import, Beispieldaten
 │   │   ├── notifications/  Notifikationen: Warteschlange, Gateway (Mock), Worker
-│   │   └── audit/          Audit-Log, nur anfügbar
+│   │   ├── exports/        CSV- und PDF-Export (gefiltert, gekennzeichnet)
+│   │   └── audit/          Audit-Log, nur anfügbar, und seine Ansicht
+│   ├── pdf_renderer/       eigenständiger PDF-Dienst ohne Django und ohne Datenbanktreiber
 │   └── templates/
 ├── tests/                  pytest; jeder Test trägt seine Anforderung: @pytest.mark.req("M-05")
 ├── docker/                 Dockerfile, Keycloak-Realm
@@ -90,7 +93,9 @@ Administration stößt sie unter **Eskalationen** an.
 2. Als `rm.mueller` unter **Risiken** bewerten. Ein IS-Risiko ab 20 wird sofort eskaliert, der
    Worker meldet den Versand in `make logs`.
 3. Als `rm.schmidt` (oder `rm.mueller` für Anträge anderer) unter **Freigaben** entscheiden.
-4. Gateway-Ausfall (AK-03.3) nachstellen: in `.env` `NOTIFY_MOCK_MODE=timeout` setzen,
+4. Als Risk Manager unter **Export** filtern und als CSV oder PDF exportieren. Ohne Filter wird
+   nicht exportiert; jeder Export erscheint im **Audit-Log**.
+5. Gateway-Ausfall (AK-03.3) nachstellen: in `.env` `NOTIFY_MOCK_MODE=timeout` setzen,
    `docker compose up -d worker`, dann ein IS-Risiko mit 4 × 5 bewerten.
 
 ## Sicherheitsrelevante Festlegungen
@@ -107,3 +112,12 @@ Administration stößt sie unter **Eskalationen** an.
 - **M-04:** Eine Einordnung als IT-Risiko und eine Herabstufung unter 20 sind Anträge. Wirksam
   werden sie erst, wenn ein anderer Risk Manager zustimmt (auch als Prüfregel in der Datenbank).
 - **M-09:** Eskalationen enthalten nur die Kennung und einen Link, der eine Anmeldung verlangt.
+- **M-01:** Eingaben erreichen ReportLab nur maskiert; Markup in Titel oder Beschreibung erscheint
+  als Text (getestet auch mit der Nutzlast von CVE-2023-33733).
+- **M-03:** Das PDF erzeugt der Dienst `pdf-renderer` im Netz `pdf` ohne Route zur Datenbank, ohne
+  Zugangsdaten, mit schreibgeschütztem Dateisystem und ohne Capabilities.
+- **M-07 / M-08:** Export nur für Risk Manager und nur mit Filter; jede Datei nennt Person und
+  Zeitpunkt (CSV je Zeile, PDF auf jeder Seite und in den Metadaten, Dateiname). Jeder Export steht
+  im Audit-Log.
+- **T-04:** Zellen, die mit `=`, `+`, `-`, `@`, Tab oder Wagenrücklauf beginnen, werden im CSV mit
+  einem Apostroph entschärft.

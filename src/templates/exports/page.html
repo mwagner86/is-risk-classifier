@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Export{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% include "_crumb.html" with url=home label="Dashboard" %}<li aria-current="page" class="text-text">Export</li>{% endblock %}
+{% block content %}
+  <h1 class="mb-2">Export</h1>
+  <p class="mb-5 max-w-3xl text-sm text-muted">
+    Exportiert wird nur eine gefilterte Auswahl. Jede Datei nennt die exportierende Person und den
+    Zeitpunkt; jeder Export steht im Audit-Log.
+  </p>
+  <form method="get" class="card mb-6 max-w-5xl" aria-label="Exportfilter">
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div>
+        <label for="x-status" class="field-label">Status</label>
+        <select id="x-status" name="status" class="input">
+          <option value="">alle</option>
+          {% for value, label in statuses %}<option value="{{ value }}"{% if filters.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="x-category" class="field-label">Kategorie</label>
+        <select id="x-category" name="category" class="input">
+          <option value="">alle</option>
+          {% for value, label in categories %}<option value="{{ value }}"{% if filters.category == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="x-level" class="field-label">Risikostufe</label>
+        <select id="x-level" name="level" class="input">
+          <option value="">alle</option>
+          {% for value, label in levels %}<option value="{{ value }}"{% if filters.level == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="x-p" class="field-label">P</label>
+        <input id="x-p" name="p" type="number" min="1" max="5" step="1" value="{{ filters.probability }}" class="input">
+      </div>
+      <div>
+        <label for="x-i" class="field-label">I</label>
+        <input id="x-i" name="i" type="number" min="1" max="5" step="1" value="{{ filters.impact }}" class="input">
+      </div>
+    </div>
+    <p class="my-4 text-sm" aria-live="polite">
+      {% if count is None %}<span class="text-muted">Noch kein Filter gesetzt.</span>{% else %}Auswahl: <strong>{{ count }}</strong> Risiken ({{ filters.describe }}){% endif %}
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <button type="submit" class="btn">Auswahl prüfen</button>
+      <button type="submit" formaction="{% url 'export_csv' %}" class="btn btn-primary">Als CSV exportieren</button>
+      <button type="submit" formaction="{% url 'export_pdf' %}" class="btn btn-primary">Als PDF exportieren</button>
+    </div>
+  </form>
+  <section class="card max-w-5xl" aria-labelledby="recent-exports">
+    <h2 id="recent-exports" class="card-title">Letzte Exporte</h2>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead><tr><th scope="col">Zeitpunkt</th><th scope="col">Person</th><th scope="col">Format</th><th scope="col">Filter</th><th scope="col">Risiken</th></tr></thead>
+        <tbody>
+          {% for export in recent %}
+            <tr><td class="whitespace-nowrap">{{ export.created_at|date:"d.m.Y H:i" }}</td><td>{{ export.exported_by }}</td><td>{{ export.get_format_display }}</td><td>{{ export.filter_description }}</td><td>{{ export.row_count }}</td></tr>
+          {% empty %}
+            <tr><td colspan="5" class="text-muted">Noch keine Exporte.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

@@ -26,6 +26,8 @@ PATHS = {
     "check": '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
     "shield": '<path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6l-8-3z"/>',
     "plus": '<path d="M12 5v14M5 12h14"/>',
+    "history": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    "download": '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
     "logout": '<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
 }
 

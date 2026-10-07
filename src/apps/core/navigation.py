@@ -46,6 +46,10 @@ NAVIGATION = (
         frozenset({Role.RISK_MANAGER, Role.CISO, Role.ADMIN}),
     ),
     NavItem("Freigaben", "approval_list", "check", frozenset({Role.RISK_MANAGER})),
+    NavItem(
+        "Audit-Log", "audit_log", "history", frozenset({Role.RISK_MANAGER, Role.CISO, Role.ADMIN})
+    ),
+    NavItem("Export", "export_page", "download", frozenset({Role.RISK_MANAGER})),
 )
 
 

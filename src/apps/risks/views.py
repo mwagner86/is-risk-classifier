@@ -10,13 +10,15 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import Role, User
+from apps.audit.views import FIELD_LABELS
 from apps.core.access import allow_roles
 from apps.core.forms import focus_first_error
 from apps.notifications.services import resend_failed
 from apps.risks import services
 from apps.risks.dashboard import FLAG_ROLES, dashboard_data, only_failed, with_failure_flag
+from apps.risks.filters import RiskFilter
 from apps.risks.forms import ClassificationForm, IncidentResponseForm, RiskForm, ScoreForm
-from apps.risks.levels import RiskLevel, score_filter
+from apps.risks.levels import RiskLevel
 from apps.risks.models import ApprovalState, Risk, RiskCategory, RiskStatus
 from apps.risks.state_machine import (
     TRANSITIONS,
@@ -69,23 +71,8 @@ def _available_transitions(risk: Risk, user: User) -> list[RiskStatus]:
 @allow_roles(*ALL_ROLES)
 def risk_list(request: HttpRequest) -> HttpResponse:
     risks = with_failure_flag(services.visible_risks(_user(request))).order_by("-created_at")
-    params = request.GET
-    filters = {
-        "status": params.get("status", ""),
-        "category": params.get("category", ""),
-        "level": params.get("level", ""),
-        "p": params.get("p", ""),
-        "i": params.get("i", ""),
-    }
-    if filters["status"] in RiskStatus.values:
-        risks = risks.filter(status=filters["status"])
-    if filters["category"] in RiskCategory.values:
-        risks = risks.filter(assessment__category=filters["category"])
-    if filters["level"] in RiskLevel.values:
-        risks = risks.filter(score_filter(RiskLevel(filters["level"])))
-    for key, field in (("p", "assessment__probability"), ("i", "assessment__impact")):
-        if filters[key] in {"1", "2", "3", "4", "5"}:
-            risks = risks.filter(**{field: int(filters[key])})
+    filters = RiskFilter.from_query(request.GET)
+    risks = filters.apply(risks)
     context = {
         "risks": risks,
         "filters": filters,
@@ -149,6 +136,10 @@ def risk_detail(request: HttpRequest, pk: UUID) -> HttpResponse:
         "can_document_ir": user.role in services.INCIDENT_ROLES
         and risk.status == RiskStatus.ESCALATED,
         "pending_approval": risk.approval_requests.filter(state=ApprovalState.PENDING).exists(),
+        "history": risk.audit_entries.select_related("actor").order_by("-created_at")[:25]
+        if user.role in FLAG_ROLES
+        else None,
+        "field_labels": FIELD_LABELS,
     }
     return render(request, "risks/detail.html", context)
 
