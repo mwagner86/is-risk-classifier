@@ -2,8 +2,7 @@ from django.db import connection
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
-from apps.accounts.models import Role
-from apps.core.access import allow_roles, public
+from apps.core.access import public
 
 
 @public
@@ -16,8 +15,3 @@ def healthz(request: HttpRequest) -> HttpResponse:
 @public
 def login_failed(request: HttpRequest) -> HttpResponse:
     return render(request, "core/login_failed.html", status=403)
-
-
-@allow_roles(*Role)
-def dashboard(request: HttpRequest) -> HttpResponse:
-    return render(request, "core/dashboard.html")

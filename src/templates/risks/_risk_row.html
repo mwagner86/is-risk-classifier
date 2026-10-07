@@ -1,0 +1,14 @@
+{% load risk_tags ui %}
+<tr{% if show_failures and risk.notification_failed %} class="risk-failed"{% endif %}>
+  <td>
+    <a href="{% url 'risk_detail' risk.pk %}" class="font-medium">{{ risk.title }}</a>
+    <span class="mono block text-muted">{{ risk.pk|stringformat:"s"|slice:":8" }}</span>
+    {% if show_failures and risk.notification_failed %}
+      <span class="flag-failed mt-1">{% icon "alert" label="Warnung" size=16 %}Notifikation fehlgeschlagen</span>
+    {% endif %}
+  </td>
+  <td>{{ risk.assessment.get_category_display|default:"–" }}</td>
+  <td>{% level_badge risk.assessment.score %}</td>
+  <td><span class="badge badge-status">{{ risk.get_status_display }}</span></td>
+  <td class="whitespace-nowrap text-muted">{{ risk.created_at|date:"d.m.Y H:i" }}</td>
+</tr>

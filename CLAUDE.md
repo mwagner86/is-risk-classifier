@@ -7,8 +7,8 @@ Softwaretechnik (SS26), Projekt der Hand-ins in Entwicklung sicherer Softwaresys
 
 ## Stand
 
-- **Phase:** Iteration 1 committet (`c487c30`), Iteration 2 fertig und getestet, noch nicht
-  committet (07.10.2026). Nächste: Iteration 3 (Dashboard und Design).
+- **Phase:** Iteration 1 (`c487c30`) und 2 (`ea7cbe0`) committet, Iteration 3 fertig, noch nicht
+  committet (07.10.2026). Nächste: Iteration 4 (Export und Audit-Log).
   INV-01 gibt es nicht (Max, 07.10.2026) — die Spezifikation kennt nur INV-02 und INV-03.
 - **Iterationen (freigegeben 07.10.2026):** 1 Gerüst, Container, Anmeldung, Modelle,
   Zustandsmaschine · 2 Kategorisierung, Risikowert, Eskalation (Benachrichtigung als Mock) ·
@@ -131,6 +131,15 @@ Einordnung als IT-Risiko **schon bei der Erfassung**.
 
 ## Design
 
+Umgesetzt in Iteration 3: Tokens in `src/static/css/app.css` (`@theme`), gebaut vom Tailwind-
+Standalone-CLI im Compose-Dienst `css` (Watch) bzw. `make css`. Ausgabe
+`src/static/css/build/app.css` ist ignoriert. Schriften und htmx lokal, Inventar
+`src/static/THIRD_PARTY.md`. Abweichungen von der Vorgabe wegen WCAG AA: `#69748f` nur für Deko und
+große Schrift, `#8190ac` nicht auf `#212a40`; Badges vollfarbig mit dunkler Schrift; zusätzlicher
+Token `level-medium #e8d44d`, `danger-strong #ff8095` für Text auf dem roten Grund. Kontraste prüft
+`tests/test_ui.py` — neue Farbpaare dort eintragen. Screenshots: `docs/screenshots/`.
+
+
 Stil nach dependencytrack.org, **ohne** Logo und Markennamen von OWASP oder Dependency-Track.
 Tokens, Schriften und Seitenaufbau stehen in docs/START-PROMPT.md, Abschnitt „Design". Kontraste nach
 WCAG AA prüfen; Animationen nur ohne `prefers-reduced-motion`.
@@ -184,8 +193,13 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
     End-to-End-Proben des Logins curl nehmen.
   - `manage.py shell -c` schreibt in Django 5.2 „N objects imported automatically" auf stdout;
     für maschinenlesbare Ausgabe `shell --no-imports -c` nehmen.
+  - **htmx:** Trigger nie mit `change from:#id_…` an Elemente binden, die ausgetauscht werden —
+    nach dem ersten Swap hört niemand mehr zu. Den Trigger an den Container hängen, der selbst
+    ausgetauscht wird (`#classification`).
+  - **htmx:** Ein `<form>` als auslösendes Element wird vor der Anfrage per HTML-Validierung
+    geprüft; ungültige Werte (z. B. Impact 6) lösen dann gar keine Anfrage aus. Live-Vorschauen an
+    einen Container im Formular hängen (`hx-include="closest form"`).
   - `select_for_update()` mit `select_related` auf eine umgekehrte 1:1-Beziehung scheitert in
     PostgreSQL („nullable side of an outer join") → `select_for_update(of=("self",))`.
-- **Noch nicht vorhanden** (laut Plan später): Tailwind, Design und Neuzustellung (3),
-  `pdf-renderer` (4), Laufzeit-Image mit gunicorn, CSP, getrennte DB-Rollen für Migration und
+- **Noch nicht vorhanden** (laut Plan später):   `pdf-renderer` (4), Laufzeit-Image mit gunicorn, CSP, getrennte DB-Rollen für Migration und
   Betrieb (5), `notify-gateway` und Mailpit (6).

@@ -1,16 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Klassifizierung ändern{% endblock %}
+{% block breadcrumb %}{% url 'risk_list' as risks %}{% url 'risk_detail' risk.pk as detail %}{% include "_crumb.html" with url=risks label="Risiken" %}{% include "_crumb.html" with url=detail label=risk.title %}<li aria-current="page" class="text-text">Klassifizierung</li>{% endblock %}
 {% block content %}
-  <h1>Klassifizierung ändern: {{ risk.title }}</h1>
-  <p>Eine Einordnung als IT-Risiko wird erst nach Freigabe durch einen anderen Risk Manager wirksam.</p>
-  <form method="post"
-        hx-post="{% url 'classification_preview' %}"
-        hx-trigger="change from:#id_confidentiality, change from:#id_integrity, change from:#id_availability, change from:#id_origin"
-        hx-target="#classification" hx-select="#classification" hx-swap="outerHTML">
+  <h1 class="mb-2">Klassifizierung ändern</h1>
+  <p class="mb-5 text-sm text-muted">Eine Einordnung als IT-Risiko wird erst nach Freigabe durch einen anderen Risk Manager wirksam.</p>
+  <form method="post" class="card max-w-3xl">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {% include "risks/_classification.html" %}
-    <button type="submit">Speichern</button>
-    <a href="{% url 'risk_detail' risk.pk %}">Abbrechen</a>
+    <div class="flex gap-3"><button type="submit" class="btn btn-primary">Speichern</button><a href="{% url 'risk_detail' risk.pk %}" class="btn">Abbrechen</a></div>
   </form>
 {% endblock %}

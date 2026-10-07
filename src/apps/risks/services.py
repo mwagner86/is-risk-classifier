@@ -20,8 +20,11 @@ from apps.audit.models import AuditAction
 from apps.audit.services import record
 from apps.cmdb.models import Asset
 from apps.core.models import BaseModel
-from apps.notifications.models import NotificationStatus
-from apps.notifications.services import enqueue_escalation, enqueue_it_handover
+from apps.notifications.services import (
+    enqueue_escalation,
+    enqueue_it_handover,
+    unresolved_failures,
+)
 from apps.risks.classification import categorize
 from apps.risks.models import (
     ESCALATION_THRESHOLD,
@@ -233,8 +236,8 @@ def pending_approvals_for(user: User) -> QuerySet[ApprovalRequest]:
 
 
 def has_failed_notification(risk: Risk) -> bool:
-    """AK-03.3: a failed delivery keeps the risk flagged."""
-    return risk.notifications.filter(status=NotificationStatus.FAILED).exists()
+    """AK-03.3: a failed delivery keeps the risk flagged until a redelivery succeeds."""
+    return unresolved_failures().filter(risk=risk).exists()
 
 
 # --- US-01: capture -------------------------------------------------------------------------

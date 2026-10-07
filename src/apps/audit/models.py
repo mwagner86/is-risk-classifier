@@ -14,6 +14,7 @@ class AuditAction(models.TextChoices):
     APPROVAL_REQUESTED = "APPROVAL_REQUESTED", "Freigabe beantragt"
     APPROVAL_DECIDED = "APPROVAL_DECIDED", "Freigabe entschieden"
     NOTIFICATION_FAILED = "NOTIFICATION_FAILED", "Notifikation fehlgeschlagen"
+    NOTIFICATION_RESENT = "NOTIFICATION_RESENT", "Notifikation erneut gesendet"
     EXPORTED = "EXPORTED", "Exportiert"
 
 

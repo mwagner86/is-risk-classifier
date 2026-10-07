@@ -1,0 +1,200 @@
+/* Design tokens and components. Style follows dependencytrack.org (dark theme, cards, badges);
+   no logo or brand names of OWASP or Dependency-Track. Contrast pairs are checked in
+   tests/test_ui.py against WCAG AA. Built by the Tailwind standalone CLI (service "css"). */
+
+@import "tailwindcss" source("../..");
+
+@font-face {
+  font-family: "Inter Variable";
+  src: url("/static/fonts/inter-latin-wght-5.3.0.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans Variable";
+  src: url("/static/fonts/plus-jakarta-sans-latin-wght-5.3.0.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono Variable";
+  src: url("/static/fonts/jetbrains-mono-latin-wght-5.3.0.woff2") format("woff2");
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans Variable", "Inter Variable", ui-sans-serif, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+
+  /* Backgrounds and surfaces */
+  --color-bg: #08061a;
+  --color-bg-2: #0c0823;
+  --color-surface-1: #161d2c;
+  --color-surface-2: #1a2233;
+  --color-surface-3: #212a40;
+  --color-border: #262f47;
+  --color-border-strong: #28324c;
+
+  /* Text. "faint" misses 4.5:1 on every surface: decoration, borders, large text only */
+  --color-text: #e6ebf5;
+  --color-muted: #8190ac;
+  --color-faint: #69748f;
+
+  /* Brand gradient, accents only */
+  --color-brand-1: #ff00cf;
+  --color-brand-2: #a855ff;
+  --color-brand-3: #7cc4ff;
+  --color-brand-4: #6c8cff;
+  --color-brand-5: #3df0d0;
+  --color-accent: #7cc4ff;
+  --color-primary: #6c8cff;
+  --color-on-primary: #08061a;
+
+  /* Signals */
+  --color-critical: #ff4d6a;
+  --color-warning: #f5a623;
+  --color-info: #34d2f5;
+  --color-danger-tint: #402637;
+  --color-danger-strong: #ff8095;
+
+  /* Risk levels (bands of the threat model): solid badge with dark text */
+  --color-level-critical: #ff4d6a;
+  --color-level-high: #f5a623;
+  --color-level-medium: #e8d44d;
+  --color-level-low: #34d2f5;
+  --color-on-level: #08061a;
+
+  --radius-card: 9px;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-bg font-sans text-text antialiased;
+  }
+  h1, h2, h3 {
+    @apply font-display font-semibold tracking-tight;
+  }
+  h1 {
+    @apply text-2xl;
+  }
+  h2 {
+    @apply text-lg;
+  }
+  a {
+    @apply text-accent underline-offset-2 hover:underline;
+  }
+  code, .mono {
+    @apply font-mono text-sm;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-card border border-border bg-surface-1 p-5;
+  }
+  .card-title {
+    @apply mb-3 font-sans text-sm font-semibold uppercase tracking-wide text-muted;
+  }
+  .kpi-value {
+    @apply font-display text-4xl font-bold;
+  }
+  .brand-text {
+    @apply bg-gradient-to-r from-brand-1 via-brand-3 to-brand-5 bg-clip-text font-display font-bold text-transparent;
+  }
+
+  /* Badges: colour plus the level in words */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap;
+  }
+  .badge-critical { @apply bg-level-critical text-on-level; }
+  .badge-high { @apply bg-level-high text-on-level; }
+  .badge-medium { @apply bg-level-medium text-on-level; }
+  .badge-low { @apply bg-level-low text-on-level; }
+  .badge-none { @apply border border-border text-muted; }
+  .badge-status { @apply border border-border-strong bg-surface-2 text-text; }
+
+  /* Buttons and form controls */
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-lg border border-border-strong bg-surface-2 px-3.5 py-2 text-sm font-medium text-text no-underline hover:bg-surface-3 hover:no-underline;
+  }
+  .btn-primary {
+    @apply border-primary bg-primary text-on-primary hover:bg-brand-3;
+  }
+  .btn-danger {
+    @apply border-critical text-danger-strong hover:bg-danger-tint;
+  }
+  .input {
+    @apply w-full rounded-lg border border-border-strong bg-bg-2 px-3 py-2 text-text placeholder:text-muted;
+  }
+  .input[aria-invalid="true"] {
+    @apply border-critical ring-1 ring-critical;
+  }
+  .input:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+  .field-label {
+    @apply mb-1 block text-sm font-medium text-text;
+  }
+  .helptext {
+    @apply mt-1 block text-sm text-muted;
+  }
+  .errorlist {
+    @apply mt-1 text-sm font-medium text-danger-strong;
+  }
+
+  /* Tables */
+  .table {
+    @apply w-full border-collapse text-sm;
+  }
+  .table th {
+    @apply border-b border-border px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted;
+  }
+  .table td {
+    @apply border-b border-border px-3 py-2.5 align-top;
+  }
+  .table tbody tr:hover {
+    @apply bg-surface-2;
+  }
+
+  /* AK-03.3 / decision 7: permanently red, with icon and text; never colour alone */
+  .risk-failed,
+  .table tbody tr.risk-failed {
+    @apply border-l-4 border-l-critical bg-danger-tint;
+  }
+  .flag-failed {
+    @apply inline-flex items-center gap-1.5 font-semibold text-danger-strong;
+  }
+
+  /* 5 x 5 matrix */
+  .matrix-cell {
+    @apply flex aspect-square items-center justify-center rounded-md text-sm font-bold no-underline hover:no-underline;
+  }
+  .matrix-cell-empty {
+    @apply border border-border bg-surface-2 text-faint;
+  }
+}
+
+/* A short pulse draws attention to the failure, only where motion is welcome. 1 s x 3 = 3 s,
+   below the 5 s of WCAG 2.2.2 and far below 3 flashes per second (WCAG 2.3.1). */
+@media (prefers-reduced-motion: no-preference) {
+  .risk-failed {
+    animation: flag-pulse 1s ease-in-out 3;
+  }
+}
+
+/* Only a ring pulses; text and background keep their checked contrast */
+@keyframes flag-pulse {
+  50% {
+    box-shadow: 0 0 0 3px var(--color-critical);
+  }
+}

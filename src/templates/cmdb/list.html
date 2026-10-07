@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Assets{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% include "_crumb.html" with url=home label="Dashboard" %}<li aria-current="page" class="text-text">Assets</li>{% endblock %}
+{% block content %}
+  <h1 class="mb-2">Assets</h1>
+  <p class="mb-5 text-sm text-muted">Gespiegelt aus der CMDB, hier nur lesbar.</p>
+  <section class="card overflow-x-auto">
+    <table class="table">
+      <thead><tr><th scope="col">CMDB-Kennung</th><th scope="col">Name</th><th scope="col">Kritikalität (1–5)</th></tr></thead>
+      <tbody>
+        {% for asset in assets %}
+          <tr>
+            <td class="mono">{{ asset.cmdb_key }}</td>
+            <td>{{ asset.name }}</td>
+            <td><span class="badge badge-status">{{ asset.criticality }}</span></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" class="text-muted">Keine Assets importiert.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

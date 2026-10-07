@@ -31,7 +31,8 @@ zufälligen Geheimnissen an. Das Passwort der Demo-Konten steht dort unter `DEMO
 
 | Befehl | Wirkung |
 | --- | --- |
-| `make dev` | Stack bauen und starten (App, Worker, PostgreSQL, Keycloak) |
+| `make dev` | Stack bauen und starten (App, Worker, Stylesheet, PostgreSQL, Keycloak) |
+| `make css` | Stylesheet einmalig minifiziert bauen |
 | `make test` | Tests gegen PostgreSQL, Filter mit `make test ARGS="-k m_05"` |
 | `make lint` | ruff (Lint und Format) und mypy (strict) |
 | `make fmt` | Formatierung und sichere Korrekturen anwenden |
@@ -49,6 +50,7 @@ vorhandenen Realm beim Import nicht überschreibt.
 | --- | --- | --- |
 | `web` | Django-Anwendung | `127.0.0.1:8000` |
 | `worker` | verschickt Notifikationen aus der Warteschlange (bis Iteration 6 über einen Mock) | — |
+| `css` | baut das Stylesheet mit dem Tailwind-CLI neu, sobald sich Templates ändern | — |
 | `keycloak` | Identity Provider (OIDC mit PKCE), Rollen aus Gruppen | `127.0.0.1:8080` |
 | `db` | PostgreSQL, im internen Netz ohne Route nach außen | nur `web` |
 | `test`, `tools` | Testlauf, Lint, Lockfile (Profil `tools`) | — |
@@ -67,9 +69,18 @@ vorhandenen Realm beim Import nicht überschreibt.
 │   └── templates/
 ├── tests/                  pytest; jeder Test trägt seine Anforderung: @pytest.mark.req("M-05")
 ├── docker/                 Dockerfile, Keycloak-Realm
-├── docs/                   Spezifikation
+├── docs/                   Spezifikation, Screenshots
 └── Makefile, compose.yaml, pyproject.toml, uv.lock, .env.example
 ```
+
+## Ansicht
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+Dunkles Thema nach dem Stil von dependencytrack.org: Kennzahlen, Risikomatrix 5 × 5, Badges je
+Risikostufe (ab 20 kritisch, 12–19 hoch, 6–11 mittel, 1–5 niedrig). Ein Risiko mit fehlgeschlagener
+Notifikation bleibt rot markiert, mit Symbol und Text, bis eine erneute Zustellung gelingt; die
+Administration stößt sie unter **Eskalationen** an.
 
 ## Ablauf ausprobieren
 
@@ -92,7 +103,7 @@ vorhandenen Realm beim Import nicht überschreibt.
 - **M-06:** Das Audit-Log ist per Trigger nur anfügbar, `UPDATE` und `DELETE` scheitern in der
   Datenbank.
 - **M-02:** Abhängigkeiten sind exakt gepinnt (`uv.lock` mit Hashes), Basis-Images per Digest,
-  htmx liegt lokal mit Prüfsumme (`src/static/vendor/README.md`).
+  htmx und die Schriften liegen lokal mit Prüfsumme (`src/static/THIRD_PARTY.md`).
 - **M-04:** Eine Einordnung als IT-Risiko und eine Herabstufung unter 20 sind Anträge. Wirksam
   werden sie erst, wenn ein anderer Risk Manager zustimmt (auch als Prüfregel in der Datenbank).
 - **M-09:** Eskalationen enthalten nur die Kennung und einen Link, der eine Anmeldung verlangt.

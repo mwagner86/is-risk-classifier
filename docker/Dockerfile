@@ -5,6 +5,11 @@ ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecc
 
 FROM ${UV_IMAGE} AS uv
 
+# Tailwind standalone CLI, no Node.js; pinned by version and checksum (M-02)
+FROM scratch AS tailwind
+ADD --checksum=sha256:dc61b3ac6b8c9ca874c0cc4c57b2409791a64c5540404ca5f5367360babc313a --chmod=755 \
+    https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.3/tailwindcss-linux-x64 /tailwindcss
+
 FROM ${PYTHON_IMAGE} AS base
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -29,6 +34,7 @@ FROM deps AS dev
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-install-project
 ENV UV_CACHE_DIR=/tmp/uv-cache
+COPY --from=tailwind /tailwindcss /usr/local/bin/tailwindcss
 COPY --chown=app:app . .
 USER app
 EXPOSE 8000

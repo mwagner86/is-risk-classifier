@@ -1,0 +1,12 @@
+<div class="overflow-x-auto">
+  <table class="table">
+    <thead><tr><th scope="col">Risiko</th><th scope="col">Kategorie</th><th scope="col">Risikowert</th><th scope="col">Status</th><th scope="col">Erfasst</th></tr></thead>
+    <tbody>
+      {% for risk in risks %}
+        {% include "risks/_risk_row.html" %}
+      {% empty %}
+        <tr><td colspan="5" class="text-muted">{{ empty|default:"Keine Risiken." }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

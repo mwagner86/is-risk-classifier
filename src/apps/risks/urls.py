@@ -3,6 +3,13 @@ from django.urls import path
 from apps.risks import views
 
 urlpatterns = [
+    path("", views.dashboard, name="dashboard"),
+    path("eskalationen/", views.escalation_list, name="escalation_list"),
+    path(
+        "eskalationen/<uuid:pk>/erneut-senden/",
+        views.escalation_resend,
+        name="escalation_resend",
+    ),
     path("risiken/", views.risk_list, name="risk_list"),
     path("risiken/neu/", views.risk_create, name="risk_create"),
     path(

@@ -1,59 +1,96 @@
 {% extends "base.html" %}
+{% load risk_tags ui %}
 {% block title %}{{ risk.title }}{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% url 'risk_list' as risks %}{% include "_crumb.html" with url=home label="Dashboard" %}{% include "_crumb.html" with url=risks label="Risiken" %}<li aria-current="page" class="text-text">{{ risk.title }}</li>{% endblock %}
 {% block content %}
-  <h1>{{ risk.title }}</h1>
+  <div class="mb-5 flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h1>{{ risk.title }}</h1>
+      <p class="mono text-muted">{{ risk.pk }}</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="badge badge-status">{{ risk.get_status_display }}</span>
+      {% level_badge assessment.score %}
+    </div>
+  </div>
+
   {% if notification_failed %}
-    <p class="flag-failed" role="alert">⚠ Notifikation fehlgeschlagen</p>
+    <div class="card risk-failed mb-5" role="alert">
+      <span class="flag-failed">{% icon "alert" label="Warnung" %}Notifikation fehlgeschlagen</span>
+      <p class="mt-1 text-sm">Das Incident-Response-Team wurde nicht erreicht. Die Markierung bleibt, bis eine erneute Zustellung gelingt.</p>
+    </div>
   {% endif %}
-  <dl>
-    <dt>Kennung</dt><dd><code>{{ risk.pk }}</code></dd>
-    <dt>Status</dt><dd>{{ risk.get_status_display }}</dd>
-    <dt>Kategorie</dt><dd>{{ assessment.get_category_display|default:"–" }}{% if pending_approval %} (Freigabe offen){% endif %}</dd>
-    <dt>Beschreibung</dt><dd>{{ risk.description|linebreaksbr }}</dd>
-    <dt>Schutzziele</dt>
-    <dd>
-      {% if assessment.cia.confidentiality %}Vertraulichkeit {% endif %}
-      {% if assessment.cia.integrity %}Integrität {% endif %}
-      {% if assessment.cia.availability %}Verfügbarkeit{% endif %}
-    </dd>
-    <dt>Ursprung</dt><dd>{{ assessment.get_origin_display|default:"–" }}</dd>
-    <dt>Betroffene Assets</dt>
-    <dd>{% for asset in assessment.assets.all %}{{ asset }}{% if not forloop.last %}, {% endif %}{% empty %}–{% endfor %}</dd>
-    <dt>Eintrittswahrscheinlichkeit × Schadensausmaß</dt>
-    <dd>{% if assessment.score %}{{ assessment.probability }} × {{ assessment.impact }} = <strong>{{ assessment.score }}</strong>{% else %}noch nicht bewertet{% endif %}</dd>
-    <dt>Erfasst</dt><dd>{{ risk.created_at|date:"d.m.Y H:i" }} von {{ risk.reporter }}</dd>
-    {% if risk.predecessor %}<dt>Neubewertung von</dt><dd><a href="{% url 'risk_detail' risk.predecessor.pk %}">{{ risk.predecessor.pk }}</a></dd>{% endif %}
-    {% if risk.incident_response %}<dt>Incident Response</dt><dd>{{ risk.incident_response|linebreaksbr }}</dd>{% endif %}
-  </dl>
 
-  <h2>Aktionen</h2>
-  <p>
-    {% if can_edit_draft %}<a href="{% url 'risk_edit' risk.pk %}">Entwurf bearbeiten und einreichen</a>{% endif %}
-    {% if can_assess %}
-      <a href="{% url 'risk_score' risk.pk %}">Bewerten (P, I)</a>
-      <a href="{% url 'risk_reclassify' risk.pk %}">Klassifizierung ändern</a>
-    {% endif %}
-    {% if can_document_ir %}<a href="{% url 'risk_incident_response' risk.pk %}">Incident Response dokumentieren</a>{% endif %}
-  </p>
-  {% for target in transitions %}
-    <form method="post" action="{% url 'risk_change_status' risk.pk %}" style="display:inline">
-      {% csrf_token %}
-      <input type="hidden" name="target" value="{{ target.value }}">
-      {% if target.value == "OBSOLETE" and risk.status == "VALIDATED" %}
-        <label><input type="checkbox" name="successor"> Neubewertung anlegen</label>
+  <div class="grid gap-6 lg:grid-cols-[1fr_20rem]">
+    <section class="card" aria-labelledby="facts">
+      <h2 id="facts" class="card-title">Bewertung</h2>
+      <dl class="grid gap-x-6 gap-y-3 sm:grid-cols-[12rem_1fr]">
+        <dt class="text-muted">Kategorie</dt>
+        <dd>{{ assessment.get_category_display|default:"–" }}{% if pending_approval %} <span class="badge badge-status">Freigabe offen</span>{% endif %}</dd>
+        <dt class="text-muted">Beschreibung</dt><dd>{{ risk.description|linebreaksbr }}</dd>
+        <dt class="text-muted">Schutzziele</dt>
+        <dd class="flex flex-wrap gap-2">
+          {% if assessment.cia.confidentiality %}<span class="badge badge-status">Vertraulichkeit</span>{% endif %}
+          {% if assessment.cia.integrity %}<span class="badge badge-status">Integrität</span>{% endif %}
+          {% if assessment.cia.availability %}<span class="badge badge-status">Verfügbarkeit</span>{% endif %}
+        </dd>
+        <dt class="text-muted">Ursprung</dt><dd>{{ assessment.get_origin_display|default:"–" }}</dd>
+        <dt class="text-muted">Betroffene Assets</dt>
+        <dd>{% for asset in assessment.assets.all %}<span class="mono">{{ asset.cmdb_key }}</span> {{ asset.name }}{% if not forloop.last %}<br>{% endif %}{% empty %}–{% endfor %}</dd>
+        <dt class="text-muted">P × I</dt>
+        <dd>{% if assessment.score %}{{ assessment.probability }} × {{ assessment.impact }} = <strong>{{ assessment.score }}</strong>{% else %}noch nicht bewertet{% endif %}</dd>
+        <dt class="text-muted">Erfasst</dt><dd>{{ risk.created_at|date:"d.m.Y H:i" }} von {{ risk.reporter }}</dd>
+        {% if risk.predecessor %}<dt class="text-muted">Neubewertung von</dt><dd><a href="{% url 'risk_detail' risk.predecessor.pk %}" class="mono">{{ risk.predecessor.pk }}</a></dd>{% endif %}
+        {% if risk.incident_response %}<dt class="text-muted">Incident Response</dt><dd>{{ risk.incident_response|linebreaksbr }}</dd>{% endif %}
+      </dl>
+    </section>
+
+    <aside class="space-y-6">
+      <section class="card" aria-labelledby="actions">
+        <h2 id="actions" class="card-title">Aktionen</h2>
+        <div class="flex flex-col gap-2">
+          {% if can_edit_draft %}<a href="{% url 'risk_edit' risk.pk %}" class="btn btn-primary">Entwurf bearbeiten und einreichen</a>{% endif %}
+          {% if can_assess %}
+            <a href="{% url 'risk_score' risk.pk %}" class="btn btn-primary">Bewerten (P, I)</a>
+            <a href="{% url 'risk_reclassify' risk.pk %}" class="btn">Klassifizierung ändern</a>
+          {% endif %}
+          {% if can_document_ir %}<a href="{% url 'risk_incident_response' risk.pk %}" class="btn btn-primary">Incident Response dokumentieren</a>{% endif %}
+          {% for target in transitions %}
+            <form method="post" action="{% url 'risk_change_status' risk.pk %}" class="flex flex-col gap-2">
+              {% csrf_token %}
+              <input type="hidden" name="target" value="{{ target.value }}">
+              {% if target.value == "OBSOLETE" and risk.status == "VALIDATED" %}
+                <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="successor" class="size-4 accent-primary"> Neubewertung anlegen</label>
+              {% endif %}
+              <button type="submit" class="btn {% if target.value == 'OBSOLETE' %}btn-danger{% endif %}">
+                {% if target.value == "VALIDATED" %}Bewertung abschließen{% elif target.value == "CLOSED" %}Schließen{% elif target.value == "OBSOLETE" %}{% if risk.status == "CLOSED" %}Neu bewerten (obsolet setzen){% else %}Obsolet setzen{% endif %}{% else %}{{ target.label }}{% endif %}
+              </button>
+            </form>
+          {% empty %}
+            {% if not can_edit_draft and not can_assess and not can_document_ir %}<p class="text-sm text-muted">Keine Aktionen für Ihre Rolle.</p>{% endif %}
+          {% endfor %}
+        </div>
+      </section>
+
+      {% if approvals %}
+        <section class="card" aria-labelledby="approvals">
+          <h2 id="approvals" class="card-title">Freigabeanträge</h2>
+          <ul class="space-y-2 text-sm">{% for a in approvals %}<li>{{ a.get_kind_display }}: <strong>{{ a.get_state_display }}</strong><br><span class="text-muted">beantragt von {{ a.requested_by }}{% if a.decided_by %}, entschieden von {{ a.decided_by }}{% endif %}</span></li>{% endfor %}</ul>
+        </section>
       {% endif %}
-      <button type="submit">
-        {% if target.value == "VALIDATED" %}Bewertung abschließen{% elif target.value == "CLOSED" %}Schließen{% elif target.value == "OBSOLETE" %}{% if risk.status == "CLOSED" %}Neu bewerten (obsolet setzen){% else %}Obsolet setzen{% endif %}{% else %}{{ target.label }}{% endif %}
-      </button>
-    </form>
-  {% endfor %}
 
-  {% if approvals %}
-    <h2>Freigabeanträge</h2>
-    <ul>{% for a in approvals %}<li>{{ a.get_kind_display }} – {{ a.get_state_display }} (beantragt von {{ a.requested_by }}{% if a.decided_by %}, entschieden von {{ a.decided_by }}{% endif %})</li>{% endfor %}</ul>
-  {% endif %}
-  {% if notifications %}
-    <h2>Notifikationen</h2>
-    <ul>{% for n in notifications %}<li{% if n.status == "FAILED" %} class="flag-failed"{% endif %}>{{ n.get_kind_display }} per {{ n.get_channel_display }} an {{ n.recipient }}: {{ n.get_status_display }}{% if n.last_error %} ({{ n.last_error }}){% endif %}</li>{% endfor %}</ul>
-  {% endif %}
+      {% if notifications %}
+        <section class="card" aria-labelledby="notifications">
+          <h2 id="notifications" class="card-title">Notifikationen</h2>
+          <ul class="space-y-2 text-sm">
+            {% for n in notifications %}
+              <li>{{ n.get_kind_display }} per {{ n.get_channel_display }}<br>
+                <span class="{% if n.status == 'FAILED' %}text-danger-strong font-semibold{% else %}text-muted{% endif %}">{{ n.get_status_display }}{% if n.last_error %} ({{ n.last_error }}){% endif %}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+    </aside>
+  </div>
 {% endblock %}

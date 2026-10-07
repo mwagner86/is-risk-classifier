@@ -1,16 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Risiko bewerten{% endblock %}
+{% block breadcrumb %}{% url 'risk_list' as risks %}{% url 'risk_detail' risk.pk as detail %}{% include "_crumb.html" with url=risks label="Risiken" %}{% include "_crumb.html" with url=detail label=risk.title %}<li aria-current="page" class="text-text">Bewertung</li>{% endblock %}
 {% block content %}
-  <h1>Risiko bewerten: {{ risk.title }}</h1>
-  <p>Kategorie: {{ risk.assessment.get_category_display }} · Status: {{ risk.get_status_display }}</p>
-  <form method="post"
-        hx-post="{% url 'score_preview' %}" hx-trigger="input delay:200ms"
-        hx-target="#score-preview" hx-swap="outerHTML">
+  <h1 class="mb-2">Risiko bewerten</h1>
+  <p class="mb-5 text-sm text-muted">{{ risk.assessment.get_category_display }} · {{ risk.get_status_display }} · Skala 1 bis 5, Risikowert R = P × I</p>
+  <form method="post" class="card max-w-xl">
     {% csrf_token %}
     {{ form.non_field_errors }}
-    {% include "risks/_field.html" with field=form.probability %}
-    {% include "risks/_field.html" with field=form.impact %}
+    {# Trigger on a container, not on the form: htmx validates a triggering form first and #}
+    {# would never ask for "Nicht berechenbar" while a value is out of range (AK-02.3) #}
+    <div class="grid gap-4 sm:grid-cols-2"
+         hx-post="{% url 'score_preview' %}" hx-trigger="input delay:200ms" hx-include="closest form"
+         hx-target="#score-preview" hx-swap="outerHTML" hx-sync="this:replace">
+      {% include "risks/_field.html" with field=form.probability %}
+      {% include "risks/_field.html" with field=form.impact %}
+    </div>
     {% include "risks/_score_preview.html" %}
-    <p><button type="submit">Speichern</button> <a href="{% url 'risk_detail' risk.pk %}">Abbrechen</a></p>
+    <div class="flex gap-3"><button type="submit" class="btn btn-primary">Speichern</button><a href="{% url 'risk_detail' risk.pk %}" class="btn">Abbrechen</a></div>
   </form>
 {% endblock %}

@@ -4,9 +4,12 @@ import logging
 from typing import TYPE_CHECKING
 
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.db.models import Exists, OuterRef, QuerySet
 from django.utils import timezone
 
+from apps.accounts.models import Role, User
 from apps.audit.models import AuditAction
 from apps.audit.services import record
 from apps.notifications.gateway import (
@@ -111,3 +114,63 @@ def process_outbox(*, gateway: NotificationGateway | None = None, batch_size: in
                 notification.status = NotificationStatus.DELIVERED
             notification.save(update_fields=["attempts", "dispatched_at", "status", "last_error"])
     return len(pending)
+
+
+# --- failed deliveries (AK-03.3, decision 7) ------------------------------------------------
+
+
+def _same_target(status: NotificationStatus) -> QuerySet[Notification]:
+    """Notifications to the same recipient for the same purpose, newer than the outer row."""
+    return Notification.objects.filter(
+        risk=OuterRef("risk"),
+        kind=OuterRef("kind"),
+        channel=OuterRef("channel"),
+        recipient=OuterRef("recipient"),
+        status=status,
+        created_at__gt=OuterRef("created_at"),
+    )
+
+
+def unresolved_failures() -> QuerySet[Notification]:
+    """Failed notifications without a later successful delivery to the same recipient.
+
+    A risk stays flagged as long as it has one of these; the failed rows themselves and their
+    audit entries are never removed.
+    """
+    return Notification.objects.filter(status=NotificationStatus.FAILED).filter(
+        ~Exists(_same_target(NotificationStatus.DELIVERED))
+    )
+
+
+@transaction.atomic
+def resend_failed(risk: "Risk", actor: User) -> list[Notification]:
+    """Queue one new attempt per failed recipient (administration only)."""
+    if not actor.is_active or actor.role != Role.ADMIN:
+        raise PermissionDenied("Nur die Administration kann Notifikationen erneut senden.")
+    latest_failures = (
+        unresolved_failures()
+        .filter(risk=risk)
+        # Only the newest failure per recipient, and only if no attempt is already queued
+        .filter(~Exists(_same_target(NotificationStatus.FAILED)))
+        .filter(~Exists(_same_target(NotificationStatus.PENDING)))
+    )
+    copies = []
+    for failed in latest_failures:
+        copy = Notification.objects.create(
+            risk=risk,
+            kind=failed.kind,
+            channel=failed.channel,
+            recipient=failed.recipient,
+            subject=failed.subject,
+            body=failed.body,
+        )
+        record(
+            actor=actor,
+            action=AuditAction.NOTIFICATION_RESENT,
+            obj=copy,
+            risk=risk,
+            field="channel",
+            new=f"{copy.get_channel_display()} an {copy.recipient}",
+        )
+        copies.append(copy)
+    return copies

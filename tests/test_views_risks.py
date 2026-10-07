@@ -251,3 +251,35 @@ def test_m_04_approval_page_lists_only_requests_of_others(
     assert response.status_code == 302
     request.refresh_from_db()
     assert request.state == ApprovalState.APPROVED
+
+
+@pytest.mark.req("AK-01.1")
+def test_ak_01_1_preview_container_keeps_its_own_trigger(nutzer_client: Client) -> None:
+    """The swapped element must carry the htmx trigger itself; a trigger bound to the old
+    elements ("change from:#id_…") stops working after the first swap."""
+    form_page = nutzer_client.get("/risiken/neu/").content.decode()
+    preview = nutzer_client.post(
+        "/risiken/kategorie-vorschau/", {"integrity": "on"}, headers={"HX-Request": "true"}
+    ).content.decode()
+    for html in (form_page, preview):
+        container = re.search(r'<div id="classification"[^>]*>', html)
+        assert container
+        assert 'hx-trigger="change"' in container.group(0)
+        assert 'hx-swap="outerHTML"' in container.group(0)
+    assert "change from:" not in form_page
+
+
+@pytest.mark.req("AK-02.3")
+def test_ak_02_3_live_preview_is_not_triggered_by_the_form(
+    rm_client: Client, make_risk: MakeRisk
+) -> None:
+    """htmx validates a triggering <form> before the request and would drop the preview for an
+    out-of-range value; the trigger therefore sits on a container inside the form."""
+    risk = make_risk(RiskStatus.CATEGORIZED)
+    html = rm_client.get(f"/risiken/{risk.pk}/bewertung/").content.decode()
+    form_tag = re.search(r'<form method="post"[^>]*>', html)
+    assert form_tag
+    assert "hx-post" not in form_tag.group(0)
+    assert re.search(
+        r'<div[^>]*hx-post="/risiken/score-vorschau/"[^>]*hx-include="closest form"', html
+    )

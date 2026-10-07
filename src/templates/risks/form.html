@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% block title %}{% if risk %}Entwurf bearbeiten{% else %}Risiko erfassen{% endif %}{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% url 'risk_list' as risks %}{% include "_crumb.html" with url=home label="Dashboard" %}{% include "_crumb.html" with url=risks label="Risiken" %}<li aria-current="page" class="text-text">{% if risk %}Entwurf bearbeiten{% else %}Erfassen{% endif %}</li>{% endblock %}
 {% block content %}
-  <h1>{% if risk %}Entwurf bearbeiten{% else %}Risiko erfassen{% endif %}</h1>
-  <form method="post"
-        hx-post="{% url 'classification_preview' %}"
-        hx-trigger="change from:#id_confidentiality, change from:#id_integrity, change from:#id_availability, change from:#id_origin"
-        hx-target="#classification" hx-select="#classification" hx-swap="outerHTML">
+  <h1 class="mb-5">{% if risk %}Entwurf bearbeiten{% else %}Risiko erfassen{% endif %}</h1>
+  <form method="post" class="card max-w-3xl">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {% include "risks/_field.html" with field=form.title %}
     {% include "risks/_field.html" with field=form.description %}
     {% include "risks/_classification.html" %}
-    <button type="submit" name="action" value="submit">Speichern</button>
-    <button type="submit" name="action" value="draft" formnovalidate>Als Entwurf ablegen</button>
+    <div class="flex flex-wrap gap-3">
+      <button type="submit" name="action" value="submit" class="btn btn-primary">Speichern</button>
+      <button type="submit" name="action" value="draft" formnovalidate class="btn">Als Entwurf ablegen</button>
+    </div>
   </form>
 {% endblock %}

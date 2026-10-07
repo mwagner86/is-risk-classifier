@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Incident Response{% endblock %}
+{% block breadcrumb %}{% url 'risk_list' as risks %}{% url 'risk_detail' risk.pk as detail %}{% include "_crumb.html" with url=risks label="Risiken" %}{% include "_crumb.html" with url=detail label=risk.title %}<li aria-current="page" class="text-text">Incident Response</li>{% endblock %}
 {% block content %}
-  <h1>Incident Response dokumentieren: {{ risk.title }}</h1>
-  <form method="post">
+  <h1 class="mb-5">Incident Response dokumentieren</h1>
+  <form method="post" class="card max-w-3xl">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {% include "risks/_field.html" with field=form.incident_response %}
-    <button type="submit">Dokumentieren und validieren</button>
-    <a href="{% url 'risk_detail' risk.pk %}">Abbrechen</a>
+    <div class="flex gap-3"><button type="submit" class="btn btn-primary">Dokumentieren und validieren</button><a href="{% url 'risk_detail' risk.pk %}" class="btn">Abbrechen</a></div>
   </form>
 {% endblock %}

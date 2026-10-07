@@ -12,9 +12,12 @@ from django.views.decorators.http import require_POST
 from apps.accounts.models import Role, User
 from apps.core.access import allow_roles
 from apps.core.forms import focus_first_error
+from apps.notifications.services import resend_failed
 from apps.risks import services
+from apps.risks.dashboard import FLAG_ROLES, dashboard_data, only_failed, with_failure_flag
 from apps.risks.forms import ClassificationForm, IncidentResponseForm, RiskForm, ScoreForm
-from apps.risks.models import ApprovalState, Risk, RiskStatus
+from apps.risks.levels import RiskLevel, score_filter
+from apps.risks.models import ApprovalState, Risk, RiskCategory, RiskStatus
 from apps.risks.state_machine import (
     TRANSITIONS,
     TransitionError,
@@ -65,8 +68,65 @@ def _available_transitions(risk: Risk, user: User) -> list[RiskStatus]:
 
 @allow_roles(*ALL_ROLES)
 def risk_list(request: HttpRequest) -> HttpResponse:
-    risks = services.visible_risks(_user(request)).order_by("-created_at")
-    return render(request, "risks/list.html", {"risks": risks})
+    risks = with_failure_flag(services.visible_risks(_user(request))).order_by("-created_at")
+    params = request.GET
+    filters = {
+        "status": params.get("status", ""),
+        "category": params.get("category", ""),
+        "level": params.get("level", ""),
+        "p": params.get("p", ""),
+        "i": params.get("i", ""),
+    }
+    if filters["status"] in RiskStatus.values:
+        risks = risks.filter(status=filters["status"])
+    if filters["category"] in RiskCategory.values:
+        risks = risks.filter(assessment__category=filters["category"])
+    if filters["level"] in RiskLevel.values:
+        risks = risks.filter(score_filter(RiskLevel(filters["level"])))
+    for key, field in (("p", "assessment__probability"), ("i", "assessment__impact")):
+        if filters[key] in {"1", "2", "3", "4", "5"}:
+            risks = risks.filter(**{field: int(filters[key])})
+    context = {
+        "risks": risks,
+        "filters": filters,
+        "statuses": RiskStatus.choices,
+        "categories": RiskCategory.choices,
+        "levels": RiskLevel.choices,
+        "show_failures": _user(request).role in FLAG_ROLES,
+    }
+    return render(request, "risks/list.html", context)
+
+
+@allow_roles(*ALL_ROLES)
+def dashboard(request: HttpRequest) -> HttpResponse:
+    return render(request, "risks/dashboard.html", {"data": dashboard_data(_user(request))})
+
+
+@allow_roles(*FLAG_ROLES)
+def escalation_list(request: HttpRequest) -> HttpResponse:
+    risks = with_failure_flag(services.visible_risks(_user(request)))
+    context = {
+        "failed_risks": only_failed(risks).order_by("-created_at"),
+        "escalated_risks": risks.filter(status=RiskStatus.ESCALATED).order_by("-created_at"),
+        "can_resend": _user(request).role == Role.ADMIN,
+    }
+    return render(request, "risks/escalations.html", context)
+
+
+@allow_roles(Role.ADMIN)
+@require_POST
+def escalation_resend(request: HttpRequest, pk: UUID) -> HttpResponse:
+    risk = _risk(request, pk)
+    copies = resend_failed(risk, _user(request))
+    if copies:
+        messages.success(
+            request, f"{len(copies)} Notifikation(en) erneut in die Warteschlange gestellt."
+        )
+    else:
+        messages.info(
+            request, "Keine fehlgeschlagene Notifikation offen oder bereits in der Warteschlange."
+        )
+    return redirect("escalation_list")
 
 
 @allow_roles(*ALL_ROLES)

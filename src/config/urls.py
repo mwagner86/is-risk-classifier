@@ -9,10 +9,10 @@ from apps.core import views
 from apps.core.access import public
 
 urlpatterns = [
-    path("", views.dashboard, name="dashboard"),
     path("healthz", views.healthz, name="healthz"),
     path("anmeldung-abgelehnt/", views.login_failed, name="login_failed"),
     path("", include("apps.risks.urls")),
+    path("", include("apps.cmdb.urls")),
     # OIDC endpoints have to be reachable without a session
     path(
         "oidc/authenticate/",

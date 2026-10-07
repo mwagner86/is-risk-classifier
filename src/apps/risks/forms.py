@@ -5,6 +5,7 @@ from typing import Any
 from django import forms
 
 from apps.cmdb.models import Asset
+from apps.core.forms import style_widgets
 from apps.risks.classification import categorize
 from apps.risks.models import Origin, RiskCategory
 
@@ -24,6 +25,7 @@ class ClassificationForm(forms.Form):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
+        style_widgets(self)
         # Lock or unlock the assets field for the category the current input yields (AK-01.1)
         assets = self.fields["assets"]
         if self.computed_category == RiskCategory.IS_RISIKO:
@@ -99,6 +101,10 @@ class ScoreForm(forms.Form):
         "Schadensausmaß", "Zulässiger Wertebereich für das Schadensausmaß ist 1 bis 5"
     )
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        style_widgets(self)
+
     def preview(self) -> int | None:
         """R = P x I for the live preview, None while not computable."""
         if not self.is_bound or not self.is_valid():
@@ -110,3 +116,7 @@ class IncidentResponseForm(forms.Form):
     incident_response = forms.CharField(
         label="Dokumentierte Incident Response", widget=forms.Textarea, required=False
     )
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        style_widgets(self)

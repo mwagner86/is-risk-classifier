@@ -1,31 +1,31 @@
 {% extends "base.html" %}
 {% block title %}Freigaben{% endblock %}
+{% block breadcrumb %}{% url 'dashboard' as home %}{% include "_crumb.html" with url=home label="Dashboard" %}<li aria-current="page" class="text-text">Freigaben</li>{% endblock %}
 {% block content %}
-  <h1>Offene Freigaben</h1>
-  <p>Angezeigt werden Anträge anderer. Eigene Anträge gibt ein anderer Risk Manager frei.</p>
-  <table>
-    <thead><tr><th>Risiko</th><th>Antrag</th><th>Vorschlag</th><th>Beantragt von</th><th>Entscheidung</th></tr></thead>
-    <tbody>
-      {% for approval in approvals %}
-        <tr>
-          <td><a href="{% url 'risk_detail' approval.risk.pk %}">{{ approval.risk.title }}</a></td>
-          <td>{{ approval.get_kind_display }}</td>
-          <td>
-            {% if approval.kind == "CATEGORY_TO_IT" %}{{ approval.get_proposed_category_display }}
-            {% else %}P {{ approval.proposed_probability }} × I {{ approval.proposed_impact }}{% endif %}
-          </td>
-          <td>{{ approval.requested_by }}</td>
-          <td>
-            <form method="post" action="{% url 'approval_decide' approval.pk %}">
-              {% csrf_token %}
-              <button type="submit" name="decision" value="approve">Freigeben</button>
-              <button type="submit" name="decision" value="reject">Ablehnen</button>
-            </form>
-          </td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="5">Keine offenen Freigaben.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <h1 class="mb-2">Offene Freigaben</h1>
+  <p class="mb-5 text-sm text-muted">Angezeigt werden Anträge anderer. Eigene Anträge gibt ein anderer Risk Manager frei (M-04).</p>
+  <section class="card overflow-x-auto">
+    <table class="table">
+      <thead><tr><th scope="col">Risiko</th><th scope="col">Antrag</th><th scope="col">Vorschlag</th><th scope="col">Beantragt von</th><th scope="col">Entscheidung</th></tr></thead>
+      <tbody>
+        {% for approval in approvals %}
+          <tr>
+            <td><a href="{% url 'risk_detail' approval.risk.pk %}" class="font-medium">{{ approval.risk.title }}</a></td>
+            <td>{{ approval.get_kind_display }}</td>
+            <td>{% if approval.kind == "CATEGORY_TO_IT" %}{{ approval.get_proposed_category_display }}{% else %}P {{ approval.proposed_probability }} × I {{ approval.proposed_impact }}{% endif %}</td>
+            <td>{{ approval.requested_by }}</td>
+            <td>
+              <form method="post" action="{% url 'approval_decide' approval.pk %}" class="flex gap-2">
+                {% csrf_token %}
+                <button type="submit" name="decision" value="approve" class="btn btn-primary">Freigeben</button>
+                <button type="submit" name="decision" value="reject" class="btn">Ablehnen</button>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-muted">Keine offenen Freigaben.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
 {% endblock %}

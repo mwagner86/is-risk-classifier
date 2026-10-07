@@ -1,1 +1,1 @@
-<output id="score-preview" aria-live="polite">Risikowert: {% if preview is not None %}{{ preview }}{% else %}Nicht berechenbar{% endif %}</output>
+{% load risk_tags %}<output id="score-preview" aria-live="polite" class="mb-4 flex items-center gap-2 text-sm">Risikowert: {% if preview is not None %}{% level_badge preview %}{% else %}<strong>Nicht berechenbar</strong>{% endif %}</output>

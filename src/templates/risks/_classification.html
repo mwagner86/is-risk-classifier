@@ -1,22 +1,27 @@
 {# Swapped by HTMX whenever protection goals or origin change (AK-01.1, AK-01.2) #}
-<div id="classification">
-  <fieldset>
-    <legend>Betroffene Schutzziele</legend>
-    {% with f=form.confidentiality %}<label>{{ f }} {{ f.label }}</label>{% endwith %}
-    {% with f=form.integrity %}<label>{{ f }} {{ f.label }}</label>{% endwith %}
-    {% with f=form.availability %}<label>{{ f }} {{ f.label }}</label>{% endwith %}
+{% url 'classification_preview' as preview_url %}
+<div id="classification" hx-post="{{ preview_url }}" hx-trigger="change" hx-include="closest form"
+     hx-target="this" hx-swap="outerHTML" hx-sync="this:replace">
+  <fieldset class="mb-4">
+    <legend class="field-label">Betroffene Schutzziele</legend>
+    <div class="flex flex-wrap gap-4">
+      {% with f=form.confidentiality %}<label class="flex items-center gap-2">{{ f }} {{ f.label }}</label>{% endwith %}
+      {% with f=form.integrity %}<label class="flex items-center gap-2">{{ f }} {{ f.label }}</label>{% endwith %}
+      {% with f=form.availability %}<label class="flex items-center gap-2">{{ f }} {{ f.label }}</label>{% endwith %}
+    </div>
     {{ form.confidentiality.errors }}
   </fieldset>
   {% include "risks/_field.html" with field=form.origin %}
-  <p aria-live="polite">
+  <p class="mb-4 rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm" aria-live="polite">
     <strong>Einstufung:</strong>
     {% if form.computed_category == "IS_RISIKO" %}
-      IS-Risiko
+      <span class="badge badge-critical">IS-Risiko</span>
     {% elif form.computed_category == "IT_RISIKO" %}
-      Allgemeines IT-Risiko – wird erst nach Freigabe durch einen Risk Manager wirksam, bis dahin gilt
-      es als IS-Risiko. Danach Weitergabe an das IT-Operations-Management.
+      <span class="badge badge-low">Allgemeines IT-Risiko</span>
+      – wird erst nach Freigabe durch einen Risk Manager wirksam, bis dahin gilt es als IS-Risiko.
+      Danach Weitergabe an das IT-Operations-Management.
     {% else %}
-      noch offen – Schutzziel und Ursprung angeben
+      <span class="text-muted">noch offen – Schutzziel und Ursprung angeben</span>
     {% endif %}
   </p>
   {% include "risks/_field.html" with field=form.assets %}

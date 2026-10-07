@@ -64,6 +64,21 @@ services:
       retries: 30
       start_period: 30s
 
+  # Tailwind in watch mode: rebuilds src/static/css/build/app.css when templates change
+  css:
+    <<: *app
+    command:
+      - tailwindcss
+      - --input=src/static/css/app.css
+      - --output=src/static/css/build/app.css
+      - --watch=always
+    network_mode: none
+    healthcheck:
+      test: ["CMD-SHELL", "test -s src/static/css/build/app.css"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+
   web:
     <<: *app
     command: >-
@@ -78,6 +93,8 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_started
+      css:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
       interval: 10s

@@ -2,7 +2,7 @@ COMPOSE := docker compose
 RUN     := $(COMPOSE) run --rm
 
 .DEFAULT_GOAL := help
-.PHONY: help dev down logs reset test lint fmt migrations lock shell import-assets
+.PHONY: help dev down logs reset test lint fmt migrations lock shell import-assets css
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -44,6 +44,9 @@ fmt: .env ## Apply ruff formatting and safe fixes
 
 migrations: .env ## Create migrations after model changes
 	$(RUN) test python src/manage.py makemigrations
+
+css: .env ## Build the stylesheet once, minified (the css service rebuilds it during make dev)
+	$(RUN) --build --no-deps tools tailwindcss --input=src/static/css/app.css --output=src/static/css/build/app.css --minify
 
 lock: .env ## Re-resolve uv.lock after editing pyproject.toml
 	$(RUN) tools uv lock
