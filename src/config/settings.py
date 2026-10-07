@@ -15,6 +15,10 @@ def env(name: str, default: str | None = None) -> str:
     return value
 
 
+def env_list(name: str) -> list[str]:
+    return [item.strip() for item in env(name, "").split(",") if item.strip()]
+
+
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env("DJANGO_DEBUG", "false").lower() == "true"
 ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -113,6 +117,18 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+# Links in notifications point here; they lead to the risk only after login (M-09)
+APP_BASE_URL = env("APP_BASE_URL", "http://localhost:8000")
+
+# Escalation (US-03) and hand-over to IT operations (AK-01.2)
+IR_TEAM_EMAILS = env_list("IR_TEAM_EMAILS")
+IR_TEAM_PHONES = env_list("IR_TEAM_PHONES")
+IT_OPS_EMAIL = env("IT_OPS_EMAIL", "")
+NOTIFICATION_GATEWAY = env("NOTIFICATION_GATEWAY", "apps.notifications.gateway.MockGateway")
+# Mock only: ok, timeout or 5xx — forces the gateway failure of AK-03.3
+NOTIFY_MOCK_MODE = env("NOTIFY_MOCK_MODE", "ok")
 
 LOGGING = {
     "version": 1,

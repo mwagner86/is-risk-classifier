@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from mozilla_django_oidc.views import (
     OIDCAuthenticationCallbackView,
     OIDCAuthenticationRequestView,
@@ -12,6 +12,7 @@ urlpatterns = [
     path("", views.dashboard, name="dashboard"),
     path("healthz", views.healthz, name="healthz"),
     path("anmeldung-abgelehnt/", views.login_failed, name="login_failed"),
+    path("", include("apps.risks.urls")),
     # OIDC endpoints have to be reachable without a session
     path(
         "oidc/authenticate/",

@@ -1,21 +1,45 @@
-<!doctype html>
+{% load static %}<!doctype html>
 <html lang="de">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}IS-Risk Classifier{% endblock %}</title>
+  <script src="{% static 'vendor/htmx-2.0.11.min.js' %}" defer></script>
+  <style>
+    /* Minimal styles until the design iteration */
+    body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 70rem; padding: 0 1rem; }
+    nav a { margin-right: 1rem; }
+    .errorlist { color: #b00020; margin: .25rem 0; padding-left: 1rem; }
+    [aria-invalid="true"] { outline: 2px solid #b00020; }
+    .flag-failed { color: #b00020; font-weight: bold; }
+    .messages li.error, .messages li.warning { color: #8a4b00; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid #ccc; padding: .3rem .5rem; text-align: left; vertical-align: top; }
+    fieldset { margin: .75rem 0; }
+    .field { margin: .5rem 0; }
+    .helptext { color: #555; font-size: .9em; display: block; }
+  </style>
 </head>
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   <header>
     <strong>IS-Risk Classifier</strong>
     {% if user.is_authenticated %}
-      <span>{{ user.get_full_name|default:user.username }} ({{ user.get_role_display }})</span>
-      <form action="{% url 'oidc_logout' %}" method="post" style="display:inline">
-        {% csrf_token %}
-        <button type="submit">Abmelden</button>
-      </form>
+      <nav>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'risk_list' %}">Risiken</a>
+        {% if user.role == "NUTZER" or user.role == "RISK_MANAGER" %}<a href="{% url 'risk_create' %}">Risiko erfassen</a>{% endif %}
+        {% if user.role == "RISK_MANAGER" %}<a href="{% url 'approval_list' %}">Freigaben</a>{% endif %}
+        <span>{{ user.get_full_name|default:user.username }} ({{ user.get_role_display }})</span>
+        <form action="{% url 'oidc_logout' %}" method="post" style="display:inline">
+          {% csrf_token %}
+          <button type="submit">Abmelden</button>
+        </form>
+      </nav>
     {% endif %}
   </header>
+  {% if messages %}
+    <ul class="messages">{% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}</ul>
+  {% endif %}
   <main>{% block content %}{% endblock %}</main>
 </body>
 </html>

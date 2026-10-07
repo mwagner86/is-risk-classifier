@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Freigaben{% endblock %}
+{% block content %}
+  <h1>Offene Freigaben</h1>
+  <p>Angezeigt werden Anträge anderer. Eigene Anträge gibt ein anderer Risk Manager frei.</p>
+  <table>
+    <thead><tr><th>Risiko</th><th>Antrag</th><th>Vorschlag</th><th>Beantragt von</th><th>Entscheidung</th></tr></thead>
+    <tbody>
+      {% for approval in approvals %}
+        <tr>
+          <td><a href="{% url 'risk_detail' approval.risk.pk %}">{{ approval.risk.title }}</a></td>
+          <td>{{ approval.get_kind_display }}</td>
+          <td>
+            {% if approval.kind == "CATEGORY_TO_IT" %}{{ approval.get_proposed_category_display }}
+            {% else %}P {{ approval.proposed_probability }} × I {{ approval.proposed_impact }}{% endif %}
+          </td>
+          <td>{{ approval.requested_by }}</td>
+          <td>
+            <form method="post" action="{% url 'approval_decide' approval.pk %}">
+              {% csrf_token %}
+              <button type="submit" name="decision" value="approve">Freigeben</button>
+              <button type="submit" name="decision" value="reject">Ablehnen</button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">Keine offenen Freigaben.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

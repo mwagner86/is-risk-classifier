@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Risiko bewerten{% endblock %}
+{% block content %}
+  <h1>Risiko bewerten: {{ risk.title }}</h1>
+  <p>Kategorie: {{ risk.assessment.get_category_display }} · Status: {{ risk.get_status_display }}</p>
+  <form method="post"
+        hx-post="{% url 'score_preview' %}" hx-trigger="input delay:200ms"
+        hx-target="#score-preview" hx-swap="outerHTML">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% include "risks/_field.html" with field=form.probability %}
+    {% include "risks/_field.html" with field=form.impact %}
+    {% include "risks/_score_preview.html" %}
+    <p><button type="submit">Speichern</button> <a href="{% url 'risk_detail' risk.pk %}">Abbrechen</a></p>
+  </form>
+{% endblock %}

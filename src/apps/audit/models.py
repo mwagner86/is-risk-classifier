@@ -11,6 +11,8 @@ class AuditAction(models.TextChoices):
     CREATED = "CREATED", "Angelegt"
     FIELD_CHANGED = "FIELD_CHANGED", "Wert geändert"
     STATUS_CHANGED = "STATUS_CHANGED", "Status geändert"
+    APPROVAL_REQUESTED = "APPROVAL_REQUESTED", "Freigabe beantragt"
+    APPROVAL_DECIDED = "APPROVAL_DECIDED", "Freigabe entschieden"
     NOTIFICATION_FAILED = "NOTIFICATION_FAILED", "Notifikation fehlgeschlagen"
     EXPORTED = "EXPORTED", "Exportiert"
 

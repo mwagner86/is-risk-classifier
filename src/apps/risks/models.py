@@ -149,6 +149,8 @@ class ApprovalState(models.TextChoices):
     PENDING = "PENDING", "Offen"
     APPROVED = "APPROVED", "Freigegeben"
     REJECTED = "REJECTED", "Abgelehnt"
+    # Superseded by a later change (e.g. reclassified as IS risk); no decision was taken
+    WITHDRAWN = "WITHDRAWN", "Zurückgezogen"
 
 
 class ApprovalRequest(BaseModel):
@@ -187,6 +189,11 @@ class ApprovalRequest(BaseModel):
             models.CheckConstraint(
                 condition=(
                     Q(state=ApprovalState.PENDING, decided_by__isnull=True, decided_at__isnull=True)
+                    | Q(
+                        state=ApprovalState.WITHDRAWN,
+                        decided_by__isnull=True,
+                        decided_at__isnull=False,
+                    )
                     | (
                         Q(state__in=[ApprovalState.APPROVED, ApprovalState.REJECTED])
                         & Q(decided_by__isnull=False, decided_at__isnull=False)

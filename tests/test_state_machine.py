@@ -326,3 +326,20 @@ def test_m_06_every_transition_is_audited(make_risk: MakeRisk, users: dict[str, 
         (None, S.SCORED, S.ESCALATED),
         (users["ciso"], S.ESCALATED, S.VALIDATED),
     ]
+
+
+@pytest.mark.req("M-04")
+def test_m_04_requested_it_categorisation_needs_no_assets(
+    make_risk: MakeRisk, users: dict[str, User]
+) -> None:
+    # Effective category IS (stricter), rule says IT: no assets required
+    risk = make_risk(S.DRAFT, category=RiskCategory.IS_RISIKO)
+    cia = risk.assessment.cia
+    cia.confidentiality, cia.availability = False, True
+    cia.save()
+    risk.assessment.origin = Origin.TECHNICAL_FAILURE
+    risk.assessment.save()
+    risk.assessment.assets.clear()
+
+    transition(risk, S.CATEGORIZED, users["nutzer"])
+    assert risk.status == S.CATEGORIZED

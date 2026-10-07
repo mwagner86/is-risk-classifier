@@ -31,7 +31,7 @@ zufälligen Geheimnissen an. Das Passwort der Demo-Konten steht dort unter `DEMO
 
 | Befehl | Wirkung |
 | --- | --- |
-| `make dev` | Stack bauen und starten (App, PostgreSQL, Keycloak) |
+| `make dev` | Stack bauen und starten (App, Worker, PostgreSQL, Keycloak) |
 | `make test` | Tests gegen PostgreSQL, Filter mit `make test ARGS="-k m_05"` |
 | `make lint` | ruff (Lint und Format) und mypy (strict) |
 | `make fmt` | Formatierung und sichere Korrekturen anwenden |
@@ -48,6 +48,7 @@ vorhandenen Realm beim Import nicht überschreibt.
 | Dienst | Aufgabe | Erreichbar |
 | --- | --- | --- |
 | `web` | Django-Anwendung | `127.0.0.1:8000` |
+| `worker` | verschickt Notifikationen aus der Warteschlange (bis Iteration 6 über einen Mock) | — |
 | `keycloak` | Identity Provider (OIDC mit PKCE), Rollen aus Gruppen | `127.0.0.1:8080` |
 | `db` | PostgreSQL, im internen Netz ohne Route nach außen | nur `web` |
 | `test`, `tools` | Testlauf, Lint, Lockfile (Profil `tools`) | — |
@@ -61,7 +62,7 @@ vorhandenen Realm beim Import nicht überschreibt.
 │   │   ├── accounts/       Benutzer, Rollen, Anmeldung über Keycloak
 │   │   ├── risks/          Risiko, Bewertung, CIA-Triade, Freigabeanträge, Zustandsmaschine
 │   │   ├── cmdb/           Assets, CSV-Import, Beispieldaten
-│   │   ├── notifications/  Notifikationen (Versand ab Iteration 2 als Mock)
+│   │   ├── notifications/  Notifikationen: Warteschlange, Gateway (Mock), Worker
 │   │   └── audit/          Audit-Log, nur anfügbar
 │   └── templates/
 ├── tests/                  pytest; jeder Test trägt seine Anforderung: @pytest.mark.req("M-05")
@@ -69,6 +70,17 @@ vorhandenen Realm beim Import nicht überschreibt.
 ├── docs/                   Spezifikation
 └── Makefile, compose.yaml, pyproject.toml, uv.lock, .env.example
 ```
+
+## Ablauf ausprobieren
+
+1. Als `melder` ein Risiko erfassen. Wer nur „Verfügbarkeit“ und „Technisches Versagen /
+   Verschleiß“ wählt, bekommt einen Antrag auf IT-Einordnung; bis zur Freigabe gilt das Risiko als
+   IS-Risiko (M-04).
+2. Als `rm.mueller` unter **Risiken** bewerten. Ein IS-Risiko ab 20 wird sofort eskaliert, der
+   Worker meldet den Versand in `make logs`.
+3. Als `rm.schmidt` (oder `rm.mueller` für Anträge anderer) unter **Freigaben** entscheiden.
+4. Gateway-Ausfall (AK-03.3) nachstellen: in `.env` `NOTIFY_MOCK_MODE=timeout` setzen,
+   `docker compose up -d worker`, dann ein IS-Risiko mit 4 × 5 bewerten.
 
 ## Sicherheitsrelevante Festlegungen
 
@@ -79,4 +91,8 @@ vorhandenen Realm beim Import nicht überschreibt.
   genau eine Rollengruppe in Keycloak wird abgewiesen.
 - **M-06:** Das Audit-Log ist per Trigger nur anfügbar, `UPDATE` und `DELETE` scheitern in der
   Datenbank.
-- **M-02:** Abhängigkeiten sind exakt gepinnt (`uv.lock` mit Hashes), Basis-Images per Digest.
+- **M-02:** Abhängigkeiten sind exakt gepinnt (`uv.lock` mit Hashes), Basis-Images per Digest,
+  htmx liegt lokal mit Prüfsumme (`src/static/vendor/README.md`).
+- **M-04:** Eine Einordnung als IT-Risiko und eine Herabstufung unter 20 sind Anträge. Wirksam
+  werden sie erst, wenn ein anderer Risk Manager zustimmt (auch als Prüfregel in der Datenbank).
+- **M-09:** Eskalationen enthalten nur die Kennung und einen Link, der eine Anmeldung verlangt.

@@ -7,7 +7,8 @@ Softwaretechnik (SS26), Projekt der Hand-ins in Entwicklung sicherer Softwaresys
 
 ## Stand
 
-- **Phase:** Iteration 1 fertig (07.10.2026), noch nicht committet. Nächste: Iteration 2.
+- **Phase:** Iteration 1 committet (`c487c30`), Iteration 2 fertig und getestet, noch nicht
+  committet (07.10.2026). Nächste: Iteration 3 (Dashboard und Design).
   INV-01 gibt es nicht (Max, 07.10.2026) — die Spezifikation kennt nur INV-02 und INV-03.
 - **Iterationen (freigegeben 07.10.2026):** 1 Gerüst, Container, Anmeldung, Modelle,
   Zustandsmaschine · 2 Kategorisierung, Risikowert, Eskalation (Benachrichtigung als Mock) ·
@@ -157,6 +158,17 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
   `src/apps/*/migrations/0002_database_guards.py`); dann in `PROTECTED_MODELS` (tests/test_invariants.py)
   aufnehmen.
 - **Statuswechsel** nur über `apps.risks.state_machine.transition()`; nie `risk.status = …` direkt.
+- **Fachlogik** nur in `apps/risks/services.py` (Erfassen, Klassifizieren, Bewerten, Freigeben,
+  Incident Response). Views rufen Services auf; Services prüfen Rolle (M-05), validieren
+  serverseitig und schreiben Änderungen an Schutzzielen, Ursprung, P, I ins Audit-Log (`_apply`).
+- **Kategorie:** die Regel steht allein in `apps/risks/classification.py` (`categorize`). Gespeichert
+  wird die *wirksame* Kategorie; eine berechnete IT-Einordnung bleibt bis zur Freigabe IS
+  (ApprovalRequest). Assets sind Pflicht, wenn die *berechnete* Kategorie IS ist.
+- **Benachrichtigungen:** Outbox in `notifications_notification`, Worker
+  `python src/manage.py run_outbox`. Gateway per `NOTIFICATION_GATEWAY` (bis Iteration 6
+  `MockGateway`, Ausfall per `NOTIFY_MOCK_MODE=timeout|5xx`). Inhalt nach M-09: Kennung und Link.
+- **Formulare:** „Speichern" prüft US-01 vollständig (AK-01.3 wörtlich), „Als Entwurf ablegen"
+  speichert ohne Prüfung. Fehlerfelder fokussiert `apps.core.forms.focus_first_error`.
 - **Enum-Werte** (`NUTZER`, `IS_RISIKO`, …) folgen den Literalen des UML-Modells; Bezeichner sonst
   englisch. Rollen = Keycloak-Gruppennamen.
 - **Tests** markieren: `@pytest.mark.req("AK-01.1")`, `"M-05"`, `"INV-03"`, `"SM"`
@@ -170,6 +182,10 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
     Demo-Passwort). Änderungen am Realm wirken erst nach `make reset`.
   - Pythons `http.cookiejar` schickt Cookies für `localhost` nicht zurück; für
     End-to-End-Proben des Logins curl nehmen.
-- **Noch nicht vorhanden** (laut Plan später): Worker und Outbox (2), Tailwind und Design (3),
+  - `manage.py shell -c` schreibt in Django 5.2 „N objects imported automatically" auf stdout;
+    für maschinenlesbare Ausgabe `shell --no-imports -c` nehmen.
+  - `select_for_update()` mit `select_related` auf eine umgekehrte 1:1-Beziehung scheitert in
+    PostgreSQL („nullable side of an outer join") → `select_for_update(of=("self",))`.
+- **Noch nicht vorhanden** (laut Plan später): Tailwind, Design und Neuzustellung (3),
   `pdf-renderer` (4), Laufzeit-Image mit gunicorn, CSP, getrennte DB-Rollen für Migration und
   Betrieb (5), `notify-gateway` und Mailpit (6).

@@ -4,10 +4,31 @@ import pytest
 
 from apps.accounts.models import Role, User
 from apps.cmdb.models import Asset
+from apps.notifications.gateway import MockGateway, OutgoingMessage
 from apps.risks.models import CIATriad, Origin, Risk, RiskAssessment, RiskCategory, RiskStatus
 
 MakeUser = Callable[..., User]
 MakeRisk = Callable[..., Risk]
+
+IR_EMAIL = "ir-team@example.org"
+IR_PHONE = "+49 30 1234567"
+IT_OPS_EMAIL = "it-ops@example.org"
+
+
+@pytest.fixture(autouse=True)
+def notification_settings(settings) -> None:
+    settings.IR_TEAM_EMAILS = [IR_EMAIL]
+    settings.IR_TEAM_PHONES = [IR_PHONE]
+    settings.IT_OPS_EMAIL = IT_OPS_EMAIL
+    settings.NOTIFY_MOCK_MODE = "ok"
+    settings.APP_BASE_URL = "http://testserver"
+
+
+@pytest.fixture(autouse=True)
+def sent_messages() -> list[OutgoingMessage]:
+    """Messages the mock gateway accepted during the test."""
+    MockGateway.sent.clear()
+    return MockGateway.sent
 
 
 @pytest.fixture

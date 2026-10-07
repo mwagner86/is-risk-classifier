@@ -1,0 +1,23 @@
+{# Swapped by HTMX whenever protection goals or origin change (AK-01.1, AK-01.2) #}
+<div id="classification">
+  <fieldset>
+    <legend>Betroffene Schutzziele</legend>
+    {% with f=form.confidentiality %}<label>{{ f }} {{ f.label }}</label>{% endwith %}
+    {% with f=form.integrity %}<label>{{ f }} {{ f.label }}</label>{% endwith %}
+    {% with f=form.availability %}<label>{{ f }} {{ f.label }}</label>{% endwith %}
+    {{ form.confidentiality.errors }}
+  </fieldset>
+  {% include "risks/_field.html" with field=form.origin %}
+  <p aria-live="polite">
+    <strong>Einstufung:</strong>
+    {% if form.computed_category == "IS_RISIKO" %}
+      IS-Risiko
+    {% elif form.computed_category == "IT_RISIKO" %}
+      Allgemeines IT-Risiko – wird erst nach Freigabe durch einen Risk Manager wirksam, bis dahin gilt
+      es als IS-Risiko. Danach Weitergabe an das IT-Operations-Management.
+    {% else %}
+      noch offen – Schutzziel und Ursprung angeben
+    {% endif %}
+  </p>
+  {% include "risks/_field.html" with field=form.assets %}
+</div>

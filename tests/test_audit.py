@@ -46,3 +46,37 @@ def test_m_06_bulk_update_is_refused_by_the_database(entry: AuditEntry) -> None:
 def test_m_06_raw_update_is_refused_by_the_database(entry: AuditEntry) -> None:
     with pytest.raises(IntegrityError), transaction.atomic(), connection.cursor() as cursor:
         cursor.execute("UPDATE audit_auditentry SET old_value = '1' WHERE id = %s", [entry.pk])
+
+
+def test_m_06_changes_to_goals_origin_p_and_i_are_audited(make_risk: MakeRisk, users) -> None:
+    from apps.risks.models import Origin
+    from apps.risks.services import reclassify, score
+
+    risk = make_risk(RiskStatus.CATEGORIZED)
+    asset = risk.assessment.assets.get()
+    reclassify(
+        risk,
+        users["rm"],
+        confidentiality=True,
+        integrity=True,
+        availability=False,
+        origin=Origin.HUMAN_ERROR,
+        assets=[asset],
+    )
+    score(risk, users["rm"], probability=2, impact=4)
+
+    changes = {
+        (e.field, e.old_value, e.new_value)
+        for e in AuditEntry.objects.filter(risk=risk, action=AuditAction.FIELD_CHANGED)
+    }
+    assert changes == {
+        ("integrity", "False", "True"),
+        ("origin", "DELIBERATE_ATTACK", "HUMAN_ERROR"),
+        ("probability", "", "2"),
+        ("impact", "", "4"),
+    }
+    assert set(
+        AuditEntry.objects.filter(risk=risk, action=AuditAction.FIELD_CHANGED).values_list(
+            "actor", flat=True
+        )
+    ) == {users["rm"].pk}

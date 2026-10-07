@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ risk.title }}{% endblock %}
+{% block content %}
+  <h1>{{ risk.title }}</h1>
+  {% if notification_failed %}
+    <p class="flag-failed" role="alert">⚠ Notifikation fehlgeschlagen</p>
+  {% endif %}
+  <dl>
+    <dt>Kennung</dt><dd><code>{{ risk.pk }}</code></dd>
+    <dt>Status</dt><dd>{{ risk.get_status_display }}</dd>
+    <dt>Kategorie</dt><dd>{{ assessment.get_category_display|default:"–" }}{% if pending_approval %} (Freigabe offen){% endif %}</dd>
+    <dt>Beschreibung</dt><dd>{{ risk.description|linebreaksbr }}</dd>
+    <dt>Schutzziele</dt>
+    <dd>
+      {% if assessment.cia.confidentiality %}Vertraulichkeit {% endif %}
+      {% if assessment.cia.integrity %}Integrität {% endif %}
+      {% if assessment.cia.availability %}Verfügbarkeit{% endif %}
+    </dd>
+    <dt>Ursprung</dt><dd>{{ assessment.get_origin_display|default:"–" }}</dd>
+    <dt>Betroffene Assets</dt>
+    <dd>{% for asset in assessment.assets.all %}{{ asset }}{% if not forloop.last %}, {% endif %}{% empty %}–{% endfor %}</dd>
+    <dt>Eintrittswahrscheinlichkeit × Schadensausmaß</dt>
+    <dd>{% if assessment.score %}{{ assessment.probability }} × {{ assessment.impact }} = <strong>{{ assessment.score }}</strong>{% else %}noch nicht bewertet{% endif %}</dd>
+    <dt>Erfasst</dt><dd>{{ risk.created_at|date:"d.m.Y H:i" }} von {{ risk.reporter }}</dd>
+    {% if risk.predecessor %}<dt>Neubewertung von</dt><dd><a href="{% url 'risk_detail' risk.predecessor.pk %}">{{ risk.predecessor.pk }}</a></dd>{% endif %}
+    {% if risk.incident_response %}<dt>Incident Response</dt><dd>{{ risk.incident_response|linebreaksbr }}</dd>{% endif %}
+  </dl>
+
+  <h2>Aktionen</h2>
+  <p>
+    {% if can_edit_draft %}<a href="{% url 'risk_edit' risk.pk %}">Entwurf bearbeiten und einreichen</a>{% endif %}
+    {% if can_assess %}
+      <a href="{% url 'risk_score' risk.pk %}">Bewerten (P, I)</a>
+      <a href="{% url 'risk_reclassify' risk.pk %}">Klassifizierung ändern</a>
+    {% endif %}
+    {% if can_document_ir %}<a href="{% url 'risk_incident_response' risk.pk %}">Incident Response dokumentieren</a>{% endif %}
+  </p>
+  {% for target in transitions %}
+    <form method="post" action="{% url 'risk_change_status' risk.pk %}" style="display:inline">
+      {% csrf_token %}
+      <input type="hidden" name="target" value="{{ target.value }}">
+      {% if target.value == "OBSOLETE" and risk.status == "VALIDATED" %}
+        <label><input type="checkbox" name="successor"> Neubewertung anlegen</label>
+      {% endif %}
+      <button type="submit">
+        {% if target.value == "VALIDATED" %}Bewertung abschließen{% elif target.value == "CLOSED" %}Schließen{% elif target.value == "OBSOLETE" %}{% if risk.status == "CLOSED" %}Neu bewerten (obsolet setzen){% else %}Obsolet setzen{% endif %}{% else %}{{ target.label }}{% endif %}
+      </button>
+    </form>
+  {% endfor %}
+
+  {% if approvals %}
+    <h2>Freigabeanträge</h2>
+    <ul>{% for a in approvals %}<li>{{ a.get_kind_display }} – {{ a.get_state_display }} (beantragt von {{ a.requested_by }}{% if a.decided_by %}, entschieden von {{ a.decided_by }}{% endif %})</li>{% endfor %}</ul>
+  {% endif %}
+  {% if notifications %}
+    <h2>Notifikationen</h2>
+    <ul>{% for n in notifications %}<li{% if n.status == "FAILED" %} class="flag-failed"{% endif %}>{{ n.get_kind_display }} per {{ n.get_channel_display }} an {{ n.recipient }}: {{ n.get_status_display }}{% if n.last_error %} ({{ n.last_error }}){% endif %}</li>{% endfor %}</ul>
+  {% endif %}
+{% endblock %}

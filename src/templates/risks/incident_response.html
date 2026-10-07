@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Incident Response{% endblock %}
+{% block content %}
+  <h1>Incident Response dokumentieren: {{ risk.title }}</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% include "risks/_field.html" with field=form.incident_response %}
+    <button type="submit">Dokumentieren und validieren</button>
+    <a href="{% url 'risk_detail' risk.pk %}">Abbrechen</a>
+  </form>
+{% endblock %}

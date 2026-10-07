@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Klassifizierung ändern{% endblock %}
+{% block content %}
+  <h1>Klassifizierung ändern: {{ risk.title }}</h1>
+  <p>Eine Einordnung als IT-Risiko wird erst nach Freigabe durch einen anderen Risk Manager wirksam.</p>
+  <form method="post"
+        hx-post="{% url 'classification_preview' %}"
+        hx-trigger="change from:#id_confidentiality, change from:#id_integrity, change from:#id_availability, change from:#id_origin"
+        hx-target="#classification" hx-select="#classification" hx-swap="outerHTML">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% include "risks/_classification.html" %}
+    <button type="submit">Speichern</button>
+    <a href="{% url 'risk_detail' risk.pk %}">Abbrechen</a>
+  </form>
+{% endblock %}

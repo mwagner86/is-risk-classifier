@@ -12,6 +12,7 @@ from django.db import transaction
 from apps.accounts.models import Role, User
 from apps.audit.models import AuditAction
 from apps.audit.services import record
+from apps.risks.classification import categorize
 from apps.risks.models import (
     ESCALATION_THRESHOLD,
     ApprovalState,
@@ -84,7 +85,10 @@ def is_categorized(risk: Risk) -> str | None:
         return "Ursprung muss zur CIA-Klassifizierung zwingend angegeben werden"
     if assessment.category is None:
         return "Die Kategorie ist noch nicht bestimmt."
-    if assessment.category == RiskCategory.IS_RISIKO and not assessment.assets.exists():
+    # Assets follow the rule's result: a requested IT categorisation needs none, even though
+    # the risk counts as IS until the request is approved (M-04)
+    computed = categorize(cia.confidentiality, cia.integrity, cia.availability, assessment.origin)
+    if computed == RiskCategory.IS_RISIKO and not assessment.assets.exists():
         return "Für ein IS-Risiko müssen die betroffenen Assets angegeben werden."
     return None
 
