@@ -16,6 +16,9 @@ updates:
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: django-stubs
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # mypy is pinned to the range django-stubs 5.2 supports
+      - dependency-name: mypy
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: docker
     directory: /docker

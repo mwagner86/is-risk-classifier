@@ -248,5 +248,8 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
   `git diff`), `make audit`, `make sbom` als Artefakt; bei Push, PR und montags 05:17 UTC. Actions
   per Commit-Hash gepinnt. Dependabot (`.github/dependabot.yml`) wöchentlich; Django bleibt auf
   5.2 LTS. Nach neuen Tests `make trace` laufen lassen und die Tabelle mitcommitten.
+  **Derzeit abgeschaltet** (07.10.2026, Max will erst die User Experience testen): Actions im
+  Repository deaktiviert, damit auch Dependabot-Versions-Updates; Sicherheitswarnungen bleiben.
+  Wieder an: `gh api -X PUT repos/mwagner86/is-risk-classifier/actions/permissions -F enabled=true`.
 - **Noch nicht vorhanden:** Kein TLS im lokalen Stack (nur `DJANGO_HTTPS` für den Betrieb hinter einem
   Proxy).
