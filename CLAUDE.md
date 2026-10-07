@@ -227,7 +227,12 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
   - Keycloak-Volume liegt auf `/opt/keycloak/data` (gehört im Image dem Keycloak-Benutzer); auf
     `/opt/keycloak/data/h2` gehört es root und Keycloak startet nicht.
   - Keycloak liest `${VAR}`-Platzhalter im Realm-Export aus der Umgebung (Client-Secret,
-    Demo-Passwort). Änderungen am Realm wirken erst nach `make reset`.
+    Demo-Passwort). Änderungen am Realm wirken erst nach `make reset` — oder live per
+    `docker compose exec keycloak /opt/keycloak/bin/kcadm.sh` (so am 07.10.2026 für
+    `127.0.0.1` als Rücksprungadresse, ohne Datenverlust).
+  - Erlaubte App-Adressen: `localhost:8000` und `127.0.0.1:8000`. Jeder weitere Hostname braucht
+    einen Eintrag in `redirectUris`/`webOrigins` des Clients, sonst meldet Keycloak „Invalid
+    parameter: redirect_uri“.
   - OIDC-Abgleich darf `set_unusable_password()` nur einmal aufrufen: ein neuer Hash bei jedem
     Login ändert den Session-Hash und meldet das Konto überall sonst ab (Test vorhanden).
   - Pythons `http.cookiejar` schickt Cookies für `localhost` nicht zurück; für

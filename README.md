@@ -16,8 +16,14 @@ git clone git@github.com:mwagner86/is-risk-classifier.git && cd is-risk-classifi
 make dev
 ```
 
-Danach <http://localhost:8000> öffnen. Beim ersten Start legt `make dev` die Datei `.env` mit
-zufälligen Geheimnissen an. Das Passwort der Demo-Konten steht dort unter `DEMO_USER_PASSWORD`.
+Danach <http://localhost:8000> (oder <http://127.0.0.1:8000>) öffnen und mit einem der Demo-Konten
+unten anmelden — nicht mit `admin`, das ist nur das Konto der Keycloak-Verwaltung. Beim ersten Start
+legt `make dev` die Datei `.env` mit zufälligen Geheimnissen an. Das Passwort der Demo-Konten steht
+dort unter `DEMO_USER_PASSWORD`:
+
+```bash
+grep ^DEMO_USER_PASSWORD= .env
+```
 
 | Konto | Rolle |
 | --- | --- |
