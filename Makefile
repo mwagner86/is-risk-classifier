@@ -6,7 +6,7 @@ export APP_UID := $(shell id -u)
 export APP_GID := $(shell id -g)
 
 .DEFAULT_GOAL := help
-.PHONY: help dev down logs reset test lint fmt migrations lock shell import-assets css sbom audit trace prod prod-down messages messages-check
+.PHONY: help dev seed down logs reset test lint fmt migrations lock shell import-assets css sbom audit trace prod prod-down messages messages-check
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -21,13 +21,17 @@ help: ## Show available targets
 	done < .env.example > .env
 	@echo ".env created with random secrets"
 
-dev: .env ## Build and start the stack (app, database, Keycloak)
+dev: .env ## Build and start the stack (app, database, Keycloak) with demo data if empty
 	$(COMPOSE) up --build --detach --wait
+	$(COMPOSE) exec -T web python src/manage.py seed_demo
 	@echo ""
 	@echo "  App:       http://localhost:8000"
 	@echo "  Keycloak:  http://localhost:8080/admin  (admin / KEYCLOAK_ADMIN_PASSWORD in .env)"
 	@echo "  Mailpit:   http://localhost:8025  (e-mails of escalations and hand-overs)"
 	@echo "  Demo users: melder, rm.mueller, rm.schmidt, ciso, app-admin, ohne-rolle (DEMO_USER_PASSWORD in .env)"
+
+seed: .env ## Fill an empty register with demo risks (make dev does this too)
+	$(COMPOSE) exec -T web python src/manage.py seed_demo
 
 down: ## Stop the stack, keep data
 	$(COMPOSE) down

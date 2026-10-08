@@ -103,8 +103,9 @@ LOGOUT_REDIRECT_URL = "/"
 # OpenID Connect (Keycloak). The browser uses the public URL, the server the internal one.
 OIDC_REALM = env("OIDC_REALM", "is-risk")
 OIDC_PUBLIC_ORIGIN = env("OIDC_PUBLIC_BASE_URL", "http://localhost:8080").rstrip("/")
+OIDC_INTERNAL_ORIGIN = env("OIDC_INTERNAL_BASE_URL", "http://keycloak:8080").rstrip("/")
 _oidc_public = f"{OIDC_PUBLIC_ORIGIN}/realms/{OIDC_REALM}"
-_oidc_internal = f"{env('OIDC_INTERNAL_BASE_URL', 'http://keycloak:8080')}/realms/{OIDC_REALM}"
+_oidc_internal = f"{OIDC_INTERNAL_ORIGIN}/realms/{OIDC_REALM}"
 OIDC_RP_CLIENT_ID = env("OIDC_RP_CLIENT_ID", "is-risk-classifier")
 OIDC_RP_CLIENT_SECRET = env("OIDC_RP_CLIENT_SECRET")
 OIDC_RP_SIGN_ALGO = "RS256"

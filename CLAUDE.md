@@ -216,6 +216,14 @@ Aufbau, Befehle und Demo-Konten: [README.md](README.md). Für Agenten zusätzlic
   Seiten. Typ für übersetzbare Texte: `StrOrPromise` aus `django_stubs_ext`, nur unter
   `TYPE_CHECKING` importieren (im Laufzeit-Image nicht vorhanden). Der PDF-Renderer hat eigene
   Labels (`LABELS` in `render.py`), die Mails an das IR-Team bleiben deutsch.
+- **Beispieldaten (08.10.2026):** `manage.py seed_demo` füllt ein **leeres** Register mit 13
+  Risiken aus `apps/risks/demo.py`. `make dev` ruft es auf, `make seed` ebenfalls. Es läuft nur mit
+  `DJANGO_DEBUG=true` und schreibt ausschließlich über Services und `transition()`, nie direkt ins
+  ORM. Die Konten liest `apps/accounts/keycloak.py` über die Admin-API von Keycloak (`sub` muss
+  passen, sonst kollidiert der erste Login) und legt sie über `RoleMappingOIDCBackend` an. Das ist
+  kein zweiter Anmeldeweg. Ändern sich Zustände, Freigaben oder Benachrichtigungen, den Datensatz
+  nachziehen: `tests/test_demo_data.py` prüft die Verteilung. `process_outbox(risk=…)` gibt es nur
+  dafür (eine fehlgeschlagene Zustellung, der Rest geht an den Worker).
 - **Formulare:** „Speichern" prüft US-01 vollständig (AK-01.3 wörtlich), „Als Entwurf ablegen"
   speichert ohne Prüfung. Fehlerfelder fokussiert `apps.core.forms.focus_first_error`.
 - **Enum-Werte** (`NUTZER`, `IS_RISIKO`, …) folgen den Literalen des UML-Modells; Bezeichner sonst

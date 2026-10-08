@@ -37,7 +37,8 @@ grep ^DEMO_USER_PASSWORD= .env
 
 | Befehl | Wirkung |
 | --- | --- |
-| `make dev` | Stack bauen und starten (App, Worker, Stylesheet, PostgreSQL, Keycloak) |
+| `make dev` | Stack bauen und starten (App, Worker, Stylesheet, PostgreSQL, Keycloak), leeres Register mit Beispieldaten füllen |
+| `make seed` | Beispieldaten anlegen, nur wenn das Register leer ist (läuft auch in `make dev`) |
 | `make css` | Stylesheet einmalig minifiziert bauen |
 | `make prod` / `make prod-down` | produktionsnaher Stack: Laufzeit-Image mit gunicorn, Debug aus, schreibgeschützt |
 | `make sbom` | SBOM im CycloneDX-Format nach `sbom/is-risk-classifier.cdx.json` |
@@ -54,6 +55,14 @@ grep ^DEMO_USER_PASSWORD= .env
 
 Änderungen an `docker/keycloak/realm-is-risk.json` wirken erst nach `make reset`, weil Keycloak einen
 vorhandenen Realm beim Import nicht überschreibt.
+
+**Beispieldaten:** Ist das Register leer, legt `make dev` 13 Risiken an (`manage.py seed_demo`). Sie
+decken alle Zustände ab, IS- und IT-Risiken, offene und entschiedene Freigaben, eine Eskalation mit
+fehlgeschlagener Notifikation und ein obsoletes Risiko mit Nachfolger. Vier davon hat `melder`
+erfasst. Angelegt wird über die Fachlogik, Audit-Log und Mails in Mailpit sind also echt. Die Konten
+liest der Befehl aus Keycloak (Admin-API), damit ihre Kennung zur späteren Anmeldung passt. Er läuft
+nur mit `DJANGO_DEBUG=true` und lässt ein Register mit Daten unangetastet. Neu anfangen:
+`make reset`, dann `make dev`.
 
 ## Aufbau
 

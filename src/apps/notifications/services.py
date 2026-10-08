@@ -78,14 +78,24 @@ def enqueue_it_handover(risk: "Risk") -> list[Notification]:
     )
 
 
-def process_outbox(*, gateway: NotificationGateway | None = None, batch_size: int = 50) -> int:
-    """Send pending notifications; a failure is logged in the audit log (AK-03.3)."""
+def process_outbox(
+    *,
+    gateway: NotificationGateway | None = None,
+    batch_size: int = 50,
+    risk: "Risk | None" = None,
+) -> int:
+    """Send pending notifications; a failure is logged in the audit log (AK-03.3).
+
+    ``risk`` limits the run to that risk's notifications (demo data: one failed delivery).
+    """
     gateway = gateway or get_gateway()
+    queue = Notification.objects.filter(status=NotificationStatus.PENDING)
+    if risk is not None:
+        queue = queue.filter(risk=risk)
     with transaction.atomic():
         pending = list(
-            Notification.objects.select_for_update(skip_locked=True)
+            queue.select_for_update(skip_locked=True)
             .select_related("risk")
-            .filter(status=NotificationStatus.PENDING)
             .order_by("created_at")[:batch_size]
         )
         for notification in pending:
