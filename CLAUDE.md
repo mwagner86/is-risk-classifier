@@ -120,12 +120,13 @@ Einordnung als IT-Risiko **schon bei der Erfassung**.
   Oberfläche und Meldungen deutsch. Gespräch und diese Datei deutsch.
 - **Makefile** mit `make dev`, `make test`, `make lint`; ruff, Typannotationen; Abhängigkeiten
   gepinnt; `.env.example` statt Geheimnissen; README mit Start in drei Befehlen.
-- **Docker:** Kontext `default` auf der Workstation. **Nicht** auf dem Homeserver
-  (Kontext `homeserver`) starten.
+- **Docker:** lokaler Kontext — `default` auf der Workstation, `desktop-linux` (Docker Desktop,
+  arm64) auf dem MacBook. **Nicht** auf dem Homeserver (Kontext `homeserver`) starten.
 - **Git:** Commits und Pushes nur auf Anweisung. Remote `origin`:
   `git@github.com:mwagner86/is-risk-classifier.git` (privat, angelegt am 07.10.2026).
 - **Systemänderungen** (Pakete, Docker-Volumes, Ports, Konfiguration außerhalb des Repos) in
-  `~/CHANGELOG.md` protokollieren — mit Befehl, Verifikation und Rückbau.
+  `~/CHANGELOG.md` protokollieren (MacBook: `~/Changes/CHANGELOG.md`) — mit Befehl, Verifikation
+  und Rückbau.
 - **Hand-ins in `~/Uni/ESS` bleiben unberührt.** Ob und wie die Implementierung dort vorkommt,
   entscheidet Max.
 

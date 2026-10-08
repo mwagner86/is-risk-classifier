@@ -38,9 +38,20 @@
     {
       "name": "tailwindcss",
       "version": "4.3.3",
-      "purl": "pkg:github/tailwindlabs/tailwindcss@v4.3.3",
+      "purl": "pkg:github/tailwindlabs/tailwindcss@v4.3.3?file_name=tailwindcss-linux-x64",
       "license": "MIT",
+      "file": "tailwindcss-linux-x64",
+      "platform": "linux/amd64",
       "sha256": "dc61b3ac6b8c9ca874c0cc4c57b2409791a64c5540404ca5f5367360babc313a"
+    },
+    {
+      "name": "tailwindcss",
+      "version": "4.3.3",
+      "purl": "pkg:github/tailwindlabs/tailwindcss@v4.3.3?file_name=tailwindcss-linux-arm64",
+      "license": "MIT",
+      "file": "tailwindcss-linux-arm64",
+      "platform": "linux/arm64",
+      "sha256": "55fd0b241214eff3de1e8ee4f22796662f2d2e7a49bcfca7477cfd0bac398195"
     }
   ]
 }

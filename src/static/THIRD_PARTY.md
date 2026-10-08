@@ -10,9 +10,14 @@ pinned by version and checksum; this list is the inventory of front-end componen
 | `fonts/plus-jakarta-sans-latin-wght-5.3.0.woff2` | `@fontsource-variable/plus-jakarta-sans` | 5.3.0 | OFL-1.1 | npm tarball `files/plus-jakarta-sans-latin-wght-normal.woff2` | `153fc85b70298beeb1d61a5f723331649e7f23bb77302a66e61cb3e2fbdb5e79` |
 | `fonts/jetbrains-mono-latin-wght-5.3.0.woff2` | `@fontsource-variable/jetbrains-mono` | 5.3.0 | OFL-1.1 | npm tarball `files/jetbrains-mono-latin-wght-normal.woff2` | `18be452724bfdc236c074ca94a249a7f41a86752c7d04ab258ce9ed5651f6a7e` |
 
-Build tool (not shipped to the browser): Tailwind CSS standalone CLI 4.3.3,
-`tailwindcss-linux-x64`, SHA-256 `dc61b3ac6b8c9ca874c0cc4c57b2409791a64c5540404ca5f5367360babc313a`,
-pinned in `docker/Dockerfile`.
+Build tool (not shipped to the browser): Tailwind CSS standalone CLI 4.3.3, one binary per
+architecture, pinned in `docker/Dockerfile` and selected by the target platform. Checksums from
+`sha256sums.txt` of the v4.3.3 release:
+
+| Binary | Platform | SHA-256 |
+| --- | --- | --- |
+| `tailwindcss-linux-x64` | `linux/amd64` | `dc61b3ac6b8c9ca874c0cc4c57b2409791a64c5540404ca5f5367360babc313a` |
+| `tailwindcss-linux-arm64` | `linux/arm64` | `55fd0b241214eff3de1e8ee4f22796662f2d2e7a49bcfca7477cfd0bac398195` |
 
 npm tarballs were checked against the registry's `dist.integrity` (SHA-512) before extraction.
 Font licences: `fonts/LICENSE-*.txt`.

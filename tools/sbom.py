@@ -3,7 +3,8 @@
 
 - Python packages: exported by uv from uv.lock, runtime dependencies only
 - front-end files served locally: src/static/third_party.json (with SHA-256)
-- build tool (Tailwind CLI): listed with scope "excluded", it never reaches the browser
+- build tools (Tailwind CLI, one binary per architecture): listed with scope "excluded", they
+  never reach the browser
 - container images: from compose.yaml and docker/Dockerfile, pinned by digest
 
 Usage: python tools/sbom.py [--output sbom/is-risk-classifier.cdx.json]

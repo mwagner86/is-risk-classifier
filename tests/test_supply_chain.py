@@ -63,9 +63,17 @@ def test_m_02_every_served_third_party_file_is_inventoried() -> None:
     assert served == listed
 
 
-def test_m_02_tailwind_checksum_matches_the_dockerfile() -> None:
-    tool = _manifest()["build_tools"][0]
-    assert f"--checksum=sha256:{tool['sha256']}" in (ROOT / "docker" / "Dockerfile").read_text()
+def test_m_02_tailwind_checksums_match_the_dockerfile() -> None:
+    dockerfile = (ROOT / "docker" / "Dockerfile").read_text()
+    tools = _manifest()["build_tools"]
+    for tool in tools:
+        add = re.search(rf"^ADD --checksum=sha256:{tool['sha256']} .*\n\s+(\S+)", dockerfile, re.M)
+        assert add, tool["file"]
+        assert add.group(1).endswith(f"/v{tool['version']}/{tool['file']}"), tool["file"]
+        assert tool["purl"].endswith(f"?file_name={tool['file']}"), tool["purl"]
+    # Every architecture the Dockerfile can select has a pinned binary
+    stages = set(re.findall(r"^FROM scratch AS tailwind-(\w+)$", dockerfile, re.M))
+    assert {t["platform"].removeprefix("linux/") for t in tools} == stages == {"amd64", "arm64"}
 
 
 def test_m_02_sbom_lists_python_packages_front_end_files_and_images(tmp_path: Path) -> None:
@@ -91,3 +99,6 @@ def test_m_02_sbom_lists_python_packages_front_end_files_and_images(tmp_path: Pa
     assert not any(p.startswith("pkg:pypi/pytest@") for p in purls)
     hashes = {c["name"]: c["hashes"][0]["content"] for c in sbom["components"] if c.get("hashes")}
     assert hashes["htmx.org"] == _manifest()["components"][0]["sha256"]
+    # CycloneDX requires unique bom-refs; one Tailwind binary per architecture must not collide
+    refs = [c["bom-ref"] for c in sbom["components"] if "bom-ref" in c]
+    assert len(refs) == len(set(refs))

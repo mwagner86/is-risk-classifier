@@ -5,10 +5,18 @@ ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecc
 
 FROM ${UV_IMAGE} AS uv
 
-# Tailwind standalone CLI, no Node.js; pinned by version and checksum (M-02)
-FROM scratch AS tailwind
+# Tailwind standalone CLI, no Node.js; pinned by version and checksum (M-02). The binary is
+# dynamically linked, so it must match the target architecture. An ADD cannot be conditional:
+# one stage per architecture, selected by TARGETARCH; BuildKit fetches only the one it needs.
+FROM scratch AS tailwind-amd64
 ADD --checksum=sha256:dc61b3ac6b8c9ca874c0cc4c57b2409791a64c5540404ca5f5367360babc313a --chmod=755 \
     https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.3/tailwindcss-linux-x64 /tailwindcss
+
+FROM scratch AS tailwind-arm64
+ADD --checksum=sha256:55fd0b241214eff3de1e8ee4f22796662f2d2e7a49bcfca7477cfd0bac398195 --chmod=755 \
+    https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.3/tailwindcss-linux-arm64 /tailwindcss
+
+FROM tailwind-${TARGETARCH} AS tailwind
 
 FROM ${PYTHON_IMAGE} AS base
 ENV PYTHONDONTWRITEBYTECODE=1 \
