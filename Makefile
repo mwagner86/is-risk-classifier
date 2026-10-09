@@ -6,7 +6,7 @@ export APP_UID := $(shell id -u)
 export APP_GID := $(shell id -g)
 
 .DEFAULT_GOAL := help
-.PHONY: help dev seed down logs reset test lint fmt migrations lock shell import-assets css sbom audit trace prod prod-down messages messages-check
+.PHONY: help dev seed down logs reset test lint fmt migrations lock shell import-assets css sbom audit trace access-matrix prod prod-down messages messages-check
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -65,6 +65,9 @@ audit: .env ## Check the runtime dependencies against known vulnerabilities (M-0
 
 trace: .env ## Write docs/traceability.md: requirement -> tests
 	$(RUN) --build test pytest --collect-only --quiet --trace-report=docs/traceability.md
+
+access-matrix: .env ## Write docs/access-matrix.md: route -> roles (M-05)
+	$(RUN) --build --no-deps tools python src/manage.py access_matrix --output docs/access-matrix.md
 
 prod: .env ## Start the production-like stack (runtime image, gunicorn, read-only)
 	$(COMPOSE) -f compose.yaml -f compose.prod.yaml up --build --detach --wait

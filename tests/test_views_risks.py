@@ -1,12 +1,14 @@
 """The web forms behind US-01 and US-02: what the user sees, and that the server decides."""
 
 import re
+import uuid
 
 import pytest
 from django.test import Client
 
 from apps.accounts.models import Role, User
 from apps.cmdb.models import Asset
+from apps.risks.dashboard import dashboard_data
 from apps.risks.models import ApprovalState, Origin, Risk, RiskCategory, RiskStatus
 from tests.conftest import MakeRisk
 
@@ -202,6 +204,52 @@ def test_m_05_reporter_sees_only_own_risks(
     assert f"/risiken/{own.pk}/" in listing
     assert f"/risiken/{foreign.pk}/" not in listing
     assert client.get(f"/risiken/{foreign.pk}/").status_code == 404
+
+
+# Planned M-10 (Hand-in 2): marker stays M-05 until the identifier is fixed there
+@pytest.mark.req("M-05")
+@pytest.mark.parametrize(
+    ("method", "suffix"), [("get", ""), ("get", "bearbeiten/"), ("post", "status/")]
+)
+def test_m_05_foreign_risk_answers_like_an_unknown_one(
+    client: Client,
+    make_risk: MakeRisk,
+    make_user,
+    users: dict[str, User],
+    method: str,
+    suffix: str,
+) -> None:
+    foreign = make_risk(RiskStatus.DRAFT, reporter=make_user(Role.NUTZER))
+    client.force_login(users["nutzer"])
+    call = getattr(client, method)
+
+    for_foreign = call(f"/risiken/{foreign.pk}/{suffix}", {"target": "OBSOLETE"})
+    for_unknown = call(f"/risiken/{uuid.uuid4()}/{suffix}", {"target": "OBSOLETE"})
+
+    # 404 for both, never 403: the answer must not reveal that the risk exists
+    assert for_foreign.status_code == for_unknown.status_code == 404
+    assert for_foreign.content == for_unknown.content
+    foreign.refresh_from_db()
+    assert foreign.status == RiskStatus.DRAFT
+
+
+@pytest.mark.req("M-05")
+def test_m_05_reporter_dashboard_counts_only_own_risks(
+    make_risk: MakeRisk, make_user, users: dict[str, User]
+) -> None:
+    other = make_user(Role.NUTZER)
+    make_risk(RiskStatus.SCORED, reporter=users["nutzer"], probability=2, impact=3)
+    for _ in range(3):
+        make_risk(RiskStatus.SCORED, reporter=other, probability=5, impact=5)
+    make_risk(RiskStatus.ESCALATED, reporter=other, probability=5, impact=5)
+
+    own = dashboard_data(users["nutzer"])
+    register = dashboard_data(users["rm"])
+
+    assert (own.open_count, own.escalated_count) == (1, 0)
+    assert sum(cell.count for row in own.matrix for cell in row.cells) == 1
+    assert [r.reporter_id for r in own.recent_risks] == [users["nutzer"].pk]
+    assert (register.open_count, register.escalated_count) == (5, 1)
 
 
 @pytest.mark.req("M-05")

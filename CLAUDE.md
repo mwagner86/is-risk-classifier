@@ -14,6 +14,42 @@ Softwaretechnik (SS26), Projekt der Hand-ins in Entwicklung sicherer Softwaresys
   Zustandsmaschine · 2 Kategorisierung, Risikowert, Eskalation (Benachrichtigung als Mock) ·
   3 Dashboard und Design · 4 Export und Audit-Log · 5 Härtung M-01 bis M-09, SBOM ·
   6 Benachrichtigungsmodul (echter Versand).
+- **Danach (08.10.2026):** Tailwind je Architektur für Apple Silicon (`0c8f857`), Beispieldaten
+  per `make dev` (`00b9ae3`).
+
+### Iteration 7 — Plan (Max, 09.10.2026)
+
+**Grundsatz:** Die Iteration folgt den ESS-Hand-ins, sie eilt ihnen nicht voraus. Bewertet wird dort
+das Vorgehen auf 5 Seiten, die Software ist Beleg, nicht Inhalt. Die Kennungen (SR-xx, US-04a/b,
+M-10) legt Max in Hand-in 2 fest, hier werden sie danach als Testmarker übernommen. Hinweis zur
+Kennzeichnungspflicht: Der Code ist weitgehend KI-generiert. Wird er in einem Hand-in als Nachweis
+zitiert, muss das gekennzeichnet sein (Entscheidung bei Max).
+
+**Teil A — vor Hand-in 1 (bis etwa 20.10.): Modell und System angleichen** — **erledigt 09.10.2026**, dazu in der ESA 1 P5 *Register
+anzeigen*, CISO, Administration, F14–F19 und M-10 unter T-03 nachgezogen (ESS-Repo)
+
+1. Zugriffsmatrix Rolle × Ansicht, erzeugt aus den `@allow_roles`-/`@public`-Angaben
+   (`make access-matrix` → `docs/access-matrix.md`). Zeigt die Lese-Flüsse vom Register zu den
+   Rollen, die im Datenflussdiagramm der ESA 1 fehlten.
+2. Belegtabelle für die Kandidaten T-04 bis T-10 aus `THREATMODEL.md`: vorhandene Maßnahme, Test,
+   was offen bleibt (`docs/threat-candidates.md`). Gerüst für die Bewertung in der
+   Threat-Dragon-Sitzung — die Bewertung selbst bleibt Max' Analyse.
+3. M-10 (vorläufig: Risikomelder sieht nur eigene Risiken) vervollständigen: Tests für die
+   Dashboard-Zahlen des Melders und dafür, dass eine fremde Kennung genauso antwortet wie eine
+   nicht vergebene. Marker bleibt `M-05`, bis Hand-in 2 die Kennung festlegt.
+
+**Teil B — vor Hand-in 2 (bis etwa 10.11.), nachdem die Kennungen feststehen**
+
+1. Testmarker auf SR-xx umstellen, `REQUIRED` in `tests/test_traceability.py` erweitern —
+   `docs/traceability.md` zeigt dann SR → Test (Aufgabenpunkt 3, Woche 10–11 Contract Testing).
+2. Evil User Stories als Missbrauchstests mit konkreten Rollen und positivem Prüfkriterium, etwa:
+   Melder späht das Register aus (M-10), Risk Manager stuft als Innentäter herunter (M-04),
+   externer Angreifer fälscht eine Eskalation (T-05).
+
+**Bewusst nicht jetzt:** SBOM-Gate mit Dependency-Track (passt zu Woche 14, nach Hand-in 2) · MFA
+für Risk Manager und CISO (Gegenmaßnahme zu T-07, nur wenn T-07 in der Sitzung über 15 kommt) ·
+neue Fachfunktionen, Django 6, CI wieder einschalten (Max testet erst die User Experience).
+**Vor allem anderen:** Max' Befunde aus dem UX-Test.
 
 ## Entscheidungen (07.10.2026)
 

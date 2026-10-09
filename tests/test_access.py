@@ -1,6 +1,7 @@
 """M-05: rights are checked on the server per role; whatever is not allowed is denied."""
 
 from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -10,6 +11,7 @@ from django.urls import URLPattern, URLResolver, get_resolver
 from apps.accounts.models import Role, User
 from apps.accounts.oidc import RoleMappingOIDCBackend, role_from_claims
 from apps.core.access import declared_access
+from apps.core.access_matrix import render
 
 pytestmark = pytest.mark.req("M-05")
 
@@ -39,6 +41,12 @@ def test_m_05_every_route_declares_its_access() -> None:
 def test_m_05_only_the_allowlisted_routes_are_public() -> None:
     public = {p.name for p in _patterns(get_resolver()) if declared_access(p.callback) is True}
     assert public == PUBLIC_ROUTES
+
+
+def test_m_05_access_matrix_is_up_to_date() -> None:
+    """docs/access-matrix.md documents the declarations; regenerate with make access-matrix."""
+    committed = (Path(__file__).resolve().parent.parent / "docs" / "access-matrix.md").read_text()
+    assert committed == render(), "docs/access-matrix.md is stale: run make access-matrix"
 
 
 @pytest.mark.django_db
