@@ -208,6 +208,9 @@ Dependabot schlägt wöchentlich Updates für Python-Pakete, Docker-Images und A
 - **M-04:** Eine Einordnung als IT-Risiko und eine Herabstufung unter 20 sind Anträge. Wirksam
   werden sie erst, wenn ein anderer Risk Manager zustimmt (auch als Prüfregel in der Datenbank).
 - **M-09:** Eskalationen enthalten nur die Kennung und einen Link, der eine Anmeldung verlangt.
+- **M-10:** Risikomelder sehen nur eigene Risiken: in der Liste, auf der Detailseite und in den
+  Zahlen des Dashboards. Eine fremde Kennung antwortet genauso wie eine nicht vergebene (404), die
+  Antwort verrät also nicht, dass es das Risiko gibt.
 - **M-01:** Eingaben erreichen ReportLab nur maskiert; Markup in Titel oder Beschreibung erscheint
   als Text (getestet auch mit der Nutzlast von CVE-2023-33733).
 - **M-03:** Das PDF erzeugt der Dienst `pdf-renderer` im Netz `pdf` ohne Route zur Datenbank, ohne

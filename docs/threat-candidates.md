@@ -31,4 +31,4 @@ fehlt:
 **Beobachtung, keine Änderung:** Die Administration (`ADMIN`) sieht das ganze Register samt
 Beschreibungen und Assets. Ihre Aufgaben laut Spezifikation sind das erneute Senden und die rote
 Markierung (US-03, AK-03.3). Gemessen an need-to-know ist das mehr als nötig. Das betrifft T-03 und
-die vorläufige M-10 in Hand-in 2.
+M-10, festgelegt in Hand-in 1 am 15.10.2026 („Risikomelder sehen nur eigene Risiken“).

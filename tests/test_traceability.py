@@ -8,6 +8,7 @@ REQUIRED = {
     "US-04a",
     "US-04b",
     *(f"M-0{n}" for n in range(1, 10)),
+    "M-10",
     "INV-02",
     "INV-03",
     "SM",

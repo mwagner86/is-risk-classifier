@@ -20,10 +20,11 @@ Softwaretechnik (SS26), Projekt der Hand-ins in Entwicklung sicherer Softwaresys
 ### Iteration 7 — Plan (Max, 09.10.2026)
 
 **Grundsatz:** Die Iteration folgt den ESS-Hand-ins, sie eilt ihnen nicht voraus. Bewertet wird dort
-das Vorgehen auf 5 Seiten, die Software ist Beleg, nicht Inhalt. Die Kennungen (SR-xx, US-04a/b,
-M-10) legt Max in Hand-in 2 fest, hier werden sie danach als Testmarker übernommen. Hinweis zur
-Kennzeichnungspflicht: Der Code ist weitgehend KI-generiert. Wird er in einem Hand-in als Nachweis
-zitiert, muss das gekennzeichnet sein (Entscheidung bei Max).
+das Vorgehen auf 5 Seiten, die Software ist Beleg, nicht Inhalt. Die Kennungen (SR-xx, US-04a/b)
+legt Max in Hand-in 2 fest, hier werden sie danach als Testmarker übernommen; M-10 steht seit
+Hand-in 1 (15.10.2026) fest. Hinweis zur Kennzeichnungspflicht: Der Code ist weitgehend
+KI-generiert. Wird er in einem Hand-in als Nachweis zitiert, muss das gekennzeichnet sein
+(Entscheidung bei Max).
 
 **Teil A — vor Hand-in 1 (bis etwa 20.10.): Modell und System angleichen** — **erledigt 09.10.2026**, dazu in der ESA 1 P5 *Register
 anzeigen*, CISO, Administration, F14–F19 und M-10 unter T-03 nachgezogen (ESS-Repo)
@@ -34,9 +35,16 @@ anzeigen*, CISO, Administration, F14–F19 und M-10 unter T-03 nachgezogen (ESS-
 2. Belegtabelle für die Kandidaten T-04 bis T-10 aus `THREATMODEL.md`: vorhandene Maßnahme, Test,
    was offen bleibt (`docs/threat-candidates.md`). Gerüst für die Bewertung in der
    Threat-Dragon-Sitzung — die Bewertung selbst bleibt Max' Analyse.
-3. M-10 (vorläufig: Risikomelder sieht nur eigene Risiken) vervollständigen: Tests für die
+3. M-10 (Risikomelder sieht nur eigene Risiken) vervollständigen: Tests für die
    Dashboard-Zahlen des Melders und dafür, dass eine fremde Kennung genauso antwortet wie eine
-   nicht vergebene. Marker bleibt `M-05`, bis Hand-in 2 die Kennung festlegt.
+   nicht vergebene. — **Erledigt 15.10.2026:** M-10 ist in Hand-in 1 festgelegt (15.10., Security
+   Control zu T-03); die Tests in `tests/test_views_risks.py` (Liste, Detail, fremde Kennung,
+   Dashboard-Zahlen) und `tests/test_dashboard.py` tragen seitdem den Marker `M-10`, `REQUIRED` in
+   `tests/test_traceability.py` enthält M-10.
+
+**Stand Hand-in 1 (15.10.2026):** Die Werte für T-04 bis T-10 sind bestätigt. T-07 (übernommenes
+Konto eines Risk Managers) ist mit P 2, I 5, R 10 bewertet, also unter 15 — MFA bleibt deshalb
+bewusst nicht umgesetzt (siehe *Bewusst nicht jetzt*).
 
 **Teil B — vor Hand-in 2 (bis etwa 10.11.), nachdem die Kennungen feststehen**
 
@@ -47,7 +55,8 @@ anzeigen*, CISO, Administration, F14–F19 und M-10 unter T-03 nachgezogen (ESS-
    externer Angreifer fälscht eine Eskalation (T-05).
 
 **Bewusst nicht jetzt:** SBOM-Gate mit Dependency-Track (passt zu Woche 14, nach Hand-in 2) · MFA
-für Risk Manager und CISO (Gegenmaßnahme zu T-07, nur wenn T-07 in der Sitzung über 15 kommt) ·
+für Risk Manager und CISO (Gegenmaßnahme zu T-07, nur wenn T-07 über 15 kommt — in Hand-in 1 mit
+R 10 bewertet, also nicht) ·
 neue Fachfunktionen, Django 6, CI wieder einschalten (Max testet erst die User Experience).
 **Vor allem anderen:** Max' Befunde aus dem UX-Test.
 
@@ -178,7 +187,6 @@ Token `level-medium #e8d44d`, `danger-strong #ff8095` für Text auf dem roten Gr
 und `de/`. Aufgenommen in einem eigenen Compose-Projekt (`COMPOSE_PROJECT_NAME=isrisk-demo`, eigene
 Volumes) mit englischen Beispieldaten und Playwright (`mcr.microsoft.com/playwright/python`),
 Cookie `language=en`; die Dev-Datenbank bleibt dabei unberührt.
-
 
 Stil nach dependencytrack.org, **ohne** Logo und Markennamen von OWASP oder Dependency-Track.
 Tokens, Schriften und Seitenaufbau stehen in docs/START-PROMPT.md, Abschnitt „Design". Kontraste nach

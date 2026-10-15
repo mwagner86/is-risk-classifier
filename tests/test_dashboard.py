@@ -66,7 +66,8 @@ def test_key_figures_count_open_risks_only(make_risk: MakeRisk, users: dict[str,
     assert data.failed_count == 0
 
 
-def test_key_figures_respect_visibility(
+@pytest.mark.req("M-10")
+def test_m_10_key_figures_respect_visibility(
     make_risk: MakeRisk, users: dict[str, User], make_user
 ) -> None:
     make_risk(RiskStatus.SCORED, reporter=users["nutzer"])

@@ -187,11 +187,11 @@ def test_ak_02_1_form_saves_score(rm_client: Client, make_risk: MakeRisk) -> Non
     assert risk.assessment.score == 20
 
 
-# --- M-05: object-level visibility and actions ----------------------------------------------
+# --- M-10: reporters see only their own risks (ESS hand-in 1, control to T-03) --------------
 
 
-@pytest.mark.req("M-05")
-def test_m_05_reporter_sees_only_own_risks(
+@pytest.mark.req("M-10")
+def test_m_10_reporter_sees_only_own_risks(
     client: Client, make_risk: MakeRisk, make_user, users: dict[str, User]
 ) -> None:
     other = make_user(Role.NUTZER)
@@ -206,12 +206,11 @@ def test_m_05_reporter_sees_only_own_risks(
     assert client.get(f"/risiken/{foreign.pk}/").status_code == 404
 
 
-# Planned M-10 (Hand-in 2): marker stays M-05 until the identifier is fixed there
-@pytest.mark.req("M-05")
+@pytest.mark.req("M-10")
 @pytest.mark.parametrize(
     ("method", "suffix"), [("get", ""), ("get", "bearbeiten/"), ("post", "status/")]
 )
-def test_m_05_foreign_risk_answers_like_an_unknown_one(
+def test_m_10_foreign_risk_answers_like_an_unknown_one(
     client: Client,
     make_risk: MakeRisk,
     make_user,
@@ -233,8 +232,8 @@ def test_m_05_foreign_risk_answers_like_an_unknown_one(
     assert foreign.status == RiskStatus.DRAFT
 
 
-@pytest.mark.req("M-05")
-def test_m_05_reporter_dashboard_counts_only_own_risks(
+@pytest.mark.req("M-10")
+def test_m_10_reporter_dashboard_counts_only_own_risks(
     make_risk: MakeRisk, make_user, users: dict[str, User]
 ) -> None:
     other = make_user(Role.NUTZER)
@@ -250,6 +249,9 @@ def test_m_05_reporter_dashboard_counts_only_own_risks(
     assert sum(cell.count for row in own.matrix for cell in row.cells) == 1
     assert [r.reporter_id for r in own.recent_risks] == [users["nutzer"].pk]
     assert (register.open_count, register.escalated_count) == (5, 1)
+
+
+# --- M-05: what each role may do -----------------------------------------------------------
 
 
 @pytest.mark.req("M-05")
