@@ -139,12 +139,12 @@ only runs with `DJANGO_DEBUG=true` and leaves a register with data untouched. To
 │   │   └── audit/          audit log, append-only, and its view
 │   ├── pdf_renderer/       standalone PDF service without Django and without database drivers
 │   ├── notify_gateway/     standalone notification service (placeholder for the provider)
+│   ├── assets/             Tailwind source with the design tokens (not shipped)
 │   └── templates/
 ├── tests/                  pytest; every test carries its requirement: @pytest.mark.req("M-05")
-│   ├── assets/             Tailwind source with the design tokens (not shipped)
 ├── tools/                  SBOM generation
 ├── docker/                 Dockerfile (dev, runtime), Keycloak realm
-├── docs/                   specification, screenshots, traceability table
+├── docs/                   specification, screenshots, traceability table, SBOM and CRA guide
 └── Makefile, compose.yaml, compose.prod.yaml, pyproject.toml, uv.lock, .env.example
 ```
 
@@ -233,6 +233,16 @@ The workflow `.github/workflows/ci.yml` runs lint, tests, the check of the trace
 as an artifact. **GitHub Actions is currently disabled for the repository**; the checks run locally
 with `make lint`, `make test`, `make audit` and `make sbom`. Dependabot proposes updates for Python
 packages, Docker images and Actions every week.
+
+## SBOM and CRA field guide
+
+[`docs/sbom-cra-guide/`](docs/sbom-cra-guide/) holds a standalone guide on producing and managing
+CycloneDX SBOMs and on what the EU Cyber Resilience Act requires: the SBOM lifecycle, content
+practices, CRA obligations and deadlines, and a readiness checklist with this project as the worked
+example. Open [`sbom-and-cra-field-guide.html`](docs/sbom-cra-guide/sbom-and-cra-field-guide.html)
+locally in a browser; the folder's README shows screenshots.
+
+[![SBOM and CRA field guide](docs/sbom-cra-guide/screenshots/01-overview.png)](docs/sbom-cra-guide/)
 
 ## Security-relevant decisions
 

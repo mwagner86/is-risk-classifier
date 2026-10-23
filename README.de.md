@@ -139,12 +139,12 @@ nur mit `DJANGO_DEBUG=true` und lässt ein Register mit Daten unangetastet. Neu 
 │   │   └── audit/          Audit-Log, nur anfügbar, und seine Ansicht
 │   ├── pdf_renderer/       eigenständiger PDF-Dienst ohne Django und ohne Datenbanktreiber
 │   ├── notify_gateway/     eigenständiger Benachrichtigungsdienst (Platzhalter für den Anbieter)
+│   ├── assets/             Tailwind-Quelle mit den Design-Tokens (wird nicht ausgeliefert)
 │   └── templates/
 ├── tests/                  pytest; jeder Test trägt seine Anforderung: @pytest.mark.req("M-05")
-│   ├── assets/             Tailwind-Quelle mit den Design-Tokens (wird nicht ausgeliefert)
 ├── tools/                  SBOM-Erzeugung
 ├── docker/                 Dockerfile (dev, runtime), Keycloak-Realm
-├── docs/                   Spezifikation, Screenshots, Nachweistabelle
+├── docs/                   Spezifikation, Screenshots, Nachweistabelle, Leitfaden SBOM und CRA
 └── Makefile, compose.yaml, compose.prod.yaml, pyproject.toml, uv.lock, .env.example
 ```
 
@@ -232,6 +232,16 @@ Lint, Tests, die Prüfung der Nachweistabelle, `make audit` und `make sbom` aus 
 Artefakt ab. **GitHub Actions ist im Repository derzeit abgeschaltet**, die Prüfungen laufen lokal
 mit `make lint`, `make test`, `make audit` und `make sbom`. Dependabot schlägt wöchentlich Updates
 für Python-Pakete, Docker-Images und Actions vor.
+
+## Leitfaden SBOM und CRA
+
+In [`docs/sbom-cra-guide/`](docs/sbom-cra-guide/) liegt ein eigenständiger Leitfaden (auf
+Englisch) dazu, wie man SBOMs in CycloneDX erzeugt und pflegt und was der EU Cyber Resilience Act
+verlangt: Lebenszyklus der SBOM, Inhalte, Pflichten und Fristen des CRA und eine Checkliste mit
+diesem Projekt als Beispiel. [`sbom-and-cra-field-guide.html`](docs/sbom-cra-guide/sbom-and-cra-field-guide.html)
+lokal im Browser öffnen; die README des Ordners zeigt Screenshots.
+
+[![Leitfaden SBOM und CRA](docs/sbom-cra-guide/screenshots/01-overview.png)](docs/sbom-cra-guide/)
 
 ## Sicherheitsrelevante Festlegungen
 
