@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SBOM and CRA Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+<style>
+/* Layout: one reading column (~70ch) with full-width bands for timeline, tables, diagram and code. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --ink: #17202c;
+  --muted: #4d5a6b;
+  --line: #d6dce4;
+  --accent: #1f5fbf;
+  --code-bg: #eef1f5;
+  --ok: #1d7a46;      --ok-bg: #e2f3e9;
+  --part: #8a5a00;    --part-bg: #fbefd6;
+  --open: #b0283d;    --open-bg: #fbe3e7;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10151d; --surface: #171e29; --ink: #e4e9f1; --muted: #a3afc0; --line: #2b3646;
+    --accent: #7fb0ff; --code-bg: #1d2633;
+    --ok: #6fd39b; --ok-bg: #173527; --part: #f2c063; --part-bg: #3a2d12; --open: #ff8a9c; --open-bg: #3d1a22;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10151d; --surface: #171e29; --ink: #e4e9f1; --muted: #a3afc0; --line: #2b3646;
+  --accent: #7fb0ff; --code-bg: #1d2633;
+  --ok: #6fd39b; --ok-bg: #173527; --part: #f2c063; --part-bg: #3a2d12; --open: #ff8a9c; --open-bg: #3d1a22;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 64px;
+}
+main { max-width: 1000px; margin: 0 auto; display: grid; gap: 60px; }
+.prose { max-width: 70ch; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.75rem; font-weight: 700; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+p { margin: 0; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code, pre, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+:not(pre) > code { background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 20px; }
+.lead { font-size: 1.12rem; color: var(--muted); }
+.note { font-size: 0.88rem; color: var(--muted); max-width: 75ch; }
+
+header { display: grid; gap: 18px; }
+nav.toc { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 0.92rem; }
+
+/* CRA timeline: a real sequence of dates */
+.timeline { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.milestone { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 4px; align-content: start; }
+.milestone time { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+.milestone.now { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.milestone span { color: var(--muted); font-size: 0.9rem; }
+
+/* lifecycle: a real cycle, so numbered */
+ol.steps { list-style: none; counter-reset: step; padding: 0; margin: 0; display: grid; gap: 16px; max-width: 80ch; }
+ol.steps li { counter-increment: step; display: grid; grid-template-columns: 2.2rem 1fr; gap: 12px; align-items: start; }
+ol.steps li::before { content: counter(step); font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; color: var(--accent);
+  border: 1.5px solid var(--accent); border-radius: 50%; width: 2rem; height: 2rem; display: grid; place-items: center; }
+ol.steps li > div { min-width: 0; display: grid; gap: 4px; }
+.example { font-size: 0.9rem; color: var(--muted); }
+.example b { color: var(--ink); font-weight: 600; }
+
+.figure { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; overflow-x: auto; }
+.figure pre.mermaid { margin: 0; background: transparent; text-align: center; min-width: 640px; }
+.caption { color: var(--muted); font-size: 0.88rem; max-width: 80ch; }
+
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; white-space: nowrap; }
+tbody th { text-transform: none; letter-spacing: 0; font-size: 0.92rem; color: var(--ink); white-space: normal; }
+tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; text-align: right; }
+.checklist td:first-child { min-width: 15rem; }
+.checklist td:nth-child(2) { white-space: nowrap; }
+
+.code { position: relative; background: var(--code-bg); border-radius: 8px; border: 1px solid var(--line); min-width: 0; }
+.code pre { margin: 0; padding: 14px 16px; overflow-x: auto; line-height: 1.5; }
+.code .label { font-family: var(--font-mono); font-size: 0.74rem; color: var(--muted); padding: 10px 90px 0 16px; }
+.copy { position: absolute; top: 8px; right: 8px; font: 500 0.75rem var(--font-body); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+.copy:hover { border-color: var(--accent); }
+.samples { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
+.samples > figure { margin: 0; display: grid; gap: 8px; min-width: 0; align-content: start; }
+.samples figcaption { font-size: 0.9rem; color: var(--muted); }
+.k { color: var(--accent); }
+
+.chip { display: inline-block; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.03em; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.chip.ok { color: var(--ok); background: var(--ok-bg); }
+.chip.part { color: var(--part); background: var(--part-bg); }
+.chip.open { color: var(--open); background: var(--open-bg); }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; font-size: 0.9rem; color: var(--muted); }
+
+.callout { border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; max-width: 78ch; display: grid; gap: 8px; }
+ul.plain { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; max-width: 78ch; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.two > div { min-width: 0; display: grid; gap: 10px; align-content: start; }
+footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 6px; }
+@media (max-width: 560px) { body { padding-block: 24px 48px; } main { gap: 48px; } h2 { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Software supply chain · CycloneDX · EU Cyber Resilience Act</div>
+    <h1>SBOM and CRA Field Guide</h1>
+    <p class="lead prose">How to produce, manage and use a Software Bill of Materials in a software project, and what the EU Cyber Resilience Act expects from manufacturers. The practices are general; the running example is the IS-Risk Classifier, a Django web application with a CycloneDX SBOM tracked in Dependency-Track.</p>
+    <nav class="toc" aria-label="Contents">
+      <a href="#basics">SBOM basics</a>
+      <a href="#cra">The CRA</a>
+      <a href="#lifecycle">SBOM lifecycle</a>
+      <a href="#content">Content practices</a>
+      <a href="#operations">Operating SBOMs</a>
+      <a href="#checklist">Readiness checklist</a>
+      <a href="#example">Worked example</a>
+      <a href="#commands">Commands</a>
+    </nav>
+  </header>
+
+  <!-- ============================================================ -->
+  <section id="basics" aria-labelledby="h-basics">
+    <div class="eyebrow">1 · Basics</div>
+    <h2 id="h-basics">What an SBOM is, and what it is for</h2>
+    <p class="prose">An SBOM is the parts list of a piece of software: every third-party component with its name, version, a unique identifier and, where possible, a hash and a licence, plus how the components depend on each other. Its value lies in what it enables. When a new vulnerability is published, an SBOM answers within minutes which products and which versions are affected. Without one, the same question takes days of searching through repositories and build logs.</p>
+    <div class="two">
+      <div>
+        <h3>The two common formats</h3>
+        <ul class="plain">
+          <li><strong>CycloneDX</strong> (OWASP): security-oriented, covers software, services, hardware, cryptography and vulnerability statements (VEX). Version 1.6 is standardised as ECMA-424.</li>
+          <li><strong>SPDX</strong> (Linux Foundation): licence-compliance heritage, standardised as ISO/IEC 5962.</li>
+        </ul>
+        <p class="note">Both are accepted by regulators and tools. This guide uses CycloneDX in JSON.</p>
+      </div>
+      <div>
+        <h3>What an SBOM does not do</h3>
+        <ul class="plain">
+          <li>It does not find vulnerabilities. A scanner matches its identifiers against vulnerability databases.</li>
+          <li>It is a snapshot of one build. A stale SBOM gives false confidence.</li>
+          <li>It lists declared components. Code copied into a package stays invisible.</li>
+          <li>It describes parts, not operation: configuration, network isolation and permissions are out of scope.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="cra" aria-labelledby="h-cra">
+    <div class="eyebrow">2 · Regulation</div>
+    <h2 id="h-cra">The EU Cyber Resilience Act</h2>
+    <p class="prose">The CRA, Regulation (EU) 2024/2847, sets cybersecurity requirements for <em>products with digital elements</em> placed on the EU market: hardware and software, including software sold or supplied commercially on its own. It makes vulnerability handling a legal obligation for the whole support period, and the SBOM is one of its named tools.</p>
+
+    <div class="timeline" aria-label="CRA timeline">
+      <div class="milestone"><time datetime="2024-12-10">10 Dec 2024</time><span>Entry into force.</span></div>
+      <div class="milestone"><time datetime="2026-06-11">11 Jun 2026</time><span>Rules for conformity assessment bodies apply.</span></div>
+      <div class="milestone now"><time datetime="2026-09-11">11 Sep 2026</time><span>Reporting obligations apply: actively exploited vulnerabilities and severe incidents. <strong>Already in effect.</strong></span></div>
+      <div class="milestone"><time datetime="2027-12-11">11 Dec 2027</time><span>All other obligations apply, including the essential requirements and the SBOM.</span></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Obligation</th><th>What it means in practice</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">SBOM (Annex I, Part II)</th><td>Identify and document the vulnerabilities and components in the product, including by drawing up an SBOM in a commonly used, machine-readable format, covering at least the top-level dependencies. CycloneDX and SPDX both qualify. The Commission may specify format and minimum elements later by implementing act.</td></tr>
+          <tr><th scope="row">SBOM is not public by default</th><td>The SBOM belongs to the technical documentation. You must hand it to market surveillance authorities on request; publishing it is your choice.</td></tr>
+          <tr><th scope="row">Vulnerability handling (Annex I, Part II)</th><td>Address and remediate vulnerabilities without delay, including through security updates; test the product regularly; publicly disclose fixed vulnerabilities; run a coordinated vulnerability disclosure policy with a contact address; distribute updates securely and, for security fixes, free of charge with advisory information.</td></tr>
+          <tr><th scope="row">Third-party components</th><td>Exercise due diligence when integrating components, open source included, so they do not compromise the product. Report vulnerabilities you find in an integrated component to whoever maintains it.</td></tr>
+          <tr><th scope="row">Reporting (Art. 14)</th><td>Actively exploited vulnerabilities and severe incidents go to the national CSIRT and ENISA through the single reporting platform: early warning within 24 hours, notification within 72 hours, final report within 14 days of a fix for vulnerabilities (one month for incidents).</td></tr>
+          <tr><th scope="row">Support period</th><td>Determine it and handle vulnerabilities throughout. As a rule at least five years, unless the product is expected to be used for a shorter time.</td></tr>
+          <tr><th scope="row">Documentation retention</th><td>Keep the technical documentation, SBOMs included, for ten years after placing on the market or for the support period, whichever is longer. In practice: archive the SBOM of every released version.</td></tr>
+          <tr><th scope="row">Scope limits</th><td>Free and open-source software that is not monetised in the course of a commercial activity is out of scope; open-source stewards have a lighter regime. Some product classes (Annex III, IV) need third-party conformity assessment; the default is self-assessment.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">This is an engineering summary, not legal advice. Harmonised standards and implementing acts are still being published and may refine the details. In Germany, BSI TR-03183 already gives concrete guidance: part 2 lists mandatory SBOM fields such as creator, component name and version, dependencies, licence and a SHA-512 hash of each deployable component, and accepts CycloneDX from 1.5 and SPDX.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="lifecycle" aria-labelledby="h-lifecycle">
+    <div class="eyebrow">3 · Process</div>
+    <h2 id="h-lifecycle">The SBOM lifecycle</h2>
+    <p class="prose">Having an SBOM is a one-off; managing it is a process that repeats with every build. The CRA asks for the process. The steps below apply to any project; the indented notes show how the IS-Risk Classifier does each one.</p>
+
+    <div class="figure">
+<pre class="mermaid">
+flowchart LR
+  G["1 Generate<br/>from lockfile / artifact"] --> E["2 Enrich<br/>licences, supplier, hashes"]
+  E --> V["3 Validate<br/>schema, completeness"]
+  V --> S["4 Sign and archive<br/>per release"]
+  S --> D["5 Distribute<br/>to the analysis platform"]
+  D --> M["6 Monitor<br/>continuous matching"]
+  M --> T["7 Triage<br/>VEX, priorities"]
+  T --> R["8 Remediate<br/>update, release"]
+  R --> G
+</pre>
+    </div>
+
+    <ol class="steps">
+      <li><div><h3>Generate</h3>
+        <p>Produce the SBOM automatically in the build, from the same inputs that produce the artifact: the lockfile for application dependencies, the built image for containers. Never write or edit it by hand.</p>
+        <p class="example"><b>Example:</b> <code>make sbom</code> runs <code>uv export --format cyclonedx1.5 --frozen --no-dev</code> on <code>uv.lock</code> and adds front-end files and container images from inventories in the repository.</p></div></li>
+      <li><div><h3>Enrich</h3>
+        <p>Generators often leave fields empty. Add what the scanner and the regulator need: licences as SPDX IDs, the supplier, hashes of the shipped files, a description of the product itself in <code>metadata.component</code>.</p>
+        <p class="example"><b>Example:</b> the Python packages arrive without licences; the front-end entries carry licence and SHA-256 from a checked inventory file.</p></div></li>
+      <li><div><h3>Validate</h3>
+        <p>Check the file against the CycloneDX JSON schema and against your own minimum fields before anything consumes it. A tool that silently accepts a broken SBOM is not a validation.</p>
+        <p class="example"><b>Example:</b> not yet automated; <code>cyclonedx-cli validate</code> would close the gap.</p></div></li>
+      <li><div><h3>Sign and archive</h3>
+        <p>Store the SBOM with the release it describes and keep it for the retention period. Signing (an embedded JSF signature or an attestation, e.g. with Sigstore) lets recipients verify that it was not altered.</p>
+        <p class="example"><b>Example:</b> the CI keeps the SBOM as a build artifact for 90 days. Neither signing nor release archiving exists yet.</p></div></li>
+      <li><div><h3>Distribute</h3>
+        <p>Upload the SBOM to an analysis platform for every build, versioned like the product. Share it with customers or authorities when they ask.</p>
+        <p class="example"><b>Example:</b> uploaded manually to a local Dependency-Track 4.14.5 as project <em>IS-Risk Classifier</em>, version <em>Lock-Stand 22.10.2026</em>.</p></div></li>
+      <li><div><h3>Monitor</h3>
+        <p>Vulnerabilities are published after your release. Match every stored SBOM against vulnerability databases continuously, not only at build time, and alert on new findings.</p>
+        <p class="example"><b>Example:</b> Dependency-Track matches against OSV; pip-audit and Dependabot add independent checks.</p></div></li>
+      <li><div><h3>Triage</h3>
+        <p>Decide for each finding whether it affects the product. Record the decision and its reason as a VEX statement (<code>not_affected</code>, <code>exploitable</code>, <code>resolved</code>, …), so customers and future you can see why. Prioritise with severity plus exploitation signals such as EPSS or the CISA KEV catalogue.</p>
+        <p class="example"><b>Example:</b> a policy flags any HIGH or CRITICAL finding as a violation; VEX export is not used yet.</p></div></li>
+      <li><div><h3>Remediate</h3>
+        <p>Update the component, ship a security release, publish an advisory, and the cycle starts again with a new SBOM. Under the CRA, an actively exploited vulnerability additionally starts the 24-hour reporting clock.</p>
+        <p class="example"><b>Example:</b> a test version with reportlab 3.6.12 (CVE-2023-33733) shows the violation that would trigger the update.</p></div></li>
+    </ol>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="content" aria-labelledby="h-content">
+    <div class="eyebrow">4 · Content</div>
+    <h2 id="h-content">What a good CycloneDX SBOM contains</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Practice</th><th>Why</th><th>CycloneDX field</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">A unique identifier for every component</th><td>Scanners match on it. A component without a correct package URL is invisible to vulnerability analysis, even if name and version are right.</td><td><code>purl</code>, optionally <code>cpe</code></td></tr>
+          <tr><th scope="row">Pin container images by digest, not tag</th><td>Tags move; a digest names exactly one image.</td><td><code>pkg:docker/…@sha256%3A…</code></td></tr>
+          <tr><th scope="row">Describe the product itself</th><td>Name, version, type and supplier of what the SBOM is about. Use the release version or commit, not a static placeholder.</td><td><code>metadata.component</code>, <code>supplier</code>, <code>authors</code></td></tr>
+          <tr><th scope="row">Hash every shipped component</th><td>Proves which exact file was used. BSI TR-03183-2 asks for SHA-512.</td><td><code>components[].hashes</code></td></tr>
+          <tr><th scope="row">State licences as SPDX</th><td>Enables licence policies and compliance checks.</td><td><code>licenses[].license.id</code> or <code>expression</code></td></tr>
+          <tr><th scope="row">Record the full dependency graph</th><td>Shows whether a vulnerable library is direct or transitive and who pulls it in. The CRA minimum is the top level; the full graph is better.</td><td><code>dependencies[].dependsOn</code></td></tr>
+          <tr><th scope="row">Separate what ships from what only builds</th><td>Keeps the attack surface accurate; build tools still deserve a record.</td><td><code>scope</code>: <code>required</code> / <code>excluded</code></td></tr>
+          <tr><th scope="row">One SBOM per deliverable, linked</th><td>An application SBOM and one per container image, so OS packages in base images are covered too.</td><td><code>externalReferences</code> of type <code>bom</code></td></tr>
+          <tr><th scope="row">State what is known to be incomplete</th><td>An honest SBOM says where it stops.</td><td><code>compositions[].aggregate</code></td></tr>
+          <tr><th scope="row">Record how it was made</th><td>Generating tools and lifecycle phase make the SBOM reproducible and comparable.</td><td><code>metadata.tools</code>, <code>metadata.lifecycles</code></td></tr>
+          <tr><th scope="row">Identify each SBOM uniquely</th><td>A new serial number per artifact, an incremented version when the same SBOM is corrected.</td><td><code>serialNumber</code>, <code>version</code></td></tr>
+          <tr><th scope="row">Keep vulnerabilities out, publish VEX separately</th><td>The SBOM is stable per release; vulnerability knowledge changes daily.</td><td>separate CycloneDX VEX document</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Ecosystem</th><th>Typical generators</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Python</th><td><code>uv export --format cyclonedx1.5</code>, <code>cyclonedx-py</code> (environment, requirements, Poetry, Pipenv)</td></tr>
+          <tr><th scope="row">JavaScript</th><td><code>@cyclonedx/cyclonedx-npm</code>, <code>npm sbom --sbom-format cyclonedx</code></td></tr>
+          <tr><th scope="row">Java</th><td>CycloneDX Maven plugin, CycloneDX Gradle plugin</td></tr>
+          <tr><th scope="row">Container images, file systems</th><td>Syft, Trivy</td></tr>
+          <tr><th scope="row">Many languages at once</th><td>cdxgen</td></tr>
+          <tr><th scope="row">Merge, convert, validate</th><td><code>cyclonedx-cli</code> (merge, convert, validate, sign)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="operations" aria-labelledby="h-ops">
+    <div class="eyebrow">5 · Operations</div>
+    <h2 id="h-ops">Operating SBOMs in a team</h2>
+    <div class="two">
+      <div>
+        <h3>Platform and automation</h3>
+        <ul class="plain">
+          <li>Use an SBOM platform such as OWASP Dependency-Track: one project per product, one version per release, the latest marked as such.</li>
+          <li>Upload from the CI through the API on every build of a release branch; use the git tag or commit as project version.</li>
+          <li>Enable more than one vulnerability source (OSV, NVD, GitHub Advisories) and alias matching, so the same CVE is not counted twice.</li>
+          <li>Define policies: severity thresholds, forbidden licences, components without a version or purl. Fail the build on violations for new releases.</li>
+          <li>Send notifications to the people who fix things: a team channel, a ticket queue.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Responsibilities and timing</h3>
+        <ul class="plain">
+          <li>Name an owner for each product's SBOM and findings.</li>
+          <li>Set remediation targets per severity and track them. Typical internal targets are days for critical and weeks for high; set your own and write them down.</li>
+          <li>Publish a security contact and a coordinated disclosure policy, for example as <code>/.well-known/security.txt</code>.</li>
+          <li>Rehearse the CRA reporting path once before you need it: who decides that a vulnerability is actively exploited, and who files the 24-hour early warning.</li>
+          <li>Ask your own suppliers for SBOMs, and check them like your own.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="checklist" aria-labelledby="h-checklist">
+    <div class="eyebrow">6 · Assessment</div>
+    <h2 id="h-checklist">Readiness checklist, applied to the IS-Risk Classifier</h2>
+    <p class="prose">Use the left column for any project. The right column shows the honest state of the example, a student project that is not placed on the market and therefore not itself subject to the CRA.</p>
+    <div class="legend"><span class="chip ok">in place</span><span class="chip part">partly</span><span class="chip open">missing</span></div>
+    <div class="table-wrap">
+      <table class="checklist">
+        <thead><tr><th>Check</th><th>State</th><th>IS-Risk Classifier</th></tr></thead>
+        <tbody>
+          <tr><td>SBOM generated automatically from the lockfile</td><td><span class="chip ok">in place</span></td><td><code>make sbom</code>, reading <code>uv.lock</code> without re-resolving.</td></tr>
+          <tr><td>Every component has a purl</td><td><span class="chip ok">in place</span></td><td>31 of 31; images by digest.</td></tr>
+          <tr><td>Shipped and build-only components separated</td><td><span class="chip ok">in place</span></td><td>Dev tools excluded; Tailwind CLI marked <code>scope: excluded</code>.</td></tr>
+          <tr><td>Continuous vulnerability monitoring</td><td><span class="chip ok">in place</span></td><td>Dependency-Track with OSV, plus pip-audit and Dependabot.</td></tr>
+          <tr><td>Product described in <code>metadata.component</code></td><td><span class="chip part">partly</span></td><td>Present, but typed <code>library</code> instead of <code>application</code>, static version 0.1.0, no supplier.</td></tr>
+          <tr><td>Hashes for every component</td><td><span class="chip part">partly</span></td><td>11 of 31 at component level, SHA-256; the Python packages carry hashes only on their download URLs.</td></tr>
+          <tr><td>Licences for every component</td><td><span class="chip part">partly</span></td><td>6 of 31. The 20 Python packages have none, so licence policies cannot run on them.</td></tr>
+          <tr><td>Complete dependency graph</td><td><span class="chip part">partly</span></td><td>Complete for Python (root with six direct dependencies); front-end files and images are not linked.</td></tr>
+          <tr><td>SBOM per release, uploaded automatically</td><td><span class="chip part">partly</span></td><td>CI produces it as an artifact (CI currently switched off); upload to Dependency-Track is manual.</td></tr>
+          <tr><td>Current specification version</td><td><span class="chip part">partly</span></td><td>CycloneDX 1.5, because uv exports only that version; 1.6 would need a different generator or a conversion step.</td></tr>
+          <tr><td>Container images have their own SBOMs</td><td><span class="chip open">missing</span></td><td>Debian packages in the Python base image and Java libraries in Keycloak are not listed.</td></tr>
+          <tr><td>Known gaps declared</td><td><span class="chip open">missing</span></td><td>No <code>compositions</code> entry.</td></tr>
+          <tr><td>Schema validation before use</td><td><span class="chip open">missing</span></td><td>No validation step.</td></tr>
+          <tr><td>Signed, archived per release</td><td><span class="chip open">missing</span></td><td>Unsigned; no release archive.</td></tr>
+          <tr><td>VEX for triage decisions</td><td><span class="chip open">missing</span></td><td>Decisions would live only inside Dependency-Track.</td></tr>
+          <tr><td>Security contact and disclosure policy</td><td><span class="chip open">missing</span></td><td>No <code>security.txt</code>, no policy; not needed for a course project, required for a product.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="example" aria-labelledby="h-example">
+    <div class="eyebrow">7 · Worked example</div>
+    <h2 id="h-example">How the IS-Risk Classifier builds its SBOM</h2>
+    <p class="prose">The script <code>tools/sbom.py</code> combines three sources. The pattern carries over to most projects: let the package manager export what it knows, keep a checked inventory for anything it cannot see, and add the container images.</p>
+    <div class="figure">
+<pre class="mermaid">
+flowchart LR
+  A["uv.lock"] -->|"uv export --format cyclonedx1.5 --frozen --no-dev"| P["Python BOM<br/>20 packages + dependency graph"]
+  B["src/static/third_party.json"] --> F["4 front-end files<br/>2 build tools"]
+  C["compose.yaml<br/>docker/Dockerfile"] -->|"name:tag@sha256"| I["5 container images"]
+  P --> M["tools/sbom.py<br/>merge, serialNumber, timestamp"]
+  F --> M
+  I --> M
+  M --> O[("sbom/is-risk-classifier.cdx.json<br/>31 components")]
+  O --> D["Dependency-Track"]
+  O --> G["CI artifact"]
+</pre>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Group</th><th>Count</th><th>Type</th><th>Identifier</th><th>Hash</th><th>Licence</th></tr></thead>
+        <tbody>
+          <tr><td>Python runtime packages</td><td class="num">20</td><td><code>library</code></td><td><code>pkg:pypi/…</code></td><td>on download URLs only</td><td>none</td></tr>
+          <tr><td>Front-end files (htmx, fonts)</td><td class="num">4</td><td><code>library</code></td><td><code>pkg:npm/…</code></td><td>SHA-256 of the file</td><td>0BSD, OFL-1.1</td></tr>
+          <tr><td>Tailwind CLI (x64, arm64)</td><td class="num">2</td><td><code>application</code></td><td><code>pkg:github/…</code></td><td>SHA-256 of the binary</td><td>MIT</td></tr>
+          <tr><td>Container images</td><td class="num">5</td><td><code>container</code></td><td><code>pkg:docker/…@sha256</code></td><td>image digest</td><td>none</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="samples">
+      <figure>
+        <div class="code"><div class="label">Python package, as exported by uv</div><pre><code>{
+  <span class="k">"type"</span>: "library",
+  <span class="k">"bom-ref"</span>: "django-7@5.2.18",
+  <span class="k">"name"</span>: "django",
+  <span class="k">"version"</span>: "5.2.18",
+  <span class="k">"purl"</span>: "pkg:pypi/django@5.2.18",
+  <span class="k">"externalReferences"</span>: [{
+    "type": "distribution",
+    "url": "…/django-5.2.18-py3-none-any.whl",
+    "hashes": [{ "alg": "SHA-256",
+                 "content": "92ed81d5…" }]
+  }]
+}</code></pre></div>
+        <figcaption>Identifier present; licence missing; hashes describe downloads, not the component.</figcaption>
+      </figure>
+      <figure>
+        <div class="code"><div class="label">Front-end file, from the inventory</div><pre><code>{
+  <span class="k">"type"</span>: "library",
+  <span class="k">"bom-ref"</span>: "pkg:npm/htmx.org@2.0.11",
+  <span class="k">"name"</span>: "htmx.org",
+  <span class="k">"version"</span>: "2.0.11",
+  <span class="k">"scope"</span>: "required",
+  <span class="k">"purl"</span>: "pkg:npm/htmx.org@2.0.11",
+  <span class="k">"licenses"</span>: [{ "license": { "id": "0BSD" } }],
+  <span class="k">"hashes"</span>: [{ "alg": "SHA-256",
+               "content": "d6fdc75f…" }]
+}</code></pre></div>
+        <figcaption>The complete pattern: identifier, SPDX licence, hash of the shipped file.</figcaption>
+      </figure>
+      <figure>
+        <div class="code"><div class="label">Container image, from compose.yaml</div><pre><code>{
+  <span class="k">"type"</span>: "container",
+  <span class="k">"name"</span>: "keycloak/keycloak",
+  <span class="k">"version"</span>: "26.8.0",
+  <span class="k">"purl"</span>: "pkg:docker/keycloak/keycloak
+    @sha256%3Ab0f60d48…
+    ?repository_url=quay.io",
+  <span class="k">"hashes"</span>: [{ "alg": "SHA-256",
+               "content": "b0f60d48…" }]
+}</code></pre></div>
+        <figcaption>Pinned by digest; the registry goes into <code>repository_url</code>, as the purl spec requires. Its contents need a separate image SBOM.</figcaption>
+      </figure>
+    </div>
+    <div class="callout">
+      <p><strong>Dependency-Track setup used for the course:</strong> version 4.14.5 in Docker Compose, OSV as the only source with alias matching, a global policy that fails on any HIGH or CRITICAL finding, and two project versions: the real lock state, and a copy with reportlab set to 3.6.12 (CVE-2023-33733). In the copy, hashes and download URLs of that one component were removed so the file stays consistent with the fake version.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="commands" aria-labelledby="h-commands">
+    <div class="eyebrow">8 · Commands</div>
+    <h2 id="h-commands">Commands to reuse</h2>
+    <div class="code"><div class="label">Quick look: component count, types, entries without licence or purl</div><button class="copy" type="button" data-copy="c1">Copy</button><pre><code id="c1">jq '.components | length' bom.cdx.json
+jq -r '.components | group_by(.type)[] | "\(.[0].type): \(length)"' bom.cdx.json
+jq -r '.components[] | select(.licenses == null) | .purl // .name' bom.cdx.json
+jq -r '.components[] | select(.purl == null) | .name' bom.cdx.json</code></pre></div>
+    <div class="code"><div class="label">Validate against the schema (CycloneDX CLI)</div><button class="copy" type="button" data-copy="c2">Copy</button><pre><code id="c2">cyclonedx validate --input-file bom.cdx.json --input-format json --fail-on-errors</code></pre></div>
+    <div class="code"><div class="label">SBOM of a container image (Syft)</div><button class="copy" type="button" data-copy="c3">Copy</button><pre><code id="c3">syft python:3.13-slim-trixie -o cyclonedx-json=image.cdx.json</code></pre></div>
+    <div class="code"><div class="label">Upload to Dependency-Track (API key from Administration → Access Management → Teams)</div><button class="copy" type="button" data-copy="c4">Copy</button><pre><code id="c4">curl -X POST "$DT_URL/api/v1/bom" \
+  -H "X-Api-Key: $DT_API_KEY" \
+  -F "autoCreate=true" \
+  -F "projectName=My Product" \
+  -F "projectVersion=$(git describe --tags --always)" \
+  -F "bom=@bom.cdx.json"</code></pre></div>
+    <div class="code"><div class="label">The example project</div><button class="copy" type="button" data-copy="c5">Copy</button><pre><code id="c5">make sbom     # writes sbom/is-risk-classifier.cdx.json
+make audit    # pip-audit on the runtime dependencies</code></pre></div>
+  </section>
+
+  <footer>
+    <span>As of 23 Oct 2026 · example repository <span class="mono">mwagner86/is-risk-classifier</span>, commit <span class="mono">990d5c3</span>, script <span class="mono">tools/sbom.py</span>.</span>
+    <span>Sources: Regulation (EU) 2024/2847 (Cyber Resilience Act); CycloneDX specification (ECMA-424); NTIA, The Minimum Elements for a Software Bill of Materials (2021); BSI TR-03183-2. Summaries, not legal advice.</span>
+  </footer>
+</main>
+
+<script>
+document.querySelectorAll(".copy").forEach(function (button) {
+  button.addEventListener("click", function () {
+    var source = document.getElementById(button.dataset.copy);
+    var text = source.textContent;
+    var done = function () { button.textContent = "Copied"; setTimeout(function () { button.textContent = "Copy"; }, 1600); };
+    var fallback = function () {
+      var range = document.createRange(); range.selectNodeContents(source);
+      var selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+      button.textContent = "Selected, press Ctrl+C";
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, fallback); }
+      else { fallback(); }
+    } catch (e) { fallback(); }
+  });
+});
+</script>
+<!-- Standalone copy of the published guide. The viewer renders the diagrams natively; opened as
+     a file, Mermaid draws them (needs network access to the CDN). -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "neutral",
+  });
+</script>
+</body>
+</html>
