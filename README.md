@@ -4,12 +4,56 @@ Leichtgewichtiges Risikoregister: trennt IT-Risiken von Informationssicherheitsr
 (IS-Risiken) anhand von Schutzzielen und Ursprung, berechnet den Risikowert R = P × I und eskaliert
 kritische IS-Risiken an das Incident-Response-Team.
 
+> [!WARNING]
+> **Studienprojekt, nicht für den Produktivbetrieb.** Der IS-Risk Classifier ist weder vollständig
+> noch unabhängig geprüft. Er ist nicht für echte Risikodaten gedacht. Die Grenzen stehen unten.
+
+## Herkunft, Zweck und Grenzen
+
+**Herkunft.** Das Projekt ist im Studiengang IT-Sicherheit an der Technischen Hochschule
+Brandenburg entstanden, für zwei Module:
+
+- **Softwaretechnik** (Sommersemester 2026): Anforderungen als User Stories mit
+  Abnahmekriterien (US-01 bis US-04, AK-xx.x) und das UML-Modell. Die fachliche Spezifikation
+  stammt von dort.
+- **Entwicklung sicherer Softwaresysteme** (Wintersemester 2026/27): Threat Analysis nach NIST
+  SP 800-154 mit den Attack Vectors T-01 bis T-10 und den Security Controls M-01 bis M-10
+  (Hand-in 1), daraus Sicherheitsanforderungen mit Testszenarien (Hand-in 2). Die Kennungen in Code
+  und Tests (`@pytest.mark.req("M-05")`) beziehen sich auf diese Arbeiten.
+
+**Zweck.** Die Anwendung ist der Gegenstand dieser Analysen. Sie zeigt, dass sich die Anforderungen
+und Security Controls umsetzen und prüfen lassen. Für die Abnahmekriterien von US-01 bis US-03, die
+Invarianten INV-02 und INV-03 und die Security Controls M-01 bis M-10 gibt es Tests, zugeordnet in
+[`docs/traceability.md`](docs/traceability.md). Ein Produkt ist sie nicht.
+
+**Entstehung.** Anforderungen, Modell, Analysen und Entscheidungen stammen aus den Studienarbeiten.
+Der Code ist weitgehend mit Claude Code (Anthropic, Modell Claude Opus 5.5) erzeugt worden.
+
+**Grenzen** (Stand 23.10.2026):
+
+- **Kein Sicherheitsaudit.** Es gab weder ein Review noch einen Penetrationstest durch Dritte. Die
+  Security Controls sind so gut wie die eigene Threat Analysis und ihre Tests.
+- **Abhängigkeiten mit bekannten Vulnerabilities:** `make audit` meldete am 22.10.2026 Befunde in
+  `pillow` 12.3.0 und `certifi` 2026.7.22. Behobene Versionen gibt es, eingespielt sind sie noch
+  nicht.
+- **Anmeldung nur für die Entwicklung:** Keycloak läuft mit Demo-Konten und gemeinsamem
+  Demo-Passwort, ohne Zwei-Faktor-Anmeldung und ohne Passwortrichtlinie. Ohne vorgeschalteten
+  TLS-Proxy läuft alles über HTTP auf `localhost`.
+- **Offene Anforderungen aus Hand-in 2:** Die Administration sieht noch das ganze Register statt
+  nur Kennung und Zustellstatus. Befunde der Abhängigkeitsprüfung lassen sich nicht mit Ablaufdatum
+  zurückstellen. Ein Export ohne Treffer liefert eine leere Datei statt eines Hinweises.
+- **Kein echter Versand:** `notify-gateway` ist ein Platzhalter. E-Mails landen in Mailpit, SMS nur
+  im Log.
+- **Keine laufende CI:** Der Workflow `.github/workflows/ci.yml` ist vorbereitet, GitHub Actions ist
+  im Repository aber abgeschaltet. Dependabot läuft.
+- **Beispieldaten:** Risiken, Assets und Konten sind erfunden.
+
 ## Start
 
 Voraussetzung: Docker mit Compose und `make`. Alles andere läuft in Containern.
 
 ```bash
-git clone git@github.com:mwagner86/is-risk-classifier.git && cd is-risk-classifier
+git clone https://github.com/mwagner86/is-risk-classifier.git && cd is-risk-classifier
 ```
 
 ```bash
@@ -181,9 +225,11 @@ dort wörtlich. Die Benachrichtigungen an das Incident-Response-Team bleiben deu
 
 ## Laufende Prüfung
 
-GitHub Actions führt bei jedem Push, bei Pull Requests und jeden Montag Lint, Tests, die Prüfung
-der Nachweistabelle, `make audit` und `make sbom` aus; die SBOM liegt als Artefakt am Lauf.
-Dependabot schlägt wöchentlich Updates für Python-Pakete, Docker-Images und Actions vor.
+Der Workflow `.github/workflows/ci.yml` führt bei jedem Push, bei Pull Requests und jeden Montag
+Lint, Tests, die Prüfung der Nachweistabelle, `make audit` und `make sbom` aus und legt die SBOM als
+Artefakt ab. **GitHub Actions ist im Repository derzeit abgeschaltet**, die Prüfungen laufen lokal
+mit `make lint`, `make test`, `make audit` und `make sbom`. Dependabot schlägt wöchentlich Updates
+für Python-Pakete, Docker-Images und Actions vor.
 
 ## Sicherheitsrelevante Festlegungen
 
